@@ -27,7 +27,7 @@
 
 <button {...rest} class={cn(buttonVariants({ variant, size, className }))}>
 	{#if isLoading}
-		<Icon icon="svg-spinners:blocks-shuffle-2" class="mr-2 h-3.5 w-3.5" />
+		<Icon icon="eos-icons:loading" class="mr-2 size-4 animate-spin" />
 	{/if}
 	{#if children}
 		{@render children()}
