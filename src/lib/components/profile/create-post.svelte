@@ -2,9 +2,13 @@
 	import { api, createAuthHeaders, uploadImage } from '$lib/api';
 	import { cn } from '$lib/cn';
 	import { toast } from '$lib/stores/toast.store';
+	import type { Post } from '$lib/types/post.types';
 	import Icon from '@iconify/svelte';
+	import { createEventDispatcher } from 'svelte';
 	import { Button } from '../ui/button';
 	import { inputVariants } from '../ui/input';
+
+	const dispatch = createEventDispatcher();
 
 	type CreatePostProps = {
 		authToken: string;
@@ -71,11 +75,14 @@
 			images: imageUrls
 		};
 		try {
-			await api.post('posts', {
-				json: payload,
-				headers: createAuthHeaders(authToken)
-			}).json;
+			const res = await api
+				.post<Post>('posts', {
+					json: payload,
+					headers: createAuthHeaders(authToken)
+				})
+				.json();
 
+			dispatch('newPost', res);
 			postContent = '';
 			imageUrls = [];
 			toast.success('Post created successfully!');
