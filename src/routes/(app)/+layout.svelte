@@ -1,16 +1,12 @@
 <script lang="ts">
-	let { children, data } = $props();
+	import { Header } from '$lib/components/layout';
+
+	let { children } = $props();
 </script>
 
-{#await data.user}
-	<div>Loading...</div>
-{:then user}
-	{#if user}
-		<div>Welcome, {user.username}!</div>
-	{:else}
-		<div>User not logged in</div>
-	{/if}
-{:catch error}
-	<div>Error: {error.message}</div>
-{/await}
-{@render children()}
+<div class="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
+	<Header />
+	<main class="container p-6">
+		{@render children()}
+	</main>
+</div>

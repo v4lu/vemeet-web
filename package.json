@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"dev": "vite dev",
+		"dev": "vite dev --host",
 		"build": "vite build",
 		"preview": "vite preview",
 		"test": "npm run test:integration && npm run test:unit",
@@ -45,7 +45,9 @@
 		"@fontsource/rubik": "^5.0.22",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.1",
+		"date-fns": "^3.6.0",
 		"ky": "^1.7.2",
+		"runed": "^0.15.2",
 		"tailwind-merge": "^2.5.2"
 	}
 }
