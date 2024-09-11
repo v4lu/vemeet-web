@@ -1,23 +1,18 @@
 <script lang="ts">
 	import { api, createAuthHeaders, uploadImage } from '$lib/api';
-	import { cn } from '$lib/cn';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { formatMemberSince } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { User } from '$lib/types/user.types';
 	import Icon from '@iconify/svelte';
-	import { MediaQuery } from 'runed';
 
 	type HeaderProps = {
-		user: User;
 		authToken: string;
 	};
 
-	let { user, authToken }: HeaderProps = $props();
-	sessionStore.setUser(user);
+	let { authToken }: HeaderProps = $props();
 
 	let formattedDate = $derived(formatMemberSince($sessionStore.birthday));
-	const screen = new MediaQuery('(min-width: 640px)');
 
 	let imageUrl = $state('');
 	let file: File | null = $state(null);
@@ -80,7 +75,7 @@
 		<div class="relative">
 			<button
 				aria-label="Upload profile picture"
-				class="relative cursor-pointer rounded-full shadow-lg"
+				class="relative cursor-pointer rounded-full border-[3px] border-white shadow-xl"
 				onclick={handleInputFileClick}
 				onmouseenter={(): boolean => (isHovering = true)}
 				onmouseleave={(): boolean => (isHovering = false)}
@@ -144,15 +139,25 @@
 	<p class="mt-4 max-w-md text-sm">{$sessionStore.bio}</p>
 {/if}
 <div class="mt-4 flex space-x-6 text-sm text-muted-foreground">
-	<span class="flex items-center">
-		<Icon icon="solar:map-point-outline" class="mr-1 size-5" />
-		Wuppertal my tal
-	</span>
+	{#if $sessionStore?.cityName || $sessionStore?.countryName}
+		<span class="flex items-center">
+			<Icon icon="solar:map-point-bold" class="mr-2 size-5" />
+			{#if $sessionStore.cityName && $sessionStore.countryName}
+				{$sessionStore.cityName}, {$sessionStore.countryName}
+			{:else if $sessionStore.cityName}
+				{$sessionStore.cityName}
+			{:else if $sessionStore.countryName}
+				{$sessionStore.countryName}
+			{/if}
+		</span>
+	{/if}
 
-	<span class="flex items-center">
-		<Icon icon="heroicons:cake" class="mr-1 size-5" />
-		{formattedDate}</span
-	>
+	{#if $sessionStore?.birthday}
+		<span class="flex items-center">
+			<Icon icon="ph:egg-crack-duotone" class="mr-2 size-5" />
+			{formattedDate}</span
+		>
+	{/if}
 </div>
 <div class="mt-4 flex items-center">
 	<div class="mr-8">
@@ -164,9 +169,9 @@
 		<span class="font-semibold">500K</span>
 		<span class="text-sm text-muted-foreground">Followers</span>
 	</div>
-
-	<a href="/settings" class={buttonVariants({ size: screen.matches ? 'sm' : 'icon' })}>
-		<Icon icon="solar:settings-bold" class={cn('size-4', screen.matches && 'mr-2')} />
-		<span class={cn(!screen.matches && 'hidden')}>Settings</span>
+</div>
+<div class="mt-4">
+	<a href="/settings/edit-profile" class={buttonVariants({ size: 'sm', variant: 'outline' })}>
+		Edit Profile
 	</a>
 </div>

@@ -13,7 +13,7 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
 
 	const api = authAPI(cookies);
 
-	const res = api.get<User>('users').json();
+	const res = await api.get<User>('users').json();
 
 	return {
 		user: res,

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import Button from '$lib/components/ui/button/button.svelte';
+	import { Button } from '$lib/components/ui/button';
 	import { Field } from '$lib/components/ui/field';
 	import { Input } from '$lib/components/ui/input';
 	import { toast } from '$lib/stores/toast.store.js';
@@ -168,15 +168,7 @@
 					</div>
 				{/if}
 
-				<Button
-					disabled={$submitting || !allRequirementsMet}
-					isLoading={$submitting}
-					type="submit"
-					class="w-full"
-					size="sm"
-				>
-					Sign in
-				</Button>
+				<Button isLoading={$submitting} type="submit" class="w-full" size="sm">Sign in</Button>
 			</form>
 
 			<div class="mt-6">

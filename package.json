@@ -42,7 +42,6 @@
 	"type": "module",
 	"dependencies": {
 		"@fontsource-variable/rubik": "^5.0.24",
-		"@fontsource/rubik": "^5.0.22",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.1",
 		"date-fns": "^3.6.0",
