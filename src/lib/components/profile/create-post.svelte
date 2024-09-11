@@ -4,17 +4,15 @@
 	import { toast } from '$lib/stores/toast.store';
 	import type { Post } from '$lib/types/post.types';
 	import Icon from '@iconify/svelte';
-	import { createEventDispatcher } from 'svelte';
 	import { Button } from '../ui/button';
 	import { inputVariants } from '../ui/input';
 
-	const dispatch = createEventDispatcher();
-
 	type CreatePostProps = {
 		authToken: string;
+		onNewPost: (post: Post) => void;
 	};
 
-	let { authToken }: CreatePostProps = $props();
+	let { authToken, onNewPost }: CreatePostProps = $props();
 
 	let postContent = $state('');
 	let imageUrls = $state<string[]>([]);
@@ -82,7 +80,7 @@
 				})
 				.json();
 
-			dispatch('newPost', res);
+			onNewPost(res);
 			postContent = '';
 			imageUrls = [];
 			toast.success('Post created successfully!');

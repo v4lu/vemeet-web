@@ -55,8 +55,7 @@
 		}
 	}
 
-	function handleNewPost(event: CustomEvent<Post>) {
-		const newPost = event.detail;
+	function handleNewPost(newPost: Post) {
 		posts = [newPost, ...posts];
 	}
 </script>
@@ -77,7 +76,7 @@
 		Media
 	</a>
 </nav>
-<CreatePost on:newPost={handleNewPost} authToken={data.accessToken} />
+<CreatePost onNewPost={handleNewPost} authToken={data.accessToken} />
 <ProfileFeed />
 <div class="posts-container">
 	{#each posts as post}
