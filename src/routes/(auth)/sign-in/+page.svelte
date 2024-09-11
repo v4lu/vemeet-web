@@ -3,7 +3,7 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Field } from '$lib/components/ui/field';
 	import { Input } from '$lib/components/ui/input';
-	import { toast } from '$lib/stores/toast-store.js';
+	import { toast } from '$lib/stores/toast.store.js';
 	import { userLoginSchema } from '$lib/validators/auth.validator.js';
 	import Icon from '@iconify/svelte';
 	import { superForm } from 'sveltekit-superforms';
@@ -62,7 +62,7 @@
 				: 'bg-yellow-500'
 	);
 
-	function updatePasswordRequirements() {
+	function updatePasswordRequirements(): void {
 		passwordRequirements = [
 			{ text: 'At least 8 characters', met: $form.password.length >= 8 },
 			{ text: 'At least 1 lowercase letter', met: /[a-z]/.test($form.password) },
@@ -123,7 +123,7 @@
 							<button
 								type="button"
 								class="mt-1 flex items-center justify-center focus:outline-none"
-								onclick={() => (togglePassword = !togglePassword)}
+								onclick={(): boolean => (togglePassword = !togglePassword)}
 							>
 								<Icon
 									icon={togglePassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}

@@ -2,7 +2,7 @@
 	import { Toast } from '$lib/components/ui/toast';
 	import '@fontsource-variable/rubik';
 	import '../app.css';
-	import { toast } from '../lib/stores/toast-store';
+	import { toast } from '../lib/stores/toast.store';
 
 	let { children } = $props();
 </script>

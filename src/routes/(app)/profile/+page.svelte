@@ -8,7 +8,7 @@
 	<div>Loading...</div>
 {:then user}
 	{#if user}
-		<Header {user} />
+		<Header {user} authToken={data.accessToken} />
 	{:else}
 		<div>User not logged in</div>
 	{/if}
