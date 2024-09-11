@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+:root {
+	height: 100dvh;
+	font-family: 'Rubik Variable', sans-serif;
+}
+
+@layer base {
+	:root {
+		--background: 216 38.46% 97.45%;
+		--foreground: 215.29 19.32% 34.51%;
+		--muted: 212.73 35.48% 89.92%;
+		--muted-foreground: 211 11% 36%;
+		--popover: 211 70% 100%;
+		--popover-foreground: 215.29 19.32% 34.51%;
+		--card: 0 0% 100%;
+		--card-foreground: 215.29 19.32% 34.51%;
+		--border: 240 5.9% 90%;
+		--input: 240 5.9% 90%;
+		--primary: 173.41 80.39% 40%;
+		--primary-foreground: 0 0% 100%;
+		--secondary: 214.29 67.8% 95.22%;
+		--secondary-foreground: 215.29 19.32% 34.51%;
+		--accent: 210 100% 98.04%;
+		--accent-foreground: 215.29 19.32% 34.51%;
+		--destructive: 2 82.15% 52.59%;
+		--destructive-foreground: 2 8.49% 97.48%;
+		--ring: 173.41 80.39% 40%;
+		--radius: 0.7rem;
+	}
+}
+
+@layer base {
+	body {
+		@apply bg-background text-foreground;
+	}
+	#__nuxt {
+		@apply flex h-full flex-col;
+	}
+}
