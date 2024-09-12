@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { api, createAuthHeaders } from '$lib/api';
+	import { cn } from '$lib/cn';
 	import { formatTimestamp } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
 	import { toast } from '$lib/stores/toast.store';
 	import type { Comment as CommentType } from '$lib/types/comment.types';
+	import type { Reaction } from '$lib/types/reaction.types';
 	import Icon from '@iconify/svelte';
 	import { Button } from '../ui/button';
 	import { Dropdown } from '../ui/dropdown';
@@ -15,9 +17,17 @@
 		postId: number;
 		authToken: string;
 		onCommentDelete: (commentId: number) => void;
+		onCommentUpdate: (updatedComment: CommentType) => void;
 	};
 
-	let { comment, depth = 0, postId, authToken, onCommentDelete }: CommentProps = $props();
+	let {
+		comment,
+		depth = 0,
+		postId,
+		authToken,
+		onCommentDelete,
+		onCommentUpdate
+	}: CommentProps = $props();
 	let isReplying = $state(false);
 	let replyContent = $state('');
 	let submitting = $state(false);
@@ -25,6 +35,12 @@
 	let isDeleteModalConfirmOpen = $state(false);
 	let isEditing = $state(false);
 	let editContent = $state(comment.content);
+
+	let isLiked = $state(
+		comment.reactions.some(
+			(reaction) => reaction.user.id === $sessionStore.id && reaction.reactionType === 'LIKE'
+		)
+	);
 
 	$effect(() => {
 		if (comment.replies) {
@@ -99,6 +115,37 @@
 			toast.error('Failed to delete comment. Please try again.');
 		}
 	}
+
+	async function handleLike() {
+		if (submitting) return;
+		submitting = true;
+		try {
+			if (isLiked) {
+				await api
+					.delete(`comments/${comment.id}/reactions`, {
+						headers: createAuthHeaders(authToken)
+					})
+					.json();
+				comment.reactions = comment.reactions.filter((r) => r.user.id !== $sessionStore.id);
+			} else {
+				const response = await api
+					.post<Reaction>(`comments/${comment.id}/reactions`, {
+						json: { reactionType: 'LIKE' },
+						headers: createAuthHeaders(authToken)
+					})
+					.json();
+				comment.reactions = [...comment.reactions, response];
+			}
+			isLiked = !isLiked;
+			onCommentUpdate(comment);
+			toast.success(`Comment ${isLiked ? 'unliked' : 'liked'} successfully!`);
+		} catch (error) {
+			console.error('Error liking/unliking comment:', error);
+			toast.error('Failed to update like status. Please try again.');
+		} finally {
+			submitting = false;
+		}
+	}
 </script>
 
 <div class="mb-4 rounded border-l-2 border-border pl-4" style="margin-left: {depth * 20}px;">
@@ -109,11 +156,11 @@
 			class="h-8 w-8 rounded-full object-cover"
 		/>
 		<div class="flex-1">
-			<div class="rounded-lg bg-gray-50 p-3">
+			<div class="rounded-lg bg-accent p-3">
 				<div class="flex items-center justify-between">
 					<p class="font-semibold">{comment.user.username}</p>
 					<div class="flex items-center">
-						<p class="mr-2 text-xs text-gray-500">{formatTimestamp(comment.createdAt)}</p>
+						<p class="mr-2 text-xs text-muted-foreground">{formatTimestamp(comment.createdAt)}</p>
 						{#if comment.user.id === $sessionStore.id}
 							<Dropdown
 								triggerIcon="solar:menu-dots-bold"
@@ -160,6 +207,18 @@
 				{:else}
 					<p class="mt-1 text-sm">{comment.content}</p>
 				{/if}
+				<div class="mt-2 flex items-center space-x-4">
+					<button class="flex items-center text-sm" onclick={handleLike} disabled={submitting}>
+						<Icon
+							icon={isLiked ? 'solar:heart-angle-bold' : 'solar:heart-angle-line-duotone'}
+							class={cn(
+								'mr-2 size-5 transition-colors',
+								isLiked ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
+							)}
+						/>
+						{comment.reactions.length}
+					</button>
+				</div>
 			</div>
 			{#if depth === 0}
 				<button
