@@ -58,6 +58,10 @@
 	function handleNewPost(newPost: Post) {
 		posts = [newPost, ...posts];
 	}
+
+	function handlePostDeletion(id: number) {
+		posts = posts.filter((post) => post.id !== id);
+	}
 </script>
 
 <Header authToken={data.accessToken} />
@@ -77,4 +81,12 @@
 	</a>
 </nav>
 <CreatePost onNewPost={handleNewPost} authToken={data.accessToken} />
-<ProfileFeed {posts} {currentPage} {isLoading} {hasMore} {loadPosts} />
+<ProfileFeed
+	{posts}
+	onPostDelete={handlePostDeletion}
+	{currentPage}
+	{isLoading}
+	{hasMore}
+	{loadPosts}
+	authToken={data.accessToken}
+/>

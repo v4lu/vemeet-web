@@ -9,9 +9,19 @@
 		isLoading: boolean;
 		hasMore: boolean;
 		loadPosts: (page: number) => Promise<void>;
+		onPostDelete: (id: number) => void;
+		authToken: string;
 	};
 
-	let { posts, currentPage, isLoading, hasMore, loadPosts }: ProfileFeedProps = $props();
+	let {
+		posts,
+		currentPage,
+		isLoading,
+		hasMore,
+		onPostDelete,
+		loadPosts,
+		authToken
+	}: ProfileFeedProps = $props();
 	let target = $state<HTMLElement | null>(null);
 
 	$effect(() => {
@@ -39,7 +49,7 @@
 
 <div class="posts-container">
 	{#each posts as post (post.id)}
-		<PostCard {post} />
+		<PostCard {authToken} {post} {onPostDelete} />
 	{/each}
 </div>
 {#if isLoading}

@@ -1,30 +1,33 @@
 <script lang="ts">
+	import { api, createAuthHeaders } from '$lib/api';
+	import { sessionStore } from '$lib/stores/session.store';
+	import { toast } from '$lib/stores/toast.store';
 	import type { Post } from '$lib/types/post.types';
 	import Icon from '@iconify/svelte';
 	import { formatDistanceToNow } from 'date-fns';
 	import { elasticOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 	import { Dropdown } from '../ui/dropdown';
-	import { ImageModal } from '../ui/modals';
+	import { ConfirmModal, ImageModal } from '../ui/modals';
 
 	type PostCardProps = {
 		post: Post;
+		onPostDelete: (id: number) => void;
+		authToken: string;
 	};
 
-	let { post }: PostCardProps = $props();
+	let { post, onPostDelete, authToken }: PostCardProps = $props();
 	let isSettingsOpen = $state(false);
 	let currentImageIndex = $state(0);
 	let isModalOpen = $state(false);
+	let isDeleteModalConfirmOpen = $state(false);
+	let submittingPostDelete = $state(false);
 
 	let hasNextImage = $derived(currentImageIndex < post.images.length - 1);
 	let hasPrevImage = $derived(currentImageIndex > 0);
 
 	function formatTimestamp(timestamp: string): string {
 		return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
-	}
-
-	function handleDelete() {
-		isSettingsOpen = false;
 	}
 
 	function handleUpdate() {
@@ -46,38 +49,65 @@
 	function setImage(index: number) {
 		currentImageIndex = index;
 	}
+
+	async function deletePost() {
+		submittingPostDelete = true;
+
+		try {
+			await api
+				.delete(`posts/${post.id}`, {
+					headers: createAuthHeaders(authToken)
+				})
+				.json();
+
+			onPostDelete(post.id);
+			isDeleteModalConfirmOpen = false;
+			toast.success('Post deleted successfully!');
+		} catch (error) {
+			console.error('Error creating post:', error);
+			toast.error('Something went wrong, please try again later!');
+		} finally {
+			submittingPostDelete = false;
+		}
+	}
 </script>
 
 <div
 	class="mb-4 overflow-hidden rounded-lg border border-border bg-card shadow transition-shadow hover:shadow-md"
 >
 	<div class="relative">
-		<div class="absolute right-2 top-2 z-10">
-			<Dropdown
-				triggerIcon="solar:menu-dots-bold"
-				bind:isOpen={isSettingsOpen}
-				triggerClass="size-6 flex min-w-0 p-0 justify-center"
-				triggerIconClass="m-0 p-0"
-				class="right-0 top-8"
-			>
-				<div class="flex w-full flex-col gap-1">
-					<button
-						class="flex w-full items-center rounded-sm px-2 py-1 text-sm text-destructive transition-colors hover:bg-destructive/10"
-						onclick={handleDelete}
-					>
-						<Icon icon="lucide:trash-2" class="mr-2" />
-						Delete
-					</button>
-					<button
-						class="flex w-full items-center rounded-sm px-2 py-1 text-sm transition-colors hover:bg-accent"
-						onclick={handleUpdate}
-					>
-						<Icon icon="lucide:pencil" class="mr-2" />
-						Edit
-					</button>
-				</div>
-			</Dropdown>
-		</div>
+		{#if post.user.id === $sessionStore.id}
+			<div class="absolute right-2 top-2 z-10">
+				<Dropdown
+					triggerIcon="solar:menu-dots-bold"
+					bind:isOpen={isSettingsOpen}
+					triggerClass="size-6 flex min-w-0 p-0 justify-center"
+					triggerIconClass="m-0 p-0"
+					class="right-0 top-8"
+				>
+					<div class="flex w-full flex-col gap-1">
+						<button
+							class="flex w-full items-center rounded-sm px-2 py-1 text-sm text-destructive transition-colors hover:bg-destructive/10"
+							onclick={() => {
+								isDeleteModalConfirmOpen = true;
+								isSettingsOpen = false;
+							}}
+						>
+							<Icon icon="lucide:trash-2" class="mr-2" />
+							Delete
+						</button>
+						<button
+							class="flex w-full items-center rounded-sm px-2 py-1 text-sm transition-colors hover:bg-accent"
+							onclick={handleUpdate}
+						>
+							<Icon icon="lucide:pencil" class="mr-2" />
+							Edit
+						</button>
+					</div>
+				</Dropdown>
+			</div>
+		{/if}
+
 		<div class="relative mb-4 flex items-center justify-between px-4 pt-4">
 			<div class="flex items-center">
 				<img
@@ -177,5 +207,16 @@
 		src={post.images[currentImageIndex].url}
 		alt="Full size post image"
 		onClose={() => (isModalOpen = false)}
+	/>
+{/if}
+
+{#if isDeleteModalConfirmOpen}
+	<ConfirmModal
+		title="Delete Content"
+		desc="Deleting content is a permanent action. Once you delete a post, it will be removed from the platform and cannot be recovered."
+		onClose={() => (isDeleteModalConfirmOpen = false)}
+		onConfirm={deletePost}
+		submitting={submittingPostDelete}
+		confirmText="Delete Post"
 	/>
 {/if}
