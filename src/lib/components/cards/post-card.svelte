@@ -119,7 +119,7 @@
 				{#if post.images.length > 1}
 					{#if hasPrevImage}
 						<button
-							class="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/30 p-1.5 text-white"
+							class="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
 							onclick={prevImage}
 						>
 							<Icon class="size-4" icon="lucide:chevron-left" />
@@ -127,7 +127,7 @@
 					{/if}
 					{#if hasNextImage}
 						<button
-							class="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/30 p-1.5 text-white"
+							class="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
 							onclick={nextImage}
 						>
 							<Icon class="size-4" icon="lucide:chevron-right" />

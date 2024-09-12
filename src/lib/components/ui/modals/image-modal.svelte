@@ -46,7 +46,7 @@
 	</div>
 	<span id="modal-title" class="sr-only">Image Modal</span>
 	<button
-		class="absolute right-4 top-4 rounded-full bg-black/50 p-2 text-white transition-opacity hover:opacity-80"
+		class="absolute right-4 top-4 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
 		onclick={onClose}
 		aria-label="Close modal"
 	>
