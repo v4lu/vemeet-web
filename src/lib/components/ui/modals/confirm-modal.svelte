@@ -61,10 +61,7 @@
 			<p class="text-pretty text-sm text-muted-foreground">{desc}</p>
 		</div>
 		<div class="mt-4 flex w-full items-center justify-end gap-3">
-			<Button onclick={onClose} variant="secondary" size="sm">
-				<Icon icon="solar:trash-bin-2-bold" class="mr-2 size-4" />
-				Cancel</Button
-			>
+			<Button onclick={onClose} variant="secondary" size="sm">Cancel</Button>
 			<Button
 				isLoading={submitting}
 				disabled={submitting}

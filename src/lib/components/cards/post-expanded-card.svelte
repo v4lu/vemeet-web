@@ -1,28 +1,34 @@
 <script lang="ts">
+	import { api, createAuthHeaders } from '$lib/api';
 	import { cn } from '$lib/cn';
 	import { formatTimestamp } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
+	import { toast } from '$lib/stores/toast.store';
+	import type { Comment } from '$lib/types/comment.types';
 	import type { Post } from '$lib/types/post.types';
+	import type { Reaction } from '$lib/types/reaction.types';
 	import Icon from '@iconify/svelte';
 	import { elasticOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
+	import { UserHorizontalCard } from '.';
+	import { CommentsFeed, CreateComment } from '../comments';
 	import { Dropdown } from '../ui/dropdown';
 	import { ConfirmModal, ImageModal, Modal } from '../ui/modals';
-	import UserHorizontalCard from './user-horizontal-card.svelte';
 
-	type PostCardProps = {
+	type PostBodyProps = {
 		post: Post;
-		onPostDelete: (id: number) => void;
+		onPostDelete: () => void;
+		postId: number;
 		authToken: string;
-		onToggleLike: (postId: number, isLiked: boolean) => Promise<void>;
 	};
-
-	let { post, onPostDelete, onToggleLike }: PostCardProps = $props();
-	let isSettingsOpen = $state(false);
-	let currentImageIndex = $state(0);
+	let { post, onPostDelete, postId, authToken }: PostBodyProps = $props();
 	let isImageModalOpen = $state(false);
+	let isSettingsOpen = $state(false);
 	let isDeleteModalConfirmOpen = $state(false);
 	let submittingPostDelete = $state(false);
+	let currentImageIndex = $state(0);
+	let hasNextImage = $derived(currentImageIndex < post.images.length - 1);
+	let hasPrevImage = $derived(currentImageIndex > 0);
 
 	let submittingLike = $state(false);
 	let isLikeModalOpen = $state(false);
@@ -33,46 +39,22 @@
 		)
 	);
 
-	let hasNextImage = $derived(currentImageIndex < post.images.length - 1);
-	let hasPrevImage = $derived(currentImageIndex > 0);
-
-	function handleUpdate() {
-		isSettingsOpen = false;
-	}
-
 	function nextImage() {
-		if (currentImageIndex < post.images.length - 1) {
-			currentImageIndex++;
-		}
+		if (hasNextImage) currentImageIndex++;
 	}
 
 	function prevImage() {
-		if (currentImageIndex > 0) {
-			currentImageIndex--;
-		}
+		if (hasPrevImage) currentImageIndex--;
 	}
 
 	function setImage(index: number) {
 		currentImageIndex = index;
 	}
 
-	async function handleToggleLike() {
-		if (submittingLike) return;
-		submittingLike = true;
-		try {
-			await onToggleLike(post.id, isLiked);
-			isLiked = !isLiked;
-		} catch (error) {
-			console.error('Error toggling like:', error);
-		} finally {
-			submittingLike = false;
-		}
-	}
-
 	async function handleDeletePost() {
 		submittingPostDelete = true;
 		try {
-			await onPostDelete(post.id);
+			await onPostDelete();
 			isDeleteModalConfirmOpen = false;
 		} catch (error) {
 			console.error('Error deleting post:', error);
@@ -80,11 +62,51 @@
 			submittingPostDelete = false;
 		}
 	}
+
+	async function handleToggleLike() {
+		if (submittingLike) return;
+		submittingLike = true;
+		try {
+			if (isLiked) {
+				await api
+					.delete(`posts/${postId}/reactions`, {
+						headers: createAuthHeaders(authToken)
+					})
+					.json();
+				post = {
+					...post,
+					reactions: post.reactions.filter((r) => r.user.id !== $sessionStore.id)
+				};
+			} else {
+				const res = await api
+					.post<Reaction>(`posts/${postId}/reactions`, {
+						json: { reactionType: 'LIKE' },
+						headers: createAuthHeaders(authToken)
+					})
+					.json();
+				post = {
+					...post,
+					reactions: [res, ...post.reactions]
+				};
+			}
+			isLiked = !isLiked;
+		} catch (error) {
+			console.error('Error toggling like:', error);
+			toast.error('Failed to update like status. Please try again.');
+		} finally {
+			submittingLike = false;
+		}
+	}
+
+	function handleCommentCreated(newComment: Comment) {
+		post = {
+			...post,
+			comments: [...post.comments, newComment]
+		};
+	}
 </script>
 
-<div
-	class="mb-4 overflow-hidden rounded-lg border border-border bg-card shadow transition-shadow hover:shadow-md"
->
+<div class="mb-4 overflow-hidden rounded-lg border border-border bg-card shadow">
 	<div class="relative">
 		{#if post.user.id === $sessionStore.id}
 			<div class="absolute right-2 top-2 z-10">
@@ -108,7 +130,6 @@
 						</button>
 						<button
 							class="flex w-full items-center rounded-sm px-2 py-1 text-sm transition-colors hover:bg-accent"
-							onclick={handleUpdate}
 						>
 							<Icon icon="lucide:pencil" class="mr-2" />
 							Edit
@@ -117,7 +138,6 @@
 				</Dropdown>
 			</div>
 		{/if}
-
 		<div class="relative mb-4 flex items-center justify-between px-4 pt-4">
 			<div class="flex items-center">
 				<img
@@ -148,10 +168,7 @@
 							src={post.images[currentImageIndex].url}
 							alt="Post"
 							class="h-[15rem] w-full object-cover object-center"
-							in:slide={{
-								duration: 300,
-								axis: 'x'
-							}}
+							in:slide={{ duration: 300, axis: 'x' }}
 							out:fade={{ duration: 200, easing: elasticOut }}
 						/>
 					{/key}
@@ -173,20 +190,20 @@
 							<Icon class="size-4" icon="lucide:chevron-right" />
 						</button>
 					{/if}
+					{#if post.images.length > 1}
+						<div class="mb-2 flex justify-center space-x-1 pt-4">
+							{#each post.images as _, index}
+								<button
+									class="h-2 w-2 rounded-full transition-colors"
+									class:bg-primary={index === currentImageIndex}
+									class:bg-gray-300={index !== currentImageIndex}
+									onclick={() => setImage(index)}
+								></button>
+							{/each}
+						</div>
+					{/if}
 				{/if}
 			</div>
-			{#if post.images.length > 1}
-				<div class="mb-2 flex justify-center space-x-1">
-					{#each post.images as _, index}
-						<button
-							class="h-2 w-2 rounded-full transition-colors"
-							class:bg-primary={index === currentImageIndex}
-							class:bg-gray-300={index !== currentImageIndex}
-							onclick={() => setImage(index)}
-						></button>
-					{/each}
-				</div>
-			{/if}
 		{/if}
 		<p class="mb-4 px-4 text-foreground">{post.content}</p>
 		<div class="flex items-center justify-between border-t border-border p-4 pt-3">
@@ -215,20 +232,10 @@
 					{post.reactions.length} Likes
 				</button>
 			</div>
-			<a
-				href={`/post/${post.id}`}
-				class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
-			>
-				<Icon icon="lucide:message-circle" class="mr-1.5" />
-				<span>Comments</span>
-			</a>
-			<button
-				class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
-			>
-				<Icon icon="lucide:share" class="mr-1.5" />
-				<span>Share</span>
-			</button>
 		</div>
+
+		<CreateComment {postId} {authToken} onCommentCreated={handleCommentCreated} />
+		<CommentsFeed comments={post.comments} postId={post.id} {authToken} />
 	</div>
 </div>
 

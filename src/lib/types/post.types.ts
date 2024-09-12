@@ -1,3 +1,4 @@
+import type { Comment } from './comment.types';
 import type { Image } from './image.types';
 import type { Pageable, Sort } from './paga.types';
 import type { Reaction } from './reaction.types';
@@ -9,6 +10,7 @@ export type Post = {
 	content: string;
 	images: Image[];
 	reactions: Reaction[];
+	comments: Comment[];
 	createdAt: string;
 	updatedAt: string;
 };
