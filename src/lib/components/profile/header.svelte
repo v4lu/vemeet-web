@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { api, createAuthHeaders, uploadImage } from '$lib/api';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { Button } from '$lib/components/ui/button';
 	import { formatMemberSince } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { User } from '$lib/types/user.types';
@@ -159,7 +159,7 @@
 		>
 	{/if}
 </div>
-<div class="mt-4 flex items-center">
+<div class="mt-4 flex items-center pb-2">
 	<div class="mr-8">
 		<span class="font-semibold">50K</span>
 		<span class="text-sm text-muted-foreground">Following</span>
@@ -169,9 +169,4 @@
 		<span class="font-semibold">500K</span>
 		<span class="text-sm text-muted-foreground">Followers</span>
 	</div>
-</div>
-<div class="mt-4">
-	<a href="/settings/edit-profile" class={buttonVariants({ size: 'sm', variant: 'outline' })}>
-		Edit Profile
-	</a>
 </div>
