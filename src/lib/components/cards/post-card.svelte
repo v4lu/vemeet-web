@@ -1,27 +1,41 @@
 <script lang="ts">
-	import { api, createAuthHeaders } from '$lib/api';
+	import { cn } from '$lib/cn';
 	import { sessionStore } from '$lib/stores/session.store';
-	import { toast } from '$lib/stores/toast.store';
 	import type { Post } from '$lib/types/post.types';
 	import Icon from '@iconify/svelte';
 	import { formatDistanceToNow } from 'date-fns';
 	import { elasticOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 	import { Dropdown } from '../ui/dropdown';
-	import { ConfirmModal, ImageModal } from '../ui/modals';
+	import { ConfirmModal, ImageModal, Modal } from '../ui/modals';
+	import UserHorizontalCard from './user-horizontal-card.svelte';
 
 	type PostCardProps = {
 		post: Post;
 		onPostDelete: (id: number) => void;
 		authToken: string;
+		onToggleLike: (postId: number) => Promise<void>;
 	};
 
-	let { post, onPostDelete, authToken }: PostCardProps = $props();
+	let { post, onPostDelete, onToggleLike }: PostCardProps = $props();
 	let isSettingsOpen = $state(false);
 	let currentImageIndex = $state(0);
 	let isModalOpen = $state(false);
 	let isDeleteModalConfirmOpen = $state(false);
 	let submittingPostDelete = $state(false);
+
+	let submittingLike = $state(false);
+	let isLikeModalOpen = $state(false);
+
+	let isLiked = $derived(
+		post.reactions.some(
+			(reaction) => reaction.user.id === $sessionStore.id && reaction.reactionType === 'LIKE'
+		)
+	);
+
+	let likeCount = $derived(
+		post.reactions.filter((reaction) => reaction.reactionType === 'LIKE').length
+	);
 
 	let hasNextImage = $derived(currentImageIndex < post.images.length - 1);
 	let hasPrevImage = $derived(currentImageIndex > 0);
@@ -50,22 +64,25 @@
 		currentImageIndex = index;
 	}
 
-	async function deletePost() {
-		submittingPostDelete = true;
-
+	async function handleToggleLike() {
+		if (submittingLike) return;
+		submittingLike = true;
 		try {
-			await api
-				.delete(`posts/${post.id}`, {
-					headers: createAuthHeaders(authToken)
-				})
-				.json();
-
-			onPostDelete(post.id);
-			isDeleteModalConfirmOpen = false;
-			toast.success('Post deleted successfully!');
+			await onToggleLike(post.id);
 		} catch (error) {
-			console.error('Error creating post:', error);
-			toast.error('Something went wrong, please try again later!');
+			console.error('Error toggling like:', error);
+		} finally {
+			submittingLike = false;
+		}
+	}
+
+	async function handleDeletePost() {
+		submittingPostDelete = true;
+		try {
+			await onPostDelete(post.id);
+			isDeleteModalConfirmOpen = false;
+		} catch (error) {
+			console.error('Error deleting post:', error);
 		} finally {
 			submittingPostDelete = false;
 		}
@@ -180,17 +197,36 @@
 		{/if}
 		<p class="mb-4 px-4 text-foreground">{post.content}</p>
 		<div class="flex items-center justify-between border-t border-border p-4 pt-3">
-			<button
-				class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
-			>
-				<Icon icon="lucide:heart" class="mr-1.5" />
-				<span>Like</span>
-			</button>
+			<div class="flex items-center">
+				<button
+					class="group mr-2 flex items-center text-sm transition-colors"
+					onclick={handleToggleLike}
+					disabled={submittingLike}
+				>
+					<Icon
+						icon={isLiked ? 'solar:heart-angle-bold' : 'solar:heart-angle-line-duotone'}
+						class={cn(
+							'size-5 transition-colors',
+							isLiked ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
+						)}
+					/>
+				</button>
+				<button
+					class="text-sm text-muted-foreground hover:text-primary"
+					onclick={() => {
+						if (likeCount > 0) {
+							isLikeModalOpen = true;
+						}
+					}}
+				>
+					{likeCount} Likes
+				</button>
+			</div>
 			<button
 				class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
 			>
 				<Icon icon="lucide:message-circle" class="mr-1.5" />
-				<span>Comment</span>
+				<span>Comments</span>
 			</button>
 			<button
 				class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
@@ -213,10 +249,34 @@
 {#if isDeleteModalConfirmOpen}
 	<ConfirmModal
 		title="Delete Content"
-		desc="Deleting content is a permanent action. Once you delete a post, it will be removed from the platform and cannot be recovered."
+		desc="Deleting content is a permanent action.Post will be removed and cannot be recovered."
 		onClose={() => (isDeleteModalConfirmOpen = false)}
-		onConfirm={deletePost}
+		onConfirm={handleDeletePost}
 		submitting={submittingPostDelete}
 		confirmText="Delete Post"
 	/>
 {/if}
+
+{#if isLikeModalOpen}
+	<Modal onClose={() => (isLikeModalOpen = false)}>
+		<div class="hide-scrollbar max-h-[25rem] overflow-y-auto">
+			<h2 class="mb-4 text-xl font-semibold">Likes</h2>
+			<div class="grid gap-2">
+				{#each post.reactions as { user }}
+					<UserHorizontalCard {user} />
+				{/each}
+			</div>
+		</div>
+	</Modal>
+{/if}
+
+<style lang="postcss">
+	.hide-scrollbar {
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+
+	.hide-scrollbar::-webkit-scrollbar {
+		display: none; /* Chrome, Safari and Opera */
+	}
+</style>

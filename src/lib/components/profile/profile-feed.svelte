@@ -10,6 +10,7 @@
 		hasMore: boolean;
 		loadPosts: (page: number) => Promise<void>;
 		onPostDelete: (id: number) => void;
+		onToggleLike: (postId: number) => Promise<void>;
 		authToken: string;
 	};
 
@@ -20,8 +21,10 @@
 		hasMore,
 		onPostDelete,
 		loadPosts,
+		onToggleLike,
 		authToken
 	}: ProfileFeedProps = $props();
+
 	let target = $state<HTMLElement | null>(null);
 
 	$effect(() => {
@@ -36,11 +39,9 @@
 		};
 
 		window.addEventListener('scroll', handleScroll);
-
 		if (currentPage === 0 && posts.length === 0) {
 			loadPosts(0);
 		}
-
 		return () => {
 			window.removeEventListener('scroll', handleScroll);
 		};
@@ -49,7 +50,7 @@
 
 <div class="posts-container">
 	{#each posts as post (post.id)}
-		<PostCard {authToken} {post} {onPostDelete} />
+		<PostCard {authToken} {post} {onPostDelete} {onToggleLike} />
 	{/each}
 </div>
 {#if isLoading}

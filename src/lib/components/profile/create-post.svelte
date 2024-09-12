@@ -1,18 +1,16 @@
 <script lang="ts">
-	import { api, createAuthHeaders, uploadImage } from '$lib/api';
+	import { uploadImage } from '$lib/api';
 	import { cn } from '$lib/cn';
 	import { toast } from '$lib/stores/toast.store';
-	import type { Post } from '$lib/types/post.types';
 	import Icon from '@iconify/svelte';
 	import { Button } from '../ui/button';
 	import { inputVariants } from '../ui/input';
 
 	type CreatePostProps = {
+		onCreatePost: (content: string, imageUrls: string[]) => Promise<void>;
 		authToken: string;
-		onNewPost: (post: Post) => void;
 	};
-
-	let { authToken, onNewPost }: CreatePostProps = $props();
+	let { onCreatePost, authToken }: CreatePostProps = $props();
 
 	let postContent = $state('');
 	let imageUrls = $state<string[]>([]);
@@ -33,18 +31,14 @@
 				imageUploadLoading = true;
 				try {
 					await Promise.all(
-						Array.from(input.files).map(async (file) => {
-							await uploadImage({
+						Array.from(input.files).map((file) =>
+							uploadImage({
 								authToken,
 								file,
-								setImageUrl: (url: string) => {
-									imageUrls.push(url);
-								},
-								setImageUploadLoading: (loading: boolean) => {
-									imageUploadLoading = loading;
-								}
-							});
-						})
+								setImageUploadLoading: () => (imageUploadLoading = true),
+								setImageUrl: (img) => (imageUrls = [img, ...imageUrls])
+							})
+						)
 					);
 				} catch (error) {
 					console.error('Error uploading images:', error);
@@ -52,13 +46,13 @@
 					imageUploadLoading = false;
 				}
 			} else {
-				toast.error('You can upload a maximum of 5 images.');
+				toast.error(`You can upload a maximum of 5 images.`);
 			}
 		}
 	}
 
 	function deleteImage(index: number): void {
-		imageUrls.splice(index, 1);
+		imageUrls = imageUrls.filter((_, i) => i !== index);
 	}
 
 	async function handleSubmit(): Promise<void> {
@@ -68,25 +62,12 @@
 		}
 
 		submitting = true;
-		const payload = {
-			content: postContent,
-			images: imageUrls
-		};
 		try {
-			const res = await api
-				.post<Post>('posts', {
-					json: payload,
-					headers: createAuthHeaders(authToken)
-				})
-				.json();
-
-			onNewPost(res);
+			await onCreatePost(postContent, imageUrls);
 			postContent = '';
 			imageUrls = [];
-			toast.success('Post created successfully!');
 		} catch (error) {
-			console.error('Error creating post:', error);
-			toast.error('Something went wrong, please try again later!');
+			console.error(error);
 		} finally {
 			submitting = false;
 		}

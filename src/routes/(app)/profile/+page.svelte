@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { api, createAuthHeaders } from '$lib/api.js';
 	import { CreatePost, Header, ProfileFeed } from '$lib/components/profile';
+	import { sessionStore } from '$lib/stores/session.store.js';
+	import { toast } from '$lib/stores/toast.store.js';
 	import type { Post, PostsPagableResponse } from '$lib/types/post.types.js';
+	import type { Reaction } from '$lib/types/reaction.types.js';
 
 	let { data } = $props();
 	let posts = $state<Post[]>([]);
@@ -55,12 +58,79 @@
 		}
 	}
 
-	function handleNewPost(newPost: Post) {
-		posts = [newPost, ...posts];
+	async function handleCreatePost(postContent: string, imageUrls: string[]): Promise<void> {
+		if (!postContent.trim() && imageUrls.length === 0) {
+			toast.error('Please enter content or upload an image.');
+			return;
+		}
+
+		const payload = {
+			content: postContent,
+			images: imageUrls
+		};
+
+		try {
+			const newPost = await api
+				.post<Post>('posts', {
+					json: payload,
+					headers: createAuthHeaders(data.accessToken)
+				})
+				.json();
+
+			posts = [newPost, ...posts];
+			toast.success('Post created successfully!');
+		} catch (error) {
+			console.error('Error creating post:', error);
+			toast.error('Something went wrong, please try again later!');
+			throw error;
+		}
 	}
 
-	function handlePostDeletion(id: number) {
-		posts = posts.filter((post) => post.id !== id);
+	async function handlePostDeletion(id: number) {
+		try {
+			await api
+				.delete(`posts/${id}`, {
+					headers: createAuthHeaders(data.accessToken)
+				})
+				.json();
+			posts = posts.filter((post) => post.id !== id);
+			toast.success('Post deleted successfully!');
+		} catch (error) {
+			console.error('Error deleting post:', error);
+			toast.error('Failed to delete post. Please try again.');
+		}
+	}
+
+	async function handleToggleLike(postId: number) {
+		const post = posts.find((p) => p.id === postId);
+		if (!post) return;
+
+		const isLiked = post.reactions.some(
+			(r) => r.user.id === $sessionStore.id && r.reactionType === 'LIKE'
+		);
+
+		try {
+			if (isLiked) {
+				await api
+					.delete(`posts/${postId}/reactions`, {
+						headers: createAuthHeaders(data.accessToken)
+					})
+					.json();
+				post.reactions = post.reactions.filter((r) => r.user.id !== $sessionStore.id);
+			} else {
+				const res = await api
+					.post<Reaction>(`posts/${postId}/reactions`, {
+						json: { reactionType: 'LIKE' },
+						headers: createAuthHeaders(data.accessToken)
+					})
+					.json();
+				post.reactions = [res, ...post.reactions];
+			}
+			posts = [...posts]; // Trigger reactivity
+		} catch (error) {
+			console.error('Error toggling like:', error);
+			toast.error('Failed to update like status. Please try again.');
+		}
 	}
 </script>
 
@@ -80,13 +150,14 @@
 		Media
 	</a>
 </nav>
-<CreatePost onNewPost={handleNewPost} authToken={data.accessToken} />
+<CreatePost onCreatePost={handleCreatePost} authToken={data.accessToken} />
 <ProfileFeed
 	{posts}
-	onPostDelete={handlePostDeletion}
 	{currentPage}
 	{isLoading}
 	{hasMore}
+	onPostDelete={handlePostDeletion}
+	onToggleLike={handleToggleLike}
 	{loadPosts}
 	authToken={data.accessToken}
 />

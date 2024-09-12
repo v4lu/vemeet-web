@@ -1,5 +1,6 @@
 import type { Image } from './image.types';
 import type { Pageable, Sort } from './paga.types';
+import type { Reaction } from './reaction.types';
 import type { User } from './user.types';
 
 export type Post = {
@@ -7,6 +8,7 @@ export type Post = {
 	user: User;
 	content: string;
 	images: Image[];
+	reactions: Reaction[];
 	createdAt: string;
 	updatedAt: string;
 };

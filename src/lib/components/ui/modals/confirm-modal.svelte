@@ -48,7 +48,7 @@
 </script>
 
 <div
-	class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-12 backdrop-blur-sm"
+	class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-5 backdrop-blur-sm"
 	transition:fade={{ duration: 200 }}
 >
 	<div
@@ -58,7 +58,7 @@
 	>
 		<div class="grid gap-2">
 			<h2 class="text-2xl font-semibold">{title}</h2>
-			<p class="text-balance text-sm text-muted-foreground">{desc}</p>
+			<p class="text-pretty text-sm text-muted-foreground">{desc}</p>
 		</div>
 		<div class="mt-4 flex w-full items-center justify-end gap-3">
 			<Button onclick={onClose} variant="secondary" size="sm">
