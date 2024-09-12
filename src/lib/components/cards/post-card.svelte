@@ -2,9 +2,10 @@
 	import type { Post } from '$lib/types/post.types';
 	import Icon from '@iconify/svelte';
 	import { formatDistanceToNow } from 'date-fns';
-	import { elasticOut, quintIn } from 'svelte/easing';
+	import { elasticOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 	import { Dropdown } from '../ui/dropdown';
+	import { ImageModal } from '../ui/modals';
 
 	type PostCardProps = {
 		post: Post;
@@ -13,6 +14,7 @@
 	let { post }: PostCardProps = $props();
 	let isSettingsOpen = $state(false);
 	let currentImageIndex = $state(0);
+	let isModalOpen = $state(false);
 
 	let hasNextImage = $derived(currentImageIndex < post.images.length - 1);
 	let hasPrevImage = $derived(currentImageIndex > 0);
@@ -92,16 +94,23 @@
 
 		{#if post.images && post.images.length > 0}
 			<div class="relative mb-4">
-				<div class="h-[15rem] overflow-hidden">
+				<div
+					role="button"
+					tabindex="0"
+					aria-label="Open image gallery"
+					aria-describedby="image-description"
+					onkeydown={(e) => e.key === 'Enter' && (isModalOpen = true)}
+					onclick={() => (isModalOpen = true)}
+					class="h-[15rem] w-full overflow-hidden"
+				>
 					{#key currentImageIndex}
 						<img
 							src={post.images[currentImageIndex].url}
 							alt="Post"
 							class="h-[15rem] w-full object-cover object-center"
 							in:slide={{
-								duration: 500,
-								axis: 'x',
-								easing: quintIn
+								duration: 300,
+								axis: 'x'
 							}}
 							out:fade={{ duration: 200, easing: elasticOut }}
 						/>
@@ -162,3 +171,11 @@
 		</div>
 	</div>
 </div>
+
+{#if isModalOpen}
+	<ImageModal
+		src={post.images[currentImageIndex].url}
+		alt="Full size post image"
+		onClose={() => (isModalOpen = false)}
+	/>
+{/if}
