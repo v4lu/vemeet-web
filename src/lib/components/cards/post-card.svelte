@@ -2,6 +2,8 @@
 	import type { Post } from '$lib/types/post.types';
 	import Icon from '@iconify/svelte';
 	import { formatDistanceToNow } from 'date-fns';
+	import { elasticOut, quintIn } from 'svelte/easing';
+	import { fade, slide } from 'svelte/transition';
 	import { Dropdown } from '../ui/dropdown';
 
 	type PostCardProps = {
@@ -10,6 +12,10 @@
 
 	let { post }: PostCardProps = $props();
 	let isSettingsOpen = $state(false);
+	let currentImageIndex = $state(0);
+
+	let hasNextImage = $derived(currentImageIndex < post.images.length - 1);
+	let hasPrevImage = $derived(currentImageIndex > 0);
 
 	function formatTimestamp(timestamp: string): string {
 		return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
@@ -21,6 +27,22 @@
 
 	function handleUpdate() {
 		isSettingsOpen = false;
+	}
+
+	function nextImage() {
+		if (currentImageIndex < post.images.length - 1) {
+			currentImageIndex++;
+		}
+	}
+
+	function prevImage() {
+		if (currentImageIndex > 0) {
+			currentImageIndex--;
+		}
+	}
+
+	function setImage(index: number) {
+		currentImageIndex = index;
 	}
 </script>
 
@@ -67,6 +89,56 @@
 				</div>
 			</div>
 		</div>
+
+		{#if post.images && post.images.length > 0}
+			<div class="relative mb-4">
+				<div class="h-[15rem] overflow-hidden">
+					{#key currentImageIndex}
+						<img
+							src={post.images[currentImageIndex].url}
+							alt="Post"
+							class="h-[15rem] w-full object-cover object-center"
+							in:slide={{
+								duration: 500,
+								axis: 'x',
+								easing: quintIn
+							}}
+							out:fade={{ duration: 200, easing: elasticOut }}
+						/>
+					{/key}
+				</div>
+				{#if post.images.length > 1}
+					{#if hasPrevImage}
+						<button
+							class="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/30 p-1.5 text-white"
+							onclick={prevImage}
+						>
+							<Icon class="size-4" icon="lucide:chevron-left" />
+						</button>
+					{/if}
+					{#if hasNextImage}
+						<button
+							class="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/30 p-1.5 text-white"
+							onclick={nextImage}
+						>
+							<Icon class="size-4" icon="lucide:chevron-right" />
+						</button>
+					{/if}
+				{/if}
+			</div>
+			{#if post.images.length > 1}
+				<div class="mb-2 flex justify-center space-x-1">
+					{#each post.images as _, index}
+						<button
+							class="h-2 w-2 rounded-full transition-colors"
+							class:bg-primary={index === currentImageIndex}
+							class:bg-gray-300={index !== currentImageIndex}
+							onclick={() => setImage(index)}
+						></button>
+					{/each}
+				</div>
+			{/if}
+		{/if}
 		<p class="mb-4 px-4 text-foreground">{post.content}</p>
 		<div class="flex items-center justify-between border-t border-border p-4 pt-3">
 			<button
