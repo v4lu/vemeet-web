@@ -219,13 +219,16 @@
 				href={`/post/${post.id}`}
 				class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
 			>
-				<Icon icon="lucide:message-circle" class="mr-1.5" />
-				<span>Comments</span>
+				<Icon icon="solar:chat-round-line-bold" class="mr-1.5" />
+				<span>
+					{post.comments.length ?? '0'}
+					Comments</span
+				>
 			</a>
 			<button
 				class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
 			>
-				<Icon icon="lucide:share" class="mr-1.5" />
+				<Icon icon="solar:square-share-line-broken" class="mr-1.5" />
 				<span>Share</span>
 			</button>
 		</div>

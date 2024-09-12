@@ -10,14 +10,18 @@
 
 	let { comments, postId, authToken }: CommentsFeedProps = $props();
 
-	let topLevelComments = $derived(comments.filter((comment) => comment.parentId === null).slice());
+	let topLevelComments = $derived(comments.filter((comment) => comment.parentId === null));
+
+	function handleCommentDelete(commentId: number) {
+		comments = comments.filter((c) => c.id !== commentId);
+	}
 </script>
 
-<div class="border-t border-gray-200">
+<div class="border-t border-border pb-4">
 	<h4 class="p-4 font-semibold">Comments</h4>
-	<div class="space-y-4 px-2">
+	<div class="space-y-4">
 		{#each topLevelComments as comment (comment.id)}
-			<Comment {comment} {postId} {authToken} />
+			<Comment {comment} {postId} {authToken} onCommentDelete={handleCommentDelete} />
 		{/each}
 	</div>
 </div>
