@@ -77,23 +77,4 @@
 	</a>
 </nav>
 <CreatePost onNewPost={handleNewPost} authToken={data.accessToken} />
-<ProfileFeed />
-<div class="posts-container">
-	{#each posts as post}
-		<h2>{post.content}</h2>
-	{/each}
-</div>
-{#if isLoading}
-	<div class="flex h-32 w-full items-center justify-center">
-		<p>Loading posts...</p>
-	</div>
-{:else if !hasMore && posts.length > 0}
-	<div class="flex h-32 w-full items-center justify-center bg-gray-100">
-		<p>No more posts to show</p>
-	</div>
-{:else if !hasMore && posts.length === 0}
-	<div class="flex h-32 w-full items-center justify-center bg-gray-100">
-		<p>No posts available</p>
-	</div>
-{/if}
-<div bind:this={target} class="h-1"></div>
+<ProfileFeed {posts} {currentPage} {isLoading} {hasMore} {loadPosts} />

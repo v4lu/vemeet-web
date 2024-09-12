@@ -4,7 +4,7 @@
 	import { buttonVariants } from '../ui/button';
 </script>
 
-<div class="fixed inset-x-0 top-0 w-full border-b border-border bg-background">
+<div class="fixed inset-x-0 top-0 z-[90] w-full border-b border-border bg-background">
 	<header class="container flex justify-between py-3">
 		<a href="/profile" class="text-lg font-bold text-primary">Vemeet</a>
 		<div class="flex items-center justify-center gap-2">

@@ -168,7 +168,13 @@
 					</div>
 				{/if}
 
-				<Button isLoading={$submitting} type="submit" class="w-full" size="sm">Sign in</Button>
+				<Button
+					disabled={$submitting}
+					isLoading={$submitting}
+					type="submit"
+					class="w-full"
+					size="sm">Sign in</Button
+				>
 			</form>
 
 			<div class="mt-6">

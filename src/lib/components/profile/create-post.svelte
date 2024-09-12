@@ -93,7 +93,7 @@
 	}
 </script>
 
-<div class="mb-6 rounded-lg border bg-background p-4">
+<div class="my-6 rounded-lg border border-border bg-background p-4 shadow">
 	<input
 		type="file"
 		accept="image/*"

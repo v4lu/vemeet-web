@@ -8,6 +8,4 @@
 	let { class: className }: SkeletonProps = $props();
 </script>
 
-<template>
-	<div class={cn('animate-pulse rounded-md bg-muted', className)}></div>
-</template>
+<div class={cn('animate-pulse rounded-md bg-muted', className)}></div>
