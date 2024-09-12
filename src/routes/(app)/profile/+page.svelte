@@ -101,13 +101,9 @@
 		}
 	}
 
-	async function handleToggleLike(postId: number) {
+	async function handleToggleLike(postId: number, isLiked: boolean) {
 		const post = posts.find((p) => p.id === postId);
 		if (!post) return;
-
-		const isLiked = post.reactions.some(
-			(r) => r.user.id === $sessionStore.id && r.reactionType === 'LIKE'
-		);
 
 		try {
 			if (isLiked) {
@@ -126,7 +122,7 @@
 					.json();
 				post.reactions = [res, ...post.reactions];
 			}
-			posts = [...posts]; // Trigger reactivity
+			posts = [...posts];
 		} catch (error) {
 			console.error('Error toggling like:', error);
 			toast.error('Failed to update like status. Please try again.');
@@ -136,19 +132,17 @@
 
 <Header authToken={data.accessToken} />
 <nav class="my-2 flex">
-	<a href="#" class="border-b-2 border-primary px-6 py-3 text-sm font-medium"> Posts </a>
-	<a
-		href="#"
+	<span class="border-b-2 border-primary px-6 py-3 text-sm font-medium"> Posts </span>
+	<span
 		class="px-6 py-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
 	>
 		Recipes
-	</a>
-	<a
-		href="#"
+	</span>
+	<span
 		class="px-6 py-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
 	>
 		Media
-	</a>
+	</span>
 </nav>
 <CreatePost onCreatePost={handleCreatePost} authToken={data.accessToken} />
 <ProfileFeed

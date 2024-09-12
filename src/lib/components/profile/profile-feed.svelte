@@ -10,7 +10,7 @@
 		hasMore: boolean;
 		loadPosts: (page: number) => Promise<void>;
 		onPostDelete: (id: number) => void;
-		onToggleLike: (postId: number) => Promise<void>;
+		onToggleLike: (postId: number, isLiked: boolean) => Promise<void>;
 		authToken: string;
 	};
 
@@ -54,7 +54,7 @@
 	{/each}
 </div>
 {#if isLoading}
-	{#each Array(3) as _}
+	{#each Array(5) as _}
 		<SkeletonCard />
 	{/each}
 {:else if !hasMore && posts.length > 0}

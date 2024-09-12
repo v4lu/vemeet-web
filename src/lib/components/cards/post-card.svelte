@@ -14,7 +14,7 @@
 		post: Post;
 		onPostDelete: (id: number) => void;
 		authToken: string;
-		onToggleLike: (postId: number) => Promise<void>;
+		onToggleLike: (postId: number, isLiked: boolean) => Promise<void>;
 	};
 
 	let { post, onPostDelete, onToggleLike }: PostCardProps = $props();
@@ -27,14 +27,10 @@
 	let submittingLike = $state(false);
 	let isLikeModalOpen = $state(false);
 
-	let isLiked = $derived(
+	let isLiked = $state(
 		post.reactions.some(
 			(reaction) => reaction.user.id === $sessionStore.id && reaction.reactionType === 'LIKE'
 		)
-	);
-
-	let likeCount = $derived(
-		post.reactions.filter((reaction) => reaction.reactionType === 'LIKE').length
 	);
 
 	let hasNextImage = $derived(currentImageIndex < post.images.length - 1);
@@ -68,7 +64,8 @@
 		if (submittingLike) return;
 		submittingLike = true;
 		try {
-			await onToggleLike(post.id);
+			await onToggleLike(post.id, isLiked);
+			isLiked = !isLiked;
 		} catch (error) {
 			console.error('Error toggling like:', error);
 		} finally {
@@ -214,12 +211,12 @@
 				<button
 					class="text-sm text-muted-foreground hover:text-primary"
 					onclick={() => {
-						if (likeCount > 0) {
+						if (post.reactions.length > 0) {
 							isLikeModalOpen = true;
 						}
 					}}
 				>
-					{likeCount} Likes
+					{post.reactions.length} Likes
 				</button>
 			</div>
 			<button
