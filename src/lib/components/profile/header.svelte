@@ -3,8 +3,13 @@
 	import { Button } from '$lib/components/ui/button';
 	import { formatMemberSince } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
+	import type { ResponseFollowStats } from '$lib/types/follow.types';
 	import type { User } from '$lib/types/user.types';
 	import Icon from '@iconify/svelte';
+	import { onMount } from 'svelte';
+	import { UserHorizontalCard } from '../cards';
+	import { Modal } from '../ui/modals';
+	import { Skeleton } from '../ui/skeleton';
 
 	type HeaderProps = {
 		authToken: string;
@@ -19,6 +24,14 @@
 	let fileInput: HTMLInputElement | null = $state(null);
 	let imageUploadLoading = $state(false);
 	let isHovering = $state(false);
+	let followStats = $state<ResponseFollowStats>();
+	let followStatsLoading = $state(false);
+
+	let isFollowersModalOpen = $state(false);
+	let isFollowingModalOpen = $state(false);
+	let followers: User[] = $state([]);
+	let following: User[] = $state([]);
+	let isLoading = $state(false);
 
 	function handleInputFileClick(): void {
 		if (!fileInput) return;
@@ -68,6 +81,63 @@
 			console.error(error);
 		}
 	}
+
+	async function loadFollowStats() {
+		followStatsLoading = true;
+		const res = await api
+			.get<ResponseFollowStats>(`followers/stats/${$sessionStore.id}`, {
+				headers: createAuthHeaders(authToken)
+			})
+			.json();
+		followStats = res;
+		followStatsLoading = false;
+	}
+
+	onMount(() => loadFollowStats());
+
+	async function fetchFollowers() {
+		isLoading = true;
+		try {
+			const res = await api
+				.get<User[]>(`followers/followers/${$sessionStore.id}`, {
+					headers: createAuthHeaders(authToken)
+				})
+				.json();
+			followers = res;
+		} catch (error) {
+			console.error('Failed to fetch followers:', error);
+		} finally {
+			isLoading = false;
+		}
+	}
+
+	async function fetchFollowing() {
+		isLoading = true;
+		try {
+			const res = await api
+				.get<User[]>(`followers/following/${$sessionStore.id}`, {
+					headers: createAuthHeaders(authToken)
+				})
+				.json();
+			following = res;
+		} catch (error) {
+			console.error('Failed to fetch following:', error);
+		} finally {
+			isLoading = false;
+		}
+	}
+
+	$effect(() => {
+		if (isFollowersModalOpen) {
+			fetchFollowers();
+		}
+	});
+
+	$effect(() => {
+		if (isFollowingModalOpen) {
+			fetchFollowing();
+		}
+	});
 </script>
 
 <div class="flex items-start justify-between">
@@ -161,12 +231,83 @@
 </div>
 <div class="mt-4 flex items-center pb-2">
 	<div class="mr-8">
-		<span class="font-semibold">50K</span>
-		<span class="text-sm text-muted-foreground">Following</span>
+		{#if followStatsLoading}
+			<Skeleton class="h-6 w-20" />
+		{:else}
+			<button
+				class="group cursor-pointer"
+				disabled={!followStats || followStats.followerCount === 0}
+				onclick={() => {
+					if (followStats && followStats.followerCount > 0) {
+						isFollowersModalOpen = true;
+					}
+				}}
+			>
+				<span class="font-semibold group-hover:text-primary">{followStats?.followerCount}</span>
+				<span class="text-sm text-muted-foreground group-hover:text-primary">Followers</span>
+			</button>
+		{/if}
 	</div>
-
 	<div class="mr-6">
-		<span class="font-semibold">500K</span>
-		<span class="text-sm text-muted-foreground">Followers</span>
+		{#if followStatsLoading}
+			<Skeleton class="h-6 w-20" />
+		{:else}
+			<button
+				disabled={!followStats || followStats.followingCount === 0}
+				class="group cursor-pointer"
+				onclick={() => {
+					if (followStats && followStats.followingCount > 0) {
+						isFollowingModalOpen = true;
+					}
+				}}
+			>
+				<span class="font-semibold group-hover:text-primary">{followStats?.followingCount}</span>
+				<span class="text-sm text-muted-foreground group-hover:text-primary">Following</span>
+			</button>
+		{/if}
 	</div>
 </div>
+
+{#if isFollowersModalOpen}
+	<Modal onClose={() => (isFollowersModalOpen = false)}>
+		<div class="hide-scrollbar max-h-[25rem] overflow-y-auto">
+			<h2 class="mb-4 text-xl font-semibold">Followers</h2>
+			<div class="grid gap-2">
+				{#if isLoading}
+					<p>Loading followers...</p>
+				{:else}
+					{#each followers as user}
+						<UserHorizontalCard {user} />
+					{/each}
+				{/if}
+			</div>
+		</div>
+	</Modal>
+{/if}
+
+{#if isFollowingModalOpen}
+	<Modal onClose={() => (isFollowingModalOpen = false)}>
+		<div class="hide-scrollbar max-h-[25rem] overflow-y-auto">
+			<h2 class="mb-4 text-xl font-semibold">Following</h2>
+			<div class="grid gap-2">
+				{#if isLoading}
+					<p>Loading following...</p>
+				{:else}
+					{#each following as user}
+						<UserHorizontalCard {user} />
+					{/each}
+				{/if}
+			</div>
+		</div>
+	</Modal>
+{/if}
+
+<style lang="postcss">
+	.hide-scrollbar {
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+	.hide-scrollbar::-webkit-scrollbar {
+		display: none; /* Chrome, Safari and Opera */
+	}
+</style>
