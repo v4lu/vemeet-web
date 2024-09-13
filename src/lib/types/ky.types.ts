@@ -11,3 +11,8 @@ export type ServerErrorResponse = {
 	message: string;
 	errors: ValidationError[] | null;
 };
+
+export type VemeetError = {
+	message: string;
+	statusCode: number;
+};

@@ -10,7 +10,7 @@
 	class="flex min-h-dvh flex-1 flex-col bg-gradient-to-r from-primary/10 via-primary/5 to-transparent"
 >
 	<Header />
-	<main class="container mt-[56px] flex-1 p-4 py-6">
+	<main class="container mt-[56px] flex-1 px-4 pb-4">
 		{@render children()}
 	</main>
 </div>

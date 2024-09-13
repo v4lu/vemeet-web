@@ -69,12 +69,12 @@
 	}
 </script>
 
-<button class="flex items-center text-sm font-medium" onclick={(): void => history.back()}>
+<button class="mt-6 flex items-center text-sm font-medium" onclick={(): void => history.back()}>
 	<Icon icon="solar:arrow-left-linear" class="mr-2 size-6" />
 	Back
 </button>
 
-<h1 class="mb-6 mt-3 text-2xl font-bold">Edit Profile</h1>
+<h1 class="mb-6 mt-6 text-2xl font-bold">Edit Profile</h1>
 
 <form class="space-y-6" onsubmit={handleSubmit}>
 	<Field name="Username">

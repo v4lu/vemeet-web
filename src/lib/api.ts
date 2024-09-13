@@ -1,7 +1,7 @@
 import { browser } from '$app/environment';
-import { type Cookies, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import ky, { type KyInstance } from 'ky';
-import { ACCESS_TOKEN, CLIENT_BASE_URL, SERVER_BASE_URL } from './constants';
+import { CLIENT_BASE_URL, SERVER_BASE_URL } from './constants';
 
 function getBaseUrl(): string {
 	return browser ? CLIENT_BASE_URL : SERVER_BASE_URL;
@@ -16,12 +16,12 @@ type RefreshResponse = {
 	accessTokenExpiry: number;
 };
 
-export function authAPI(cookies: Cookies): KyInstance {
+export function authAPI(authToken: string): KyInstance {
 	return ky.create({
 		prefixUrl: getBaseUrl(),
 		timeout: 10000,
 		headers: {
-			Authorization: `Bearer ${cookies.get(ACCESS_TOKEN)}`
+			Authorization: `Bearer ${authToken}`
 		},
 		retry: {
 			limit: 2,

@@ -1,12 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./src/**/*.{html,js,svelte,ts}'],
-  theme: {
+	content: ['./src/**/*.{html,js,svelte,ts}'],
+	theme: {
 		container: {
 			center: true,
 			padding: {
-				DEFAULT: '1.5rem',
-				xl: '2rem'
+				DEFAULT: '1.5rem'
 			},
 			screens: {
 				'2xl': '60rem'
@@ -59,6 +58,5 @@ export default {
 			}
 		}
 	},
-  plugins: [],
-}
-
+	plugins: []
+};

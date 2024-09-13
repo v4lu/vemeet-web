@@ -21,13 +21,15 @@
 	}
 </script>
 
-{#await data.post}
-	<p>Loading</p>
-{:then post}
-	<PostExpandedCard
-		{post}
-		authToken={data.accessToken}
-		postId={+data.id}
-		onPostDelete={handlePostDeletion}
-	/>
-{/await}
+<div class="mt-6">
+	{#await data.post}
+		<p>Loading</p>
+	{:then post}
+		<PostExpandedCard
+			{post}
+			authToken={data.accessToken}
+			postId={+data.id}
+			onPostDelete={handlePostDeletion}
+		/>
+	{/await}
+</div>

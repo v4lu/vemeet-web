@@ -11,7 +11,7 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
 		throw redirect(307, '/sign-in');
 	}
 
-	const api = authAPI(cookies);
+	const api = authAPI(accessToken);
 
 	const user = await api.get<User>('users').json();
 
