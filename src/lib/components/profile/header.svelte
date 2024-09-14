@@ -60,12 +60,18 @@
 						quality: 0.8
 					});
 
-					file = new File([jpegBlob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), {
-						type: 'image/jpeg'
-					});
+					const convertedBlob = Array.isArray(jpegBlob) ? jpegBlob[0] : jpegBlob;
+
+					if (convertedBlob instanceof Blob) {
+						file = new File([convertedBlob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), {
+							type: 'image/jpeg'
+						});
+					} else {
+						throw new TypeError('Conversion failed: invalid blob');
+					}
 				} catch (error) {
 					console.error('Error converting HEIF/HEIC to JPEG:', error);
-					toast.error('ios is mehhh.');
+					toast.error('Failed to process iOS image format.');
 					return;
 				}
 			}
