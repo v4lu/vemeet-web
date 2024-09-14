@@ -3,11 +3,9 @@
 	import { Button } from '$lib/components/ui/button';
 	import { formatMemberSince } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
-	import { toast } from '$lib/stores/toast.store';
 	import type { ResponseFollowStats } from '$lib/types/follow.types';
 	import type { User } from '$lib/types/user.types';
 	import Icon from '@iconify/svelte';
-	import heic2any from 'heic2any';
 	import { onMount } from 'svelte';
 	import { UserHorizontalCard } from '../cards';
 	import { Modal } from '../ui/modals';
@@ -21,7 +19,6 @@
 	let formattedDate = $derived(formatMemberSince($sessionStore.birthday));
 
 	let imageUrl = $state('');
-	let file: File | null = $state(null);
 	let fileInput: HTMLInputElement | null = $state(null);
 	let imageUploadLoading = $state(false);
 	let isHovering = $state(false);
@@ -50,40 +47,12 @@
 	async function handleFileChange(e: Event): Promise<void> {
 		const input = e.target as HTMLInputElement;
 		if (input.files?.length) {
-			file = input.files[0];
-
-			if (file.type === 'image/heic' || file.type === 'image/heif') {
-				try {
-					const jpegBlob = await heic2any({
-						blob: file,
-						toType: 'image/jpeg',
-						quality: 0.8
-					});
-
-					const convertedBlob = Array.isArray(jpegBlob) ? jpegBlob[0] : jpegBlob;
-
-					if (convertedBlob instanceof Blob) {
-						file = new File([convertedBlob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), {
-							type: 'image/jpeg'
-						});
-					} else {
-						throw new TypeError('Conversion failed: invalid blob');
-					}
-				} catch (error) {
-					console.error('Error converting HEIF/HEIC to JPEG:', error);
-					toast.error('Failed to process iOS image format.');
-					return;
-				}
-			}
-
-			if (authToken) {
-				await uploadImage({
-					authToken,
-					file,
-					setImageUrl,
-					setImageUploadLoading
-				});
-			}
+			await uploadImage({
+				authToken,
+				file: input.files[0],
+				setImageUrl,
+				setImageUploadLoading
+			});
 		}
 	}
 
