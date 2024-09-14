@@ -4,7 +4,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { inputVariants } from '$lib/components/ui/input';
 	import { formatTimestamp } from '$lib/date';
-	import { webSocketService } from '$lib/service/chat-websocket.service';
+	import { webSocketService } from '$lib/services/chat-websocket.service';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { Message } from '$lib/types/chat.types';
 	import { type User } from '$lib/types/user.types';

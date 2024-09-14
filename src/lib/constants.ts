@@ -4,4 +4,4 @@ export const WEBSOCKET_URL = 'wss://api.vemeet.me';
 export const ACCESS_TOKEN = 'access_token';
 export const REFRESH_TOKEN = 'refresh_token';
 export const COGNITO_ID = 'cognito_id';
-export const isProduction = false;
+export const isProduction = true;
