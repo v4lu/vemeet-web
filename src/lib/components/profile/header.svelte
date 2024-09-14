@@ -3,14 +3,15 @@
 	import { Button } from '$lib/components/ui/button';
 	import { formatMemberSince } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
+	import { toast } from '$lib/stores/toast.store';
 	import type { ResponseFollowStats } from '$lib/types/follow.types';
 	import type { User } from '$lib/types/user.types';
 	import Icon from '@iconify/svelte';
+	import heic2any from 'heic2any';
 	import { onMount } from 'svelte';
 	import { UserHorizontalCard } from '../cards';
 	import { Modal } from '../ui/modals';
 	import { Skeleton } from '../ui/skeleton';
-
 	type HeaderProps = {
 		authToken: string;
 	};
@@ -50,6 +51,24 @@
 		const input = e.target as HTMLInputElement;
 		if (input.files?.length) {
 			file = input.files[0];
+
+			if (file.type === 'image/heic' || file.type === 'image/heif') {
+				try {
+					const jpegBlob = await heic2any({
+						blob: file,
+						toType: 'image/jpeg',
+						quality: 0.8
+					});
+
+					file = new File([jpegBlob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), {
+						type: 'image/jpeg'
+					});
+				} catch (error) {
+					console.error('Error converting HEIF/HEIC to JPEG:', error);
+					toast.error('ios is mehhh.');
+					return;
+				}
+			}
 
 			if (authToken) {
 				await uploadImage({
@@ -141,7 +160,7 @@
 	});
 </script>
 
-<div class="flex items-start justify-between">
+<div class="flex items-start justify-between pt-4">
 	<div class="flex items-center">
 		<div class="relative">
 			<button
@@ -177,7 +196,7 @@
 				{/if}
 				<input
 					type="file"
-					accept=".heic, .heif"
+					accept="image/*,.heic,.heif"
 					class="hidden"
 					bind:this={fileInput}
 					onchange={handleFileChange}
