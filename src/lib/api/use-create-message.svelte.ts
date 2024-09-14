@@ -4,6 +4,13 @@ import type { Message } from '$lib/types/chat.types';
 import type { ServerErrorResponse } from '$lib/types/ky.types';
 import { HTTPError } from 'ky';
 
+type MessagePayload = {
+	recipientId: number;
+	messageType: string;
+	content: string;
+	isOneTime: boolean;
+};
+
 class PostMessageResponse {
 	error = $state<ServerErrorResponse | null>(null);
 	isLoading = $state(false);
@@ -12,12 +19,7 @@ class PostMessageResponse {
 export function usePostMessage(chatId: number, authToken: string) {
 	const resp = new PostMessageResponse();
 
-	async function postMessage(payload: {
-		recipientId: number;
-		messageType: string;
-		content: string;
-		isOneTime: boolean;
-	}) {
+	async function postMessage(payload: MessagePayload) {
 		resp.isLoading = true;
 		try {
 			const api = authAPI(authToken);

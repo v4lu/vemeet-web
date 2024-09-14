@@ -1,15 +1,11 @@
 <script lang="ts">
-	import { api, createAuthHeaders } from '$lib/api';
+	import { useUpdateUser } from '$lib/api/use-update-user.svelte.js';
 	import { cn } from '$lib/cn';
 	import { Button } from '$lib/components/ui/button';
 	import { Field } from '$lib/components/ui/field';
 	import { Input, inputVariants } from '$lib/components/ui/input';
 	import { sessionStore } from '$lib/stores/session.store';
-	import { toast } from '$lib/stores/toast.store.js';
-	import type { ServerErrorResponse } from '$lib/types/ky.types.js';
-	import type { User } from '$lib/types/user.types.js';
 	import Icon from '@iconify/svelte';
-	import { HTTPError } from 'ky';
 
 	let { data } = $props();
 
@@ -28,12 +24,11 @@
 	let countryName = $state($sessionStore.countryName || '');
 	let cityName = $state($sessionStore.cityName || '');
 	let bio = $state($sessionStore.bio || '');
-	let isSubmitting = $state(false);
+
+	const { isSubmitting, updateUser } = useUpdateUser(data.accessToken);
 
 	async function handleSubmit(event: Event): Promise<void> {
 		event.preventDefault();
-		isSubmitting = true;
-
 		const payload: UserUpdateFormData = {
 			username,
 			bio,
@@ -42,30 +37,7 @@
 			countryName,
 			cityName
 		};
-
-		try {
-			const res = await api
-				.patch<User>('users', {
-					json: payload,
-					headers: createAuthHeaders(data.accessToken)
-				})
-				.json();
-
-			sessionStore.setUser(res);
-			toast.success('Profile updated successfully');
-		} catch (e) {
-			if (e instanceof HTTPError) {
-				const eRes = (await e.response.json()) as ServerErrorResponse;
-				if (eRes.statusCode === 409) {
-					toast.error(eRes.message);
-				}
-				console.error(eRes);
-			} else {
-				toast.error('An error occurred while updating your profile');
-			}
-		} finally {
-			isSubmitting = false;
-		}
+		await updateUser(payload);
 	}
 </script>
 
