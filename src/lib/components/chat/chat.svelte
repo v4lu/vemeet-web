@@ -4,20 +4,20 @@
 	import { Button } from '$lib/components/ui/button';
 	import { inputVariants } from '$lib/components/ui/input';
 	import { formatTimestamp } from '$lib/date';
+	import { webSocketService } from '$lib/service/chat-websocket.service';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { Message } from '$lib/types/chat.types';
 	import { type User } from '$lib/types/user.types';
 	import Icon from '@iconify/svelte';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	type ChatProps = {
 		messages: Message[];
 		authToken: string;
 		chatId: number;
-		onSendMessage: (message: Message) => void;
 	};
 
-	let { messages, chatId, authToken, onSendMessage }: ChatProps = $props();
+	let { messages, chatId, authToken }: ChatProps = $props();
 	let newMessage = $state('');
 	let otherUser = $state<User | null>(null);
 	let chatContainer = $state<HTMLDivElement>();
@@ -41,24 +41,53 @@
 		}
 	}
 
+	function updateMessages(newMessages: Message[]) {
+		const uniqueMessages = newMessages.filter(
+			(newMsg) => !messages.some((existingMsg) => existingMsg.id === newMsg.id)
+		);
+		if (uniqueMessages.length > 0) {
+			messages = [...messages, ...uniqueMessages];
+			setTimeout(scrollToBottom, 0);
+		}
+	}
+
 	onMount(() => {
 		scrollToBottom();
+		webSocketService.connect($sessionStore.id, authToken);
+		const unsubscribe = webSocketService.subscribe((newMessages) => {
+			updateMessages(newMessages);
+		});
+		return unsubscribe;
+	});
+
+	onDestroy(() => {
+		webSocketService.disconnect();
 	});
 
 	async function handleSubmit(event: Event) {
 		event.preventDefault();
 		if (newMessage.trim().length > 0 && !isLoading && otherUser) {
-			const res = await postMessage({
+			const messageData = {
 				recipientId: otherUser.id,
 				messageType: 'text',
 				content: newMessage,
 				isOneTime: false
-			});
+			};
+
+			const res = await postMessage(messageData);
 			if (res) {
-				onSendMessage(res);
+				updateMessages([res]);
+				webSocketService.sendMessage(res);
 				newMessage = '';
-				setTimeout(scrollToBottom, 0);
 			}
+			setTimeout(scrollToBottom, 0);
+		}
+	}
+
+	function handleKeyDown(event: KeyboardEvent) {
+		if (event.key === 'Enter' && !event.shiftKey) {
+			event.preventDefault();
+			handleSubmit(event);
 		}
 	}
 </script>
@@ -78,7 +107,7 @@
 		</Button>
 	</div>
 
-	<div bind:this={chatContainer} class="flex-1 overflow-y-auto p-4">
+	<div bind:this={chatContainer} class="hide-scrollbar flex-1 overflow-y-auto p-4">
 		{#if messages && messages.length > 0}
 			{#each messages as message (message.id)}
 				<div
@@ -117,6 +146,7 @@
 	<div class="border-t p-4">
 		<form onsubmit={handleSubmit} class="flex items-center gap-4">
 			<textarea
+				onkeydown={handleKeyDown}
 				class={cn(inputVariants(), 'resize-none')}
 				placeholder="Type a message..."
 				bind:value={newMessage}
@@ -127,3 +157,16 @@
 		</form>
 	</div>
 </div>
+
+<style>
+	/* Hide scrollbar for Chrome, Safari and Opera */
+	.hide-scrollbar::-webkit-scrollbar {
+		display: none;
+	}
+
+	/* Hide scrollbar for IE, Edge and Firefox */
+	.hide-scrollbar {
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+</style>

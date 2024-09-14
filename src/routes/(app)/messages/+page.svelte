@@ -2,6 +2,7 @@
 	import { useFetchChats } from '$lib/api/use-fetch-chats.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
+	import { formatTimestamp } from '$lib/date.js';
 	import { sessionStore } from '$lib/stores/session.store.js';
 	import type { Chat } from '$lib/types/chat.types';
 	import Icon from '@iconify/svelte';
@@ -16,8 +17,8 @@
 	function getLastMessage(chat: Chat) {
 		return {
 			text: 'Last message placeholder',
-			timestamp: new Date(chat.updatedAt).toLocaleTimeString(),
-			unread: false // You'll need to implement unread status
+			timestamp: formatTimestamp(chat.updatedAt),
+			unread: true
 		};
 	}
 </script>
@@ -46,16 +47,11 @@
 					class="flex cursor-pointer items-center rounded-md p-3 hover:bg-accent"
 				>
 					<div class="relative mr-4">
-						<div class="h-12 w-12 rounded-full">
-							<img
-								src={otherUser.profileImage?.url || '/placeholder-user.webp'}
-								class="rounded-full"
-								alt={otherUser.name || otherUser.username}
-							/>
-						</div>
-						<span
-							class="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-2 border-white bg-green-400"
-						></span>
+						<img
+							src={otherUser.profileImage?.url || '/placeholder-user.webp'}
+							class="size-12 rounded-full bg-cover bg-center object-cover object-center"
+							alt={otherUser.name || otherUser.username}
+						/>
 					</div>
 					<div class="flex-1">
 						<div class="flex items-center justify-between">

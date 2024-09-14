@@ -10,10 +10,5 @@
 {#if chatResponse.isLoading}
 	<ChatSkeleton />
 {:else if chatResponse.messages}
-	<Chat
-		authToken={data.accessToken}
-		chatId={+data.id}
-		messages={chatResponse.messages}
-		onSendMessage={chatResponse.addMessage}
-	/>
+	<Chat authToken={data.accessToken} chatId={+data.id} messages={chatResponse.messages} />
 {/if}

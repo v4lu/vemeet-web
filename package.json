@@ -47,7 +47,6 @@
 		"date-fns": "^3.6.0",
 		"ky": "^1.7.2",
 		"mode-watcher": "^0.4.1",
-		"runed": "^0.15.2",
 		"tailwind-merge": "^2.5.2"
 	}
 }

@@ -4,8 +4,8 @@ export type Chat = {
 	id: number;
 	user1: User;
 	user2: User;
-	createdAt: number;
-	updatedAt: number;
+	createdAt: string;
+	updatedAt: string;
 };
 
 export type Message = {
