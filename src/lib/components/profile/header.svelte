@@ -175,7 +175,13 @@
 						<Icon icon="eos-icons:loading" class="size-8 animate-spin" />
 					</div>
 				{/if}
-				<input type="file" class="hidden" bind:this={fileInput} onchange={handleFileChange} />
+				<input
+					type="file"
+					accept=".heic, .heif"
+					class="hidden"
+					bind:this={fileInput}
+					onchange={handleFileChange}
+				/>
 			</button>
 			{#if imageUrl}
 				<div class="absolute -right-1 bottom-0 z-20 flex space-x-1">
