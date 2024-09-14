@@ -15,7 +15,7 @@
 
 <div class="mt-4">
 	<Header authToken={data.accessToken} />
-	<nav class="my-2flex relative">
+	<nav class="relative my-2 flex">
 		{#each tabs as tab}
 			<button
 				class="flex-1 px-6 py-3 text-sm font-medium transition-colors"
