@@ -72,7 +72,7 @@ export async function uploadImage({
 		formData.append('file', file);
 		try {
 			const res = await api
-				.post<{ url: string }>('files/images-avif', {
+				.post<{ url: string }>('files/image-avif', {
 					headers: {
 						Authorization: `Bearer ${authToken}`
 					},
