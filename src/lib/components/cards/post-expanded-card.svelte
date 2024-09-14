@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { api, createAuthHeaders } from '$lib/api';
+	import { useDeletePost } from '$lib/api/use-delete-post.svelte';
 	import { cn } from '$lib/cn';
 	import { formatTimestamp } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
@@ -17,11 +18,12 @@
 
 	type PostBodyProps = {
 		post: Post;
-		onPostDelete: () => void;
 		postId: number;
 		authToken: string;
 	};
-	let { post, onPostDelete, postId, authToken }: PostBodyProps = $props();
+	let { post, postId, authToken }: PostBodyProps = $props();
+	const { deletePost } = useDeletePost(postId, authToken);
+
 	let isImageModalOpen = $state(false);
 	let isSettingsOpen = $state(false);
 	let isDeleteModalConfirmOpen = $state(false);
@@ -54,7 +56,7 @@
 	async function handleDeletePost() {
 		submittingPostDelete = true;
 		try {
-			await onPostDelete();
+			await deletePost();
 			isDeleteModalConfirmOpen = false;
 		} catch (error) {
 			console.error('Error deleting post:', error);
