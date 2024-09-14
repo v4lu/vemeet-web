@@ -75,14 +75,7 @@
 </script>
 
 <div class="my-6 rounded-lg border border-border bg-background p-4 shadow">
-	<input
-		type="file"
-		accept="image/*"
-		class="hidden"
-		bind:this={fileInput}
-		onchange={handleImageUpload}
-		multiple
-	/>
+	<input type="file" class="hidden" bind:this={fileInput} onchange={handleImageUpload} multiple />
 	<textarea
 		bind:value={postContent}
 		placeholder="What's on your mind?"
@@ -127,7 +120,6 @@
 			<input
 				id="file-input"
 				type="file"
-				accept="image/*"
 				multiple={true}
 				class="hidden"
 				onchange={handleImageUpload}
