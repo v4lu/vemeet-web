@@ -54,7 +54,7 @@ export async function refreshToken(refresh: string, cognitoId: string): Promise<
 }
 
 type UploadImageType = {
-	file: File | null;
+	file: File | Blob | null;
 	setImageUrl: (val: string) => void;
 	setImageUploadLoading: (val: boolean) => void;
 	authToken: string;
