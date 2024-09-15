@@ -101,7 +101,7 @@
 <div class="mt-4 flex items-center gap-4 pb-2">
 	<Button onclick={() => (isFollowing ? unfollowUser() : followUser())} size="sm" variant="outline">
 		<Icon
-			icon={isFollowing ? 'solar:users-group-rounded-bold' : 'solar:user-block-bold'}
+			icon={isFollowing ? 'solar:user-block-bold' : 'solar:users-group-rounded-bold'}
 			class="mr-2 size-4"
 		/>
 		{isFollowing ? 'Unfollow' : 'Follow'}
