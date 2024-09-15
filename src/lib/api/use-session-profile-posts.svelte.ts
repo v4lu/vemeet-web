@@ -2,7 +2,6 @@ import { authAPI } from '$lib/api';
 import { toast } from '$lib/stores/toast.store';
 import type { ServerErrorResponse } from '$lib/types/ky.types';
 import type { Post, PostsPagableResponse } from '$lib/types/post.types';
-import type { Reaction } from '$lib/types/reaction.types';
 
 class ProfilePosts {
 	error = $state<ServerErrorResponse | null>(null);
@@ -71,25 +70,20 @@ export function useSessionProfilePosts(authToken: string) {
 		}
 	}
 
-	async function postLikeToggle(postId: number, isLiked: boolean, userId: number) {
+	async function postLikeToggle(postId: number, isLiked: boolean) {
 		try {
+			let updatedPost: Post;
 			if (isLiked) {
-				await api.delete(`posts/${postId}/reactions`, {}).json();
-				resp.posts = resp.posts.map((post) =>
-					post.id === postId
-						? { ...post, reactions: post.reactions.filter((r) => r.user.id !== userId) }
-						: post
-				);
+				updatedPost = await api.delete<Post>(`posts/${postId}/reactions`, {}).json();
 			} else {
-				const newReaction = await api
-					.post<Reaction>(`posts/${postId}/reactions`, {
+				updatedPost = await api
+					.post<Post>(`posts/${postId}/reactions`, {
 						json: { reactionType: 'LIKE' }
 					})
 					.json();
-				resp.posts = resp.posts.map((post) =>
-					post.id === postId ? { ...post, reactions: [newReaction, ...post.reactions] } : post
-				);
 			}
+			resp.posts = resp.posts.map((post) => (post.id === postId ? updatedPost : post));
+
 			toast.success(`Post ${isLiked ? 'unliked' : 'liked'} successfully!`);
 		} catch (error) {
 			console.error('Error toggling like:', error);
