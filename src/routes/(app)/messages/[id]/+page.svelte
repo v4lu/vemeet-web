@@ -4,11 +4,11 @@
 	import { ChatSkeleton } from '$lib/components/skeleton';
 
 	let { data } = $props();
-	const chatResponse = useFetchChat(+data.id, data.accessToken);
+	const { resp } = useFetchChat(+data.id, data.accessToken);
 </script>
 
-{#if chatResponse.isLoading}
+{#if resp.isLoading}
 	<ChatSkeleton />
-{:else if chatResponse.messages}
-	<Chat authToken={data.accessToken} chatId={+data.id} messages={chatResponse.messages} />
+{:else if resp.messages}
+	<Chat authToken={data.accessToken} chatId={+data.id} messages={resp.messages} />
 {/if}

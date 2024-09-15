@@ -34,5 +34,7 @@ export function useFetchChat(id: number, authToken: string) {
 	}
 
 	fetchData();
-	return resp;
+	return {
+		resp
+	};
 }

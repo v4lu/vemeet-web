@@ -8,7 +8,7 @@
 	import Icon from '@iconify/svelte';
 
 	let { data } = $props();
-	const chatsResponse = useFetchChats(data.accessToken);
+	const { resp } = useFetchChats(data.accessToken);
 
 	function getOtherUser(chat: Chat, currentUserId: number) {
 		return chat.user1.id === currentUserId ? chat.user2 : chat.user1;
@@ -31,15 +31,15 @@
 		</Button>
 	</div>
 
-	{#if chatsResponse.isLoading}
+	{#if resp.isLoading}
 		<div class="space-y-2">
 			{#each Array(5) as _}
 				<Skeleton class="h-14 w-full" />
 			{/each}
 		</div>
-	{:else if chatsResponse.chats}
+	{:else if resp.chats}
 		<div class="space-y-2">
-			{#each chatsResponse.chats as chat (chat.id)}
+			{#each resp.chats as chat (chat.id)}
 				{@const otherUser = getOtherUser(chat, $sessionStore.id)}
 				{@const lastMessage = getLastMessage(chat)}
 				<a
