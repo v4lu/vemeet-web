@@ -144,14 +144,26 @@ export function useSignlePost(postId: number, authToken: string) {
 				})
 				.json();
 
-			res.comments = [...res.comments, response];
+			// Update top-level comments
+			res.comments = res.comments.map((comment) => (comment.id === commentId ? response : comment));
+
+			// Update replies
+			res.comments = res.comments.map((comment) => {
+				if (comment.replies) {
+					comment.replies = comment.replies.map((reply) =>
+						reply.id === commentId ? response : reply
+					);
+				}
+				return comment;
+			});
 
 			toast.success('Comment updated successfully!');
 		} catch (error) {
 			console.error('Error updating comment:', error);
 			toast.error('Failed to update comment. Please try again.');
+		} finally {
+			res.isEditCommentSubmitting = false;
 		}
-		res.isEditCommentSubmitting = false;
 	}
 
 	async function handleCommentLike(isLiked: boolean, commentId: number) {
