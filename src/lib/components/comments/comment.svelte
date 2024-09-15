@@ -1,11 +1,8 @@
 <script lang="ts">
-	import { api, createAuthHeaders } from '$lib/api';
 	import { cn } from '$lib/cn';
 	import { formatTimestamp } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
-	import { toast } from '$lib/stores/toast.store';
 	import type { Comment as CommentType } from '$lib/types/comment.types';
-	import type { Reaction } from '$lib/types/reaction.types';
 	import Icon from '@iconify/svelte';
 	import { Button } from '../ui/button';
 	import { Dropdown } from '../ui/dropdown';
@@ -14,23 +11,29 @@
 	type CommentProps = {
 		comment: CommentType;
 		depth?: number;
-		postId: number;
-		authToken: string;
-		onCommentDelete: (commentId: number) => void;
-		onCommentUpdate: (updatedComment: CommentType) => void;
+		postReply: (parentId: number, content: string) => void;
+		deleteComment: (commentId: number) => void;
+		editComment: (commentId: number, content: string) => void;
+		handleCommentLike: (isLike: boolean, commentId: number, userId: number) => void;
+		isSubmittingDeleteComment: boolean;
+		isSubmittingEditComment: boolean;
+		isSubmittingReply: boolean;
 	};
 
 	let {
 		comment,
 		depth = 0,
-		postId,
-		authToken,
-		onCommentDelete,
-		onCommentUpdate
+		postReply,
+		isSubmittingReply,
+		deleteComment,
+		isSubmittingDeleteComment,
+		editComment,
+		isSubmittingEditComment,
+		handleCommentLike
 	}: CommentProps = $props();
+
 	let isReplying = $state(false);
 	let replyContent = $state('');
-	let submitting = $state(false);
 	let isSettingsOpen = $state(false);
 	let isDeleteModalConfirmOpen = $state(false);
 	let isEditing = $state(false);
@@ -50,101 +53,23 @@
 		}
 	});
 
-	async function handleReply() {
-		if (!replyContent.trim() || submitting) return;
-
-		submitting = true;
-		try {
-			const response = await api
-				.post(`comments/posts/${postId}/comments`, {
-					json: { content: replyContent, parentId: comment.id },
-					headers: createAuthHeaders(authToken)
-				})
-				.json();
-
-			comment = {
-				...comment,
-				replies: [...(comment.replies ?? []), response as CommentType]
-			};
-			replyContent = '';
-			isReplying = false;
-			toast.success('Reply added successfully!');
-		} catch (error) {
-			console.error('Error adding reply:', error);
-			toast.error('Failed to add reply. Please try again.');
-		} finally {
-			submitting = false;
-		}
+	function handleReply() {
+		if (!replyContent) return;
+		postReply(comment.id, replyContent);
+		replyContent = '';
+		isReplying = false;
 	}
 
-	async function handleEdit() {
-		if (!editContent.trim() || submitting) return;
-
-		submitting = true;
-		try {
-			const response = await api
-				.patch<CommentType>(`comments/${comment.id}`, {
-					json: { content: editContent },
-					headers: createAuthHeaders(authToken)
-				})
-				.json();
-
-			comment = { ...comment, content: response.content };
-			isEditing = false;
-			toast.success('Comment updated successfully!');
-		} catch (error) {
-			console.error('Error updating comment:', error);
-			toast.error('Failed to update comment. Please try again.');
-		} finally {
-			submitting = false;
-		}
+	function handleDelete() {
+		deleteComment(comment.id);
+		isDeleteModalConfirmOpen = false;
 	}
 
-	async function handleDelete() {
-		try {
-			await api
-				.delete(`comments/${comment.id}`, {
-					headers: createAuthHeaders(authToken)
-				})
-				.json();
-
-			onCommentDelete(comment.id);
-			toast.success('Comment deleted successfully!');
-		} catch (error) {
-			console.error('Error deleting comment:', error);
-			toast.error('Failed to delete comment. Please try again.');
-		}
-	}
-
-	async function handleLike() {
-		if (submitting) return;
-		submitting = true;
-		try {
-			if (isLiked) {
-				await api
-					.delete(`comments/${comment.id}/reactions`, {
-						headers: createAuthHeaders(authToken)
-					})
-					.json();
-				comment.reactions = comment.reactions.filter((r) => r.user.id !== $sessionStore.id);
-			} else {
-				const response = await api
-					.post<Reaction>(`comments/${comment.id}/reactions`, {
-						json: { reactionType: 'LIKE' },
-						headers: createAuthHeaders(authToken)
-					})
-					.json();
-				comment.reactions = [...comment.reactions, response];
-			}
-			isLiked = !isLiked;
-			onCommentUpdate(comment);
-			toast.success(`Comment ${isLiked ? 'unliked' : 'liked'} successfully!`);
-		} catch (error) {
-			console.error('Error liking/unliking comment:', error);
-			toast.error('Failed to update like status. Please try again.');
-		} finally {
-			submitting = false;
-		}
+	function handleEdit() {
+		if (!editContent) return;
+		editComment(comment.id, editContent);
+		editContent = '';
+		isEditing = false;
 	}
 </script>
 
@@ -200,15 +125,25 @@
 					></textarea>
 					<div class="mt-2 flex justify-end space-x-2">
 						<Button size="sm" variant="outline" onclick={() => (isEditing = false)}>Cancel</Button>
-						<Button size="sm" onclick={handleEdit} disabled={submitting || !editContent.trim()}>
-							{submitting ? 'Updating...' : 'Update'}
+						<Button
+							size="sm"
+							onclick={handleEdit}
+							disabled={isSubmittingEditComment || !editContent.trim()}
+						>
+							{isSubmittingEditComment ? 'Updating...' : 'Update'}
 						</Button>
 					</div>
 				{:else}
 					<p class="mt-1 text-sm">{comment.content}</p>
 				{/if}
 				<div class="mt-2 flex items-center space-x-4">
-					<button class="flex items-center text-sm" onclick={handleLike} disabled={submitting}>
+					<button
+						onclick={() => {
+							handleCommentLike(isLiked, comment.id, $sessionStore.id);
+							isLiked = !isLiked;
+						}}
+						class="flex items-center text-sm"
+					>
 						<Icon
 							icon={isLiked ? 'solar:heart-angle-bold' : 'solar:heart-angle-line-duotone'}
 							class={cn(
@@ -237,10 +172,13 @@
 						rows="2"
 					></textarea>
 					<div class="mt-2 flex justify-end space-x-2">
-						<Button size="sm" variant="outline" on:click={() => (isReplying = false)}>Cancel</Button
+						<Button size="sm" variant="outline" onclick={() => (isReplying = false)}>Cancel</Button>
+						<Button
+							onclick={handleReply}
+							size="sm"
+							disabled={isSubmittingReply || !replyContent.trim()}
 						>
-						<Button size="sm" onclick={handleReply} disabled={submitting || !replyContent.trim()}>
-							{submitting ? 'Posting...' : 'Post Reply'}
+							{isSubmittingReply ? 'Posting...' : 'Post Reply'}
 						</Button>
 					</div>
 				</div>
@@ -250,7 +188,16 @@
 	{#if comment.replies && comment.replies.length > 0}
 		<div class="mt-2">
 			{#each comment.replies as reply (reply.id)}
-				<svelte:self comment={reply} depth={depth + 1} {postId} {authToken} {onCommentDelete} />
+				<svelte:self
+					comment={reply}
+					depth={depth + 1}
+					{deleteComment}
+					{editComment}
+					{isSubmittingDeleteComment}
+					{isSubmittingEditComment}
+					postReply={() => {}}
+					isSubmittingReply={false}
+				/>
 			{/each}
 		</div>
 	{/if}
@@ -263,5 +210,6 @@
 		onClose={() => (isDeleteModalConfirmOpen = false)}
 		onConfirm={handleDelete}
 		confirmText="Delete Comment"
+		submitting={isSubmittingDeleteComment}
 	/>
 {/if}

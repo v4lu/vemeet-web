@@ -1,43 +1,21 @@
 <script lang="ts">
-	import { api, createAuthHeaders } from '$lib/api';
 	import { cn } from '$lib/cn';
-	import { toast } from '$lib/stores/toast.store';
-	import type { Comment } from '$lib/types/comment.types';
 	import { Button } from '../ui/button';
 	import { inputVariants } from '../ui/input';
 
 	type CreateCommentProp = {
-		postId: number;
-		authToken: string;
-		onCommentCreated: (newComment: Comment) => void;
+		isSubmitting: boolean;
+		postComment: (newComment: string) => void;
 	};
 
-	let { authToken, onCommentCreated, postId }: CreateCommentProp = $props();
+	let { postComment, isSubmitting }: CreateCommentProp = $props();
 
 	let newComment = $state('');
-	let isSubmitting = $state(false);
 
 	async function handleSubmitComment() {
 		if (!newComment.trim() || isSubmitting) return;
-
-		isSubmitting = true;
-		try {
-			const response = await api
-				.post<Comment>(`comments/posts/${postId}/comments`, {
-					json: { content: newComment },
-					headers: createAuthHeaders(authToken)
-				})
-				.json();
-
-			onCommentCreated(response);
-			newComment = '';
-			toast.success('Comment posted successfully!');
-		} catch (error) {
-			console.error('Error posting comment:', error);
-			toast.error('Failed to post comment. Please try again.');
-		} finally {
-			isSubmitting = false;
-		}
+		postComment(newComment);
+		newComment = '';
 	}
 </script>
 

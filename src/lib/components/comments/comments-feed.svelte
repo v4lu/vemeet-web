@@ -4,21 +4,27 @@
 
 	type CommentsFeedProps = {
 		comments: CommentType[];
-		postId: number;
-		authToken: string;
+		postReply: (commentId: number, value: string) => void;
+		isSubmittingReply: boolean;
+		deleteComment: (commentId: number) => void;
+		isSubmittingDeleteComment: boolean;
+		editComment: (commentId: number, content: string) => void;
+		isSubmittingEditComment: boolean;
+		handleCommentLike: (isLike: boolean, commentId: number, userId: number) => void;
 	};
 
-	let { comments, postId, authToken }: CommentsFeedProps = $props();
+	let {
+		comments,
+		isSubmittingReply,
+		postReply,
+		deleteComment,
+		isSubmittingDeleteComment,
+		editComment,
+		isSubmittingEditComment,
+		handleCommentLike
+	}: CommentsFeedProps = $props();
 
 	let topLevelComments = $derived(comments.filter((comment) => comment.parentId === null));
-
-	function handleCommentDelete(commentId: number) {
-		comments = comments.filter((c) => c.id !== commentId);
-	}
-
-	function handleCommentUpdate(updatedComment: CommentType) {
-		comments = comments.map((c) => (c.id === updatedComment.id ? updatedComment : c));
-	}
 </script>
 
 <div class="border-t border-border pb-4">
@@ -26,11 +32,14 @@
 	<div class="space-y-4">
 		{#each topLevelComments as comment (comment.id)}
 			<Comment
+				{handleCommentLike}
+				{editComment}
+				{isSubmittingEditComment}
+				{isSubmittingDeleteComment}
+				{deleteComment}
 				{comment}
-				{postId}
-				{authToken}
-				onCommentDelete={handleCommentDelete}
-				onCommentUpdate={handleCommentUpdate}
+				{postReply}
+				{isSubmittingReply}
 			/>
 		{/each}
 	</div>
