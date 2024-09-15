@@ -42,7 +42,7 @@ export function useProfilePosts(authToken: string, userId: number) {
 		try {
 			let updatedPost: Post;
 			if (isLiked) {
-				updatedPost = await api.delete<Post>(`posts/${postId}/reactions`, {}).json();
+				updatedPost = await api.delete<Post>(`posts/${postId}/reactions`).json();
 			} else {
 				updatedPost = await api
 					.post<Post>(`posts/${postId}/reactions`, {

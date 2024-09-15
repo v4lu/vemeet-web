@@ -10,7 +10,7 @@
 		isSubmittingDeleteComment: boolean;
 		editComment: (commentId: number, content: string) => void;
 		isSubmittingEditComment: boolean;
-		handleCommentLike: (isLike: boolean, commentId: number, userId: number) => void;
+		handleCommentLike: (isLike: boolean, commentId: number) => void;
 	};
 
 	let {

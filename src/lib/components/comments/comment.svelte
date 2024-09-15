@@ -14,7 +14,7 @@
 		postReply: (parentId: number, content: string) => void;
 		deleteComment: (commentId: number) => void;
 		editComment: (commentId: number, content: string) => void;
-		handleCommentLike: (isLike: boolean, commentId: number, userId: number) => void;
+		handleCommentLike: (isLike: boolean, commentId: number) => void;
 		isSubmittingDeleteComment: boolean;
 		isSubmittingEditComment: boolean;
 		isSubmittingReply: boolean;
@@ -139,7 +139,7 @@
 				<div class="mt-2 flex items-center space-x-4">
 					<button
 						onclick={() => {
-							handleCommentLike(isLiked, comment.id, $sessionStore.id);
+							handleCommentLike(isLiked, comment.id);
 							isLiked = !isLiked;
 						}}
 						class="flex items-center text-sm"

@@ -7,7 +7,7 @@
 	import { Modal } from '../ui/modals';
 
 	type PostLikesProps = {
-		handlePostLike: (isLiked: boolean, userId: number) => void;
+		handlePostLike: (isLiked: boolean) => void;
 		reactions: Reaction[];
 	};
 	let { handlePostLike, reactions }: PostLikesProps = $props();
@@ -23,7 +23,7 @@
 <div class="flex items-center">
 	<button
 		onclick={() => {
-			handlePostLike(isLiked, $sessionStore.id);
+			handlePostLike(isLiked);
 			isLiked = !isLiked;
 		}}
 		class="group mr-2 flex items-center text-sm transition-colors"

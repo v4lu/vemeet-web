@@ -50,23 +50,21 @@ export function useSignlePost(postId: number, authToken: string) {
 		res.isPostDeletionSubmitting = false;
 	}
 
-	async function handlePostLike(isLiked: boolean, userId: number) {
+	async function handlePostLike(isLiked: boolean) {
 		try {
+			let updatedPost: Post;
 			if (isLiked) {
-				await api.delete(`posts/${postId}/reactions`, {}).json();
-				const newReactions = res.reactions.filter((r) => {
-					return r.user.id !== userId;
-				});
-				res.reactions = [...newReactions];
+				updatedPost = await api.delete<Post>(`posts/${postId}/reactions`).json();
 			} else {
-				const reaction = await api
-					.post<Reaction>(`posts/${postId}/reactions`, {
+				updatedPost = await api
+					.post<Post>(`posts/${postId}/reactions`, {
 						json: { reactionType: 'LIKE' }
 					})
 					.json();
-				res.reactions.push(reaction);
 			}
-			isLiked = !isLiked;
+
+			res.post = updatedPost;
+			res.reactions = updatedPost.reactions;
 		} catch (error) {
 			console.error('Error toggling like:', error);
 			toast.error('Failed to update like status. Please try again.');
@@ -156,35 +154,44 @@ export function useSignlePost(postId: number, authToken: string) {
 		res.isEditCommentSubmitting = false;
 	}
 
-	async function handleCommentLike(isLiked: boolean, commentId: number, userId: number) {
+	async function handleCommentLike(isLiked: boolean, commentId: number) {
 		try {
+			let updatedComment: Comment;
 			if (isLiked) {
-				await api.delete(`comments/${commentId}/reactions`, {}).json();
-				res.comments = res.comments.map((comment) => {
-					if (comment.id === commentId) {
-						return {
-							...comment,
-							reactions: comment.reactions.filter((r) => r.user.id !== userId)
-						};
-					}
-					return comment;
-				});
+				updatedComment = await api.delete<Comment>(`comments/${commentId}/reactions`).json();
 			} else {
-				const response = await api
-					.post<Reaction>(`comments/${commentId}/reactions`, {
+				updatedComment = await api
+					.post<Comment>(`comments/${commentId}/reactions`, {
 						json: { reactionType: 'LIKE' }
 					})
 					.json();
-				res.comments.find((c) => c.id === commentId)?.reactions.push(response);
 			}
-			isLiked = !isLiked;
+
+			res.comments = res.comments.map((comment) => {
+				if (comment.id === commentId) {
+					return updatedComment;
+				}
+				return comment;
+			});
+
+			res.comments = res.comments.map((comment) => {
+				if (comment.replies) {
+					comment.replies = comment.replies.map((reply) => {
+						if (reply.id === commentId) {
+							return updatedComment;
+						}
+						return reply;
+					});
+				}
+				return comment;
+			});
+
 			toast.success(`Comment ${isLiked ? 'unliked' : 'liked'} successfully!`);
 		} catch (error) {
 			console.error('Error liking/unliking comment:', error);
 			toast.error('Failed to update like status. Please try again.');
 		}
 	}
-
 	fetchPost();
 
 	return {
