@@ -8,10 +8,6 @@ class Chat {
 	messages = $state<Message[]>([]);
 	error = $state<ServerErrorResponse>();
 	isLoading = $state(false);
-
-	addMessage(message: Message) {
-		this.messages.push(message);
-	}
 }
 
 export function useFetchChat(id: number, authToken: string) {
