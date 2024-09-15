@@ -9,19 +9,21 @@
 		isLoading: boolean;
 		hasMore: boolean;
 		loadPosts: (page: number) => Promise<void>;
-		onPostDelete: (id: number) => void;
-		onToggleLike: (postId: number, isLiked: boolean) => Promise<void>;
+		deletePost: (id: number) => void;
+		isPostDeleteing: boolean;
+		postLikeToggle: (postId: number, isLiked: boolean, userId: number) => Promise<void>;
 		authToken: string;
 	};
 
 	let {
+		isPostDeleteing,
 		posts,
 		currentPage,
 		isLoading,
 		hasMore,
-		onPostDelete,
+		deletePost,
 		loadPosts,
-		onToggleLike,
+		postLikeToggle,
 		authToken
 	}: ProfileFeedProps = $props();
 
@@ -50,7 +52,7 @@
 
 <div class="posts-container">
 	{#each posts as post (post.id)}
-		<PostCard {authToken} {post} {onPostDelete} {onToggleLike} />
+		<PostCard {authToken} {isPostDeleteing} {post} {deletePost} {postLikeToggle} />
 	{/each}
 </div>
 {#if isLoading}

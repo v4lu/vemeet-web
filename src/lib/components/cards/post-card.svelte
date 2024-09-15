@@ -12,17 +12,17 @@
 
 	type PostCardProps = {
 		post: Post;
-		onPostDelete: (id: number) => void;
+		deletePost: (id: number) => void;
+		isPostDeleteing: boolean;
 		authToken: string;
-		onToggleLike: (postId: number, isLiked: boolean) => Promise<void>;
+		postLikeToggle: (postId: number, isLiked: boolean, userId: number) => Promise<void>;
 	};
 
-	let { post, onPostDelete, onToggleLike }: PostCardProps = $props();
+	let { post, deletePost, postLikeToggle, isPostDeleteing }: PostCardProps = $props();
 	let isSettingsOpen = $state(false);
 	let currentImageIndex = $state(0);
 	let isImageModalOpen = $state(false);
 	let isDeleteModalConfirmOpen = $state(false);
-	let submittingPostDelete = $state(false);
 
 	let submittingLike = $state(false);
 	let isLikeModalOpen = $state(false);
@@ -56,29 +56,14 @@
 		currentImageIndex = index;
 	}
 
-	async function handleToggleLike() {
-		if (submittingLike) return;
-		submittingLike = true;
-		try {
-			await onToggleLike(post.id, isLiked);
-			isLiked = !isLiked;
-		} catch (error) {
-			console.error('Error toggling like:', error);
-		} finally {
-			submittingLike = false;
-		}
+	function handleToggleLike() {
+		postLikeToggle(post.id, isLiked, $sessionStore.id);
+		isLiked = !isLiked;
 	}
 
 	async function handleDeletePost() {
-		submittingPostDelete = true;
-		try {
-			await onPostDelete(post.id);
-			isDeleteModalConfirmOpen = false;
-		} catch (error) {
-			console.error('Error deleting post:', error);
-		} finally {
-			submittingPostDelete = false;
-		}
+		deletePost(post.id);
+		isDeleteModalConfirmOpen = false;
 	}
 </script>
 
@@ -249,7 +234,7 @@
 		desc="Deleting content is a permanent action.Post will be removed and cannot be recovered."
 		onClose={() => (isDeleteModalConfirmOpen = false)}
 		onConfirm={handleDeletePost}
-		submitting={submittingPostDelete}
+		submitting={isPostDeleteing}
 		confirmText="Delete Post"
 	/>
 {/if}

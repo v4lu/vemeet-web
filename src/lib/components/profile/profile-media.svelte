@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { api, createAuthHeaders } from '$lib/api';
+	import { useProfileMedia } from '$lib/api/use-profile-media.svelte';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { Image } from '$lib/types/image.types';
-	import { onMount } from 'svelte';
 	import { ImageModal } from '../ui/modals';
 	import { Skeleton } from '../ui/skeleton';
 
@@ -11,26 +10,8 @@
 	};
 
 	let { authToken }: ProfileMediaProps = $props();
-	let isLoading = $state(false);
-	let images = $state<Image[]>([]);
+	let { resp } = useProfileMedia(authToken, $sessionStore.id);
 	let selectedImage = $state<Image | null>(null);
-
-	async function loadImages() {
-		if (isLoading) return;
-		isLoading = true;
-		try {
-			const response = await api
-				.get<Image[]>(`images/${$sessionStore.id}`, {
-					headers: createAuthHeaders(authToken)
-				})
-				.json();
-			images = response;
-		} catch (error) {
-			console.error('Error fetching images:', error);
-		} finally {
-			isLoading = false;
-		}
-	}
 
 	function openImageModal(image: Image) {
 		selectedImage = image;
@@ -39,26 +20,22 @@
 	function closeImageModal() {
 		selectedImage = null;
 	}
-
-	onMount(() => {
-		loadImages();
-	});
 </script>
 
 <div class="pt-2">
-	{#if isLoading}
+	{#if resp.isLoading}
 		<div class="grid grid-cols-3 gap-4 md:grid-cols-3 lg:grid-cols-4">
 			{#each Array(12) as _}
 				<Skeleton class="h-[220px] w-full rounded-lg" />
 			{/each}
 		</div>
-	{:else if images.length === 0}
+	{:else if resp.media.length === 0}
 		<div class="flex h-64 items-center justify-center">
 			<p class="text-lg">No images found.</p>
 		</div>
 	{:else}
 		<div class="grid grid-cols-3 gap-4 md:grid-cols-3 lg:grid-cols-4">
-			{#each images as image (image.id)}
+			{#each resp.media as image (image.id)}
 				<div
 					role="button"
 					tabindex="0"

@@ -7,16 +7,16 @@
 	import { inputVariants } from '../ui/input';
 
 	type CreatePostProps = {
-		onCreatePost: (content: string, imageUrls: string[]) => Promise<void>;
+		createPost: (content: string, imageUrls: string[]) => Promise<void>;
+		isSubmittingCreatePost: boolean;
 		authToken: string;
 	};
-	let { onCreatePost, authToken }: CreatePostProps = $props();
+	let { createPost, authToken, isSubmittingCreatePost }: CreatePostProps = $props();
 
 	let postContent = $state('');
 	let imageUrls = $state<string[]>([]);
 	let fileInput: HTMLInputElement | null = $state(null);
 	let imageUploadLoading = $state(false);
-	let submitting = $state(false);
 
 	function handleInputFileClick(): void {
 		if (!fileInput) return;
@@ -60,17 +60,9 @@
 			toast.error('Please enter content or upload an image.');
 			return;
 		}
-
-		submitting = true;
-		try {
-			await onCreatePost(postContent, imageUrls);
-			postContent = '';
-			imageUrls = [];
-		} catch (error) {
-			console.error(error);
-		} finally {
-			submitting = false;
-		}
+		createPost(postContent, imageUrls);
+		postContent = '';
+		imageUrls = [];
 	}
 </script>
 
@@ -131,8 +123,9 @@
 		<Button
 			onclick={handleSubmit}
 			size="sm"
-			isLoading={submitting}
-			disabled={submitting || (!postContent.trim() && imageUrls.length === 0)}>Create :)</Button
+			isLoading={isSubmittingCreatePost}
+			disabled={isSubmittingCreatePost || (!postContent.trim() && imageUrls.length === 0)}
+			>Create :)</Button
 		>
 	</div>
 </div>
