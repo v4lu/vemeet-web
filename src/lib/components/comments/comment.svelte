@@ -193,6 +193,7 @@
 					depth={depth + 1}
 					{deleteComment}
 					{editComment}
+					{handleCommentLike}
 					{isSubmittingDeleteComment}
 					{isSubmittingEditComment}
 					postReply={() => {}}
