@@ -68,7 +68,6 @@
 	function handleEdit() {
 		if (!editContent) return;
 		editComment(comment.id, editContent);
-		editContent = '';
 		isEditing = false;
 	}
 </script>
