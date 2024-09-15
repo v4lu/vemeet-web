@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import { api, createAuthHeaders, uploadImage } from '$lib/api';
 	import { Button } from '$lib/components/ui/button';
 	import { formatMemberSince } from '$lib/date';
@@ -33,14 +32,6 @@
 	let following: User[] = $state([]);
 	let isLoading = $state(false);
 
-	let heic2any = $state();
-
-	onMount(async () => {
-		if (browser) {
-			heic2any = (await import('heic2any')).default;
-		}
-	});
-
 	function handleInputFileClick(): void {
 		if (!fileInput) return;
 		fileInput.click();
@@ -54,51 +45,15 @@
 		imageUploadLoading = loadingState;
 	}
 
-	async function convertHeicToJpeg(file: File): Promise<File> {
-		if (!browser || !heic2any) {
-			throw new Error('HEIC conversion is not available');
-		}
-
-		try {
-			const convertedBlob = await heic2any({
-				blob: file,
-				toType: 'image/jpeg',
-				quality: 0.8
-			});
-			return new File([convertedBlob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), {
-				type: 'image/jpeg'
-			});
-		} catch (error) {
-			console.error('Error converting HEIC to JPEG:', error);
-			throw error;
-		}
-	}
-
 	async function handleFileChange(e: Event) {
-		if (!browser) return;
-
 		const input = e.target as HTMLInputElement;
 		if (input.files?.length) {
-			const file = input.files[0];
-			let fileToUpload = file;
-
-			setImageUploadLoading(true);
-
-			try {
-				if (file.type === 'image/heic' || file.type === 'image/heif') {
-					fileToUpload = await convertHeicToJpeg(file);
-				}
-
-				await uploadImage({
-					authToken,
-					file: fileToUpload,
-					setImageUrl,
-					setImageUploadLoading
-				});
-			} catch (error) {
-				console.error('Error processing file:', error);
-				setImageUploadLoading(false);
-			}
+			await uploadImage({
+				authToken,
+				file: input.files[0],
+				setImageUrl,
+				setImageUploadLoading
+			});
 		}
 	}
 
