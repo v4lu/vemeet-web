@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { useProfileMedia } from '$lib/api/use-profile-media.svelte';
-	import { sessionStore } from '$lib/stores/session.store';
 	import type { Image } from '$lib/types/image.types';
 	import { ImageModal } from '../ui/modals';
 	import { Skeleton } from '../ui/skeleton';
 
 	type ProfileMediaProps = {
 		authToken: string;
+		userId: number;
 	};
 
-	let { authToken }: ProfileMediaProps = $props();
-	let { resp } = useProfileMedia(authToken, $sessionStore.id);
+	let { authToken, userId }: ProfileMediaProps = $props();
+	let { resp } = useProfileMedia(authToken, userId);
 	let selectedImage = $state<Image | null>(null);
 
 	function openImageModal(image: Image) {

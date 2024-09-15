@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Header, ProfileMedia, ProfilePosts } from '$lib/components/profile';
+	import { ProfileMedia, ProfileSessionHeader, ProfileSessionPosts } from '$lib/components/profile';
+	import { sessionStore } from '$lib/stores/session.store.js';
 	import { quintOut } from 'svelte/easing';
 	import { fade } from 'svelte/transition';
 
@@ -14,7 +15,7 @@
 </script>
 
 <div class="mt-4">
-	<Header authToken={data.accessToken} />
+	<ProfileSessionHeader authToken={data.accessToken} />
 	<nav class="relative my-2 flex">
 		{#each tabs as tab}
 			<button
@@ -34,7 +35,7 @@
 	<div class="mt-4">
 		{#if activeTab === 'Posts'}
 			<div in:fade={{ duration: 300, easing: quintOut }}>
-				<ProfilePosts authToken={data.accessToken} />
+				<ProfileSessionPosts authToken={data.accessToken} />
 			</div>
 		{:else if activeTab === 'Recipes'}
 			<div in:fade={{ duration: 300, easing: quintOut }}>
@@ -42,7 +43,7 @@
 			</div>
 		{:else if activeTab === 'Media'}
 			<div in:fade={{ duration: 300, easing: quintOut }}>
-				<ProfileMedia authToken={data.accessToken} />
+				<ProfileMedia userId={$sessionStore.id} authToken={data.accessToken} />
 			</div>
 		{/if}
 	</div>

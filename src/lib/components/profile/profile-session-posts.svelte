@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useSessionProfilePosts } from '$lib/api/use-session-profile-posts.svelte';
-	import { CreatePost, ProfileFeed } from '$lib/components/profile';
+	import { CreatePost, ProfileSessionFeed } from '$lib/components/profile';
 
 	type ProfilePostsProps = {
 		authToken: string;
@@ -37,7 +37,7 @@
 </script>
 
 <CreatePost {createPost} isSubmittingCreatePost={resp.isSumbmittingNewPost} {authToken} />
-<ProfileFeed
+<ProfileSessionFeed
 	isPostDeleteing={resp.isSubmittingPostDeleting}
 	posts={resp.posts}
 	currentPage={resp.currentPage}
@@ -46,5 +46,4 @@
 	{deletePost}
 	{postLikeToggle}
 	{loadPosts}
-	{authToken}
 />

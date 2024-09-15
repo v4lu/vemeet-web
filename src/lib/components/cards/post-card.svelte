@@ -12,10 +12,9 @@
 
 	type PostCardProps = {
 		post: Post;
-		deletePost: (id: number) => void;
-		isPostDeleteing: boolean;
-		authToken: string;
-		postLikeToggle: (postId: number, isLiked: boolean, userId: number) => Promise<void>;
+		deletePost?: (id: number) => void;
+		isPostDeleteing?: boolean;
+		postLikeToggle: (postId: number, isLiked: boolean) => Promise<void>;
 	};
 
 	let { post, deletePost, postLikeToggle, isPostDeleteing }: PostCardProps = $props();
@@ -56,14 +55,16 @@
 		currentImageIndex = index;
 	}
 
-	function handleToggleLike() {
-		postLikeToggle(post.id, isLiked, $sessionStore.id);
+	async function handleToggleLike() {
+		postLikeToggle(post.id, isLiked);
 		isLiked = !isLiked;
 	}
 
 	async function handleDeletePost() {
-		deletePost(post.id);
-		isDeleteModalConfirmOpen = false;
+		if (deletePost) {
+			deletePost(post.id);
+			isDeleteModalConfirmOpen = false;
+		}
 	}
 </script>
 

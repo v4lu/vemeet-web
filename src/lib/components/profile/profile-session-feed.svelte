@@ -1,30 +1,45 @@
 <script lang="ts">
-	import { useProfilePosts } from '$lib/api/use-profile-posts.svelte';
-	import PostCard from '../cards/post-card.svelte';
+	import type { Post } from '$lib/types/post.types.js';
+	import { PostCard } from '../cards';
 	import { SkeletonCard } from '../ui/skeleton';
 
 	type ProfileFeedProps = {
-		userId: number;
-		authToken: string;
+		posts: Post[];
+		currentPage: number;
+		isLoading: boolean;
+		hasMore: boolean;
+		loadPosts: (page: number) => Promise<void>;
+		deletePost: (id: number) => void;
+		isPostDeleteing: boolean;
+		postLikeToggle: (postId: number, isLiked: boolean) => Promise<void>;
 	};
 
-	let { userId, authToken }: ProfileFeedProps = $props();
-	const { resp, loadPosts, postLikeToggle } = useProfilePosts(authToken, userId);
+	let {
+		isPostDeleteing,
+		posts,
+		currentPage,
+		isLoading,
+		hasMore,
+		deletePost,
+		loadPosts,
+		postLikeToggle
+	}: ProfileFeedProps = $props();
+
 	let target = $state<HTMLElement | null>(null);
 
 	$effect(() => {
 		const handleScroll = () => {
-			if (target && !resp.isLoading && resp.hasMore) {
+			if (target && !isLoading && hasMore) {
 				const rect = target.getBoundingClientRect();
 				const isInViewport = rect.top <= window.innerHeight;
 				if (isInViewport) {
-					loadPosts(resp.currentPage + 1);
+					loadPosts(currentPage + 1);
 				}
 			}
 		};
 
 		window.addEventListener('scroll', handleScroll);
-		if (resp.currentPage === 0 && resp.posts.length === 0) {
+		if (currentPage === 0 && posts.length === 0) {
 			loadPosts(0);
 		}
 		return () => {
@@ -34,19 +49,19 @@
 </script>
 
 <div class="posts-container">
-	{#each resp.posts as post (post.id)}
-		<PostCard {post} {postLikeToggle} />
+	{#each posts as post (post.id)}
+		<PostCard {isPostDeleteing} {post} {deletePost} {postLikeToggle} />
 	{/each}
 </div>
-{#if resp.isLoading}
+{#if isLoading}
 	{#each Array(8) as _}
 		<SkeletonCard />
 	{/each}
-{:else if !resp.hasMore && resp.posts.length > 0}
+{:else if !hasMore && posts.length > 0}
 	<div class="pt-4">
 		<p class="text-center text-muted-foreground">No more posts to show</p>
 	</div>
-{:else if !resp.hasMore && resp.posts.length === 0}
+{:else if !hasMore && posts.length === 0}
 	<div class="pt-4">
 		<p class="text-center text-muted-foreground">No posts available</p>
 	</div>

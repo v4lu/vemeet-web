@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { api, createAuthHeaders, uploadImage } from '$lib/api';
 	import { Button } from '$lib/components/ui/button';
-	import { formatMemberSince } from '$lib/date';
+	import { formatBday } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { ResponseFollowStats } from '$lib/types/follow.types';
 	import type { User } from '$lib/types/user.types';
@@ -17,7 +17,7 @@
 
 	let { authToken }: HeaderProps = $props();
 
-	let formattedDate = $derived(formatMemberSince($sessionStore.birthday));
+	let formattedDate = $derived(formatBday($sessionStore.birthday));
 
 	let imageUrl = $state('');
 	let fileInput: HTMLInputElement | null = $state(null);
