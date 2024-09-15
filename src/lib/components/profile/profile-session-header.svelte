@@ -8,6 +8,7 @@
 	import Icon from '@iconify/svelte';
 	import { onMount } from 'svelte';
 	import { UserHorizontalCard } from '../cards';
+	import { Avatar } from '../ui/avatar';
 	import { Modal } from '../ui/modals';
 	import { Skeleton } from '../ui/skeleton';
 
@@ -146,16 +147,17 @@
 				onmouseenter={(): boolean => (isHovering = true)}
 				onmouseleave={(): boolean => (isHovering = false)}
 			>
-				<img
-					height="80"
-					width="80"
-					class="size-20 rounded-full bg-cover bg-center object-cover object-center"
-					src={imageUrl ||
-						($sessionStore.profileImage
-							? $sessionStore.profileImage.url
-							: '/placeholder-user.webp')}
-					alt={$sessionStore.username}
-				/>
+				{#if imageUrl || $sessionStore.profileImage}
+					<img
+						height="80"
+						width="80"
+						class="size-20 rounded-full bg-cover bg-center object-cover object-center"
+						src={imageUrl || $sessionStore.profileImage?.url}
+						alt={$sessionStore.username}
+					/>
+				{:else}
+					<Avatar class="size-20" user={$sessionStore} />
+				{/if}
 				{#if isHovering && !imageUploadLoading}
 					<div
 						class="absolute inset-0 flex items-center justify-center rounded-full bg-neutral-900/30 text-neutral-50"

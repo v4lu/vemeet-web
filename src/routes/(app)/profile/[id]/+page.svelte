@@ -2,6 +2,7 @@
 	import { useUser } from '$lib/api/use-user-by-id.svelte.js';
 	import { ProfileFeed, ProfileHeader, ProfileMedia } from '$lib/components/profile';
 	import { ProfileHeaderSkeleton } from '$lib/components/skeleton';
+	import { sessionStore } from '$lib/stores/session.store.js';
 	import { quintOut } from 'svelte/easing';
 	import { fade } from 'svelte/transition';
 
@@ -14,14 +15,21 @@
 		activeTab = tab;
 	}
 
-	const { resp } = useUser(data.accessToken, data.id);
+	const { resp, followUser, unfollowUser } = useUser(data.accessToken, data.id, $sessionStore);
 </script>
 
 <div class="mt-4">
 	{#if resp.isLoading}
 		<ProfileHeaderSkeleton />
 	{:else if resp.user}
-		<ProfileHeader followers={resp.followers} following={resp.following} user={resp.user} />
+		<ProfileHeader
+			followers={resp.followers}
+			{followUser}
+			{unfollowUser}
+			following={resp.following}
+			user={resp.user}
+			isFollowing={resp.isFollowing}
+		/>
 	{/if}
 </div>
 <nav class="relative my-2 flex">

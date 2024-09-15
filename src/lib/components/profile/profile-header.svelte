@@ -3,14 +3,20 @@
 	import type { User } from '$lib/types/user.types';
 	import Icon from '@iconify/svelte';
 	import { UserHorizontalCard } from '../cards';
+	import { Avatar } from '../ui/avatar';
+	import { Button } from '../ui/button';
 	import Modal from '../ui/modals/modal.svelte';
 
 	type ProfileHeaderProps = {
 		user: User;
 		followers: User[];
 		following: User[];
+		unfollowUser: () => void;
+		followUser: () => void;
+		isFollowing: boolean;
 	};
-	let { user, followers, following }: ProfileHeaderProps = $props();
+	let { user, followers, following, followUser, unfollowUser, isFollowing }: ProfileHeaderProps =
+		$props();
 	let formattedDate = $derived(formatBday(user.birthday));
 	let isFollowersModalOpen = $state(false);
 	let isFollowingModalOpen = $state(false);
@@ -21,15 +27,9 @@
 		<div class="relative">
 			<div
 				aria-label="Upload profile picture"
-				class="relative size-fit cursor-pointer rounded-full border-[3px] border-white shadow-xl"
+				class="relative size-fit rounded-full border-[3px] border-white shadow-xl"
 			>
-				<img
-					height="80"
-					width="80"
-					class="size-20 rounded-full bg-cover bg-center object-cover object-center"
-					src={user.profileImage?.url ?? '/placeholder-user.webp'}
-					alt={user.username}
-				/>
+				<Avatar class="size-20" {user} />
 			</div>
 		</div>
 		<div class="ml-4">
@@ -96,6 +96,20 @@
 			<span class="text-sm text-muted-foreground group-hover:text-primary">Following</span>
 		</button>
 	</div>
+</div>
+
+<div class="mt-4 flex items-center gap-4 pb-2">
+	<Button onclick={() => (isFollowing ? unfollowUser() : followUser())} size="sm" variant="outline">
+		<Icon
+			icon={isFollowing ? 'solar:users-group-rounded-bold' : 'solar:user-block-bold'}
+			class="mr-2 size-4"
+		/>
+		{isFollowing ? 'Unfollow' : 'Follow'}
+	</Button>
+	<Button size="sm" variant="outline">
+		<Icon icon="solar:chat-line-bold" class="mr-2 size-4" />
+		Message</Button
+	>
 </div>
 
 {#if isFollowersModalOpen}

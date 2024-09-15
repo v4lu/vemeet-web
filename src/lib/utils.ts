@@ -17,3 +17,7 @@ export function clickOutside(node: HTMLElement, onClickOutside: () => void) {
 		}
 	};
 }
+
+export function getInitial(username: string): string {
+	return username.charAt(0).toUpperCase();
+}
