@@ -1,20 +1,21 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 
-	let mediaRecorder;
-	let audioChunks = [];
-	let audioUrl = '';
-	let isRecording = false;
-	let permissionStatus = 'prompt'; // 'prompt', 'granted', 'denied'
-	let errorMessage = '';
+	let mediaRecorder: MediaRecorder | null = null;
+	let audioChunks: Blob[] = [];
+	let audioUrl: string = '';
+	let isRecording: boolean = false;
+	let permissionStatus: PermissionState = 'prompt';
+	let errorMessage: string = '';
+	let audioElement: HTMLAudioElement | null = null;
 
 	onMount(() => {
 		checkPermission();
 	});
 
-	async function checkPermission() {
+	async function checkPermission(): Promise<void> {
 		try {
-			const result = await navigator.permissions.query({ name: 'microphone' });
+			const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
 			permissionStatus = result.state;
 			result.onchange = () => {
 				permissionStatus = result.state;
@@ -25,7 +26,7 @@
 		}
 	}
 
-	async function requestPermissionAndSetup() {
+	async function requestPermissionAndSetup(): Promise<void> {
 		try {
 			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 			setupMediaRecorder(stream);
@@ -38,21 +39,21 @@
 		}
 	}
 
-	function setupMediaRecorder(stream) {
+	function setupMediaRecorder(stream: MediaStream): void {
 		mediaRecorder = new MediaRecorder(stream);
 
-		mediaRecorder.ondataavailable = (event) => {
+		mediaRecorder.ondataavailable = (event: BlobEvent) => {
 			audioChunks.push(event.data);
 		};
 
 		mediaRecorder.onstop = () => {
-			const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+			const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
 			audioUrl = URL.createObjectURL(audioBlob);
 			audioChunks = [];
 		};
 	}
 
-	function toggleRecording() {
+	function toggleRecording(): void {
 		if (permissionStatus === 'granted' && mediaRecorder) {
 			if (isRecording) {
 				mediaRecorder.stop();
@@ -65,6 +66,19 @@
 		} else {
 			requestPermissionAndSetup();
 		}
+	}
+
+	function handlePlayback(): void {
+		if (audioElement) {
+			audioElement.play().catch((error) => {
+				console.error('Playback error:', error);
+				errorMessage = 'Error playing audio. Please try again.';
+			});
+		}
+	}
+
+	function handleAudioLoad(): void {
+		errorMessage = '';
 	}
 </script>
 
@@ -89,7 +103,14 @@
 {/if}
 
 {#if audioUrl}
-	<audio controls src={audioUrl}></audio>
+	<audio
+		bind:this={audioElement}
+		controls
+		src={audioUrl}
+		on:play={handlePlayback}
+		on:loadedmetadata={handleAudioLoad}
+	></audio>
+	<button on:click={handlePlayback}>Play Recording</button>
 {/if}
 
 <style>
@@ -101,6 +122,7 @@
 		border: none;
 		border-radius: 5px;
 		cursor: pointer;
+		margin-right: 10px;
 	}
 
 	button:hover {
