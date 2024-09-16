@@ -1,6 +1,6 @@
 import type { Comment } from './comment.types';
 import type { Image } from './image.types';
-import type { Pageable, Sort } from './paga.types';
+import type { Pageable, Sort } from './page.types';
 import type { Reaction } from './reaction.types';
 import type { User } from './user.types';
 

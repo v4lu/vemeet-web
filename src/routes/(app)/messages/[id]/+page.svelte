@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { useFetchChat } from '$lib/api/use-fetch-chat.svelte';
 	import { Chat } from '$lib/components/chat';
-	import { ChatSkeleton } from '$lib/components/skeleton';
 
 	let { data } = $props();
-	const { resp } = useFetchChat(+data.id, data.accessToken);
+	const { resp, fetchData } = useFetchChat(+data.id, data.accessToken);
 </script>
 
-{#if resp.isLoading}
-	<ChatSkeleton />
-{:else if resp.messages}
-	<Chat authToken={data.accessToken} chatId={+data.id} messages={resp.messages} />
-{/if}
+<Chat
+	authToken={data.accessToken}
+	isLoading={resp.isLoading}
+	chatId={+data.id}
+	messages={resp.messages}
+	currentPage={resp.currentPage}
+	hasMore={resp.hasMore}
+	loadMessages={fetchData}
+/>
