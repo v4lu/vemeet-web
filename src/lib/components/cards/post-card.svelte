@@ -112,7 +112,11 @@
 					class="mr-3 h-10 w-10 rounded-full object-cover"
 				/>
 				<div>
-					<h3 class="font-semibold text-foreground">{post.user.username}</h3>
+					<a
+						href={`/profile/${post.user.id}`}
+						class="font-semibold text-foreground transition-colors duration-200 hover:text-primary"
+						>{post.user.username}</a
+					>
 					<p class="text-xs text-muted-foreground">{formatTimestamp(post.createdAt)}</p>
 				</div>
 			</div>
