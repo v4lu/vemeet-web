@@ -4,12 +4,10 @@
 	import { Button } from '$lib/components/ui/button';
 	import { inputVariants } from '$lib/components/ui/input';
 	import { formatTimestamp } from '$lib/date';
-	import { webSocketService } from '$lib/services/chat-websocket.service';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { Message } from '$lib/types/chat.types';
 	import { type User } from '$lib/types/user.types';
 	import Icon from '@iconify/svelte';
-	import { onDestroy, onMount } from 'svelte';
 	import { ChatSkeleton, MessageSkeleton } from '../skeleton';
 
 	type ChatProps = {
@@ -68,24 +66,14 @@
 		);
 		if (uniqueMessages.length > 0) {
 			shouldAutoScroll = isNearBottom();
-			messages = [...messages, ...uniqueMessages];
+			messages = [...messages, ...uniqueMessages].sort(
+				(a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+			);
 			if (shouldAutoScroll) {
 				setTimeout(() => scrollToBottom(true), 0);
 			}
 		}
 	}
-
-	onMount(() => {
-		webSocketService.connect($sessionStore.id, authToken);
-		const unsubscribe = webSocketService.subscribe((newMessages) => {
-			updateMessages(newMessages);
-		});
-		return unsubscribe;
-	});
-
-	onDestroy(() => {
-		webSocketService.disconnect();
-	});
 
 	async function handleSubmit(event: Event) {
 		event.preventDefault();
@@ -101,7 +89,6 @@
 			if (res) {
 				shouldAutoScroll = true;
 				updateMessages([res]);
-				webSocketService.sendMessage(res);
 				newMessage = '';
 			}
 		}
