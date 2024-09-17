@@ -13,11 +13,13 @@ export type Message = {
 	id: number;
 	chatId: number;
 	sender: User;
+	recipient: User;
 	messageType: string;
 	content: string;
 	createdAt: string;
 	readAt: string;
 	isOneTime: boolean;
+	isSessionUserSender: boolean;
 };
 
 export type MessagesPagableResponse = {

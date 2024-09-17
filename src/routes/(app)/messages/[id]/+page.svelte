@@ -8,32 +8,26 @@
 	import { formatTimestamp } from '$lib/date.js';
 	import { sessionStore } from '$lib/stores/session.store.js';
 	import type { Message } from '$lib/types/chat.types.js';
-	import type { User } from '$lib/types/user.types.js';
 	import Icon from '@iconify/svelte';
 
 	let { data } = $props();
 	const { resp, fetchData } = useFetchChat(+data.id, data.accessToken);
 
 	let newMessage = $state('');
-	let otherUser = $state<User | null>(null);
+
 	let chatContainer = $state<HTMLDivElement>();
 	let target = $state<HTMLElement | null>(null);
 	let isInitialLoad = $state(true);
 	let prevMessagesLength = $state(0);
 	let shouldAutoScroll = $state(true);
+	let otherUser = $derived(
+		resp.messages.length > 0
+			? resp.messages[0].isSessionUserSender
+				? resp.messages[0].recipient
+				: resp.messages[0].sender
+			: null
+	);
 	const { postMessage } = usePostMessage(+data.id, data.accessToken);
-
-	$effect(() => {
-		if (resp.messages && resp.messages.length > 0) {
-			const uniqueUsers = new Set(resp.messages.map((m) => m.sender.id));
-			if (uniqueUsers.size === 2) {
-				const otherUserId = Array.from(uniqueUsers).find((id) => id !== $sessionStore.id);
-				otherUser = resp.messages.find((m) => m.sender.id === otherUserId)?.sender || null;
-			} else if (uniqueUsers.size === 1 && !uniqueUsers.has($sessionStore.id)) {
-				otherUser = resp.messages[0].sender;
-			}
-		}
-	});
 
 	function scrollToBottom(smooth = false) {
 		if (chatContainer) {
