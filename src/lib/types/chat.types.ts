@@ -3,10 +3,13 @@ import type { User } from './user.types';
 
 export type Chat = {
 	id: number;
-	user1: User;
-	user2: User;
+	sessionUser: User;
+	otherUser: User;
 	createdAt: string;
 	updatedAt: string;
+	lastMessage: Message;
+	sessionUserSeenStatus: boolean;
+	otherUserSeenStatus: boolean;
 };
 
 export type Message = {

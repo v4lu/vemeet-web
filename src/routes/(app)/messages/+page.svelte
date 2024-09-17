@@ -3,23 +3,15 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 	import { formatTimestamp } from '$lib/date.js';
-	import { sessionStore } from '$lib/stores/session.store.js';
 	import type { Chat } from '$lib/types/chat.types';
 	import Icon from '@iconify/svelte';
 
 	let { data } = $props();
 	const { resp } = useFetchChats(data.accessToken);
 
-	function getOtherUser(chat: Chat, currentUserId: number) {
-		return chat.user1.id === currentUserId ? chat.user2 : chat.user1;
-	}
-
-	function getLastMessage(chat: Chat) {
-		return {
-			text: 'Last message placeholder',
-			timestamp: formatTimestamp(chat.updatedAt),
-			unread: true
-		};
+	function getLastMessagePreview(chat: Chat): string {
+		if (!chat.lastMessage) return 'No messages yet';
+		return chat.lastMessage.content || `[${chat.lastMessage.messageType}]`;
 	}
 </script>
 
@@ -40,33 +32,37 @@
 	{:else if resp.chats}
 		<div class="space-y-2">
 			{#each resp.chats as chat (chat.id)}
-				{@const otherUser = getOtherUser(chat, $sessionStore.id)}
-				{@const lastMessage = getLastMessage(chat)}
 				<a
 					href={`/messages/${chat.id}`}
 					class="flex cursor-pointer items-center rounded-md p-3 hover:bg-accent"
 				>
 					<div class="relative mr-4">
 						<img
-							src={otherUser.profileImage?.url || '/placeholder-user.webp'}
+							src={chat.otherUser.profileImage?.url || '/placeholder-user.webp'}
 							class="size-12 rounded-full bg-cover bg-center object-cover object-center"
-							alt={otherUser.name || otherUser.username}
+							alt={chat.otherUser.name || chat.otherUser.username}
 						/>
 					</div>
 					<div class="flex-1">
 						<div class="flex items-center justify-between">
-							<h2 class="font-semibold">{otherUser.name || otherUser.username}</h2>
-							<span class="text-sm text-muted-foreground">{lastMessage.timestamp}</span>
+							<h2 class="font-semibold">{chat.otherUser.name || chat.otherUser.username}</h2>
+							<span class="text-sm text-muted-foreground">
+								{chat.lastMessage
+									? formatTimestamp(chat.lastMessage.createdAt)
+									: formatTimestamp(chat.updatedAt)}
+							</span>
 						</div>
 						<p class="truncate text-sm text-muted-foreground">
-							{lastMessage.text}
+							{getLastMessagePreview(chat)}
 						</p>
 					</div>
-					{#if lastMessage.unread}
+					{#if !chat.sessionUserSeenStatus}
 						<div class="ml-2 h-2 w-2 rounded-full bg-blue-500"></div>
 					{/if}
 				</a>
 			{/each}
 		</div>
+	{:else}
+		<p>No chats found.</p>
 	{/if}
 </div>
