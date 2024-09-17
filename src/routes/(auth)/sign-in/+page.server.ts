@@ -2,7 +2,7 @@ import { api } from '$lib/api.js';
 import { ACCESS_TOKEN, COGNITO_ID, REFRESH_TOKEN, isProduction } from '$lib/constants.js';
 import type { ServerErrorResponse } from '$lib/types/ky.types.js';
 import { type UserLoginSchemaPayload, userLoginSchema } from '$lib/validators/auth.validator.js';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import { HTTPError } from 'ky';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -69,6 +69,8 @@ export const actions = {
 				path: '/',
 				maxAge: Math.max(0, refreshTokenExpiry - now - bufferTime)
 			});
+
+			redirect(307, '/');
 		} catch (error) {
 			if (error instanceof HTTPError) {
 				if (error.response.status === 401) {
