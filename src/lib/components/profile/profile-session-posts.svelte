@@ -9,24 +9,23 @@
 	let { authToken }: ProfilePostsProps = $props();
 	const { resp, loadPosts, createPost, deletePost, postLikeToggle } =
 		useSessionProfilePosts(authToken);
-	const { currentPage, hasMore, isLoading, posts } = resp;
 
 	let target = $state<HTMLElement | null>(null);
 
 	$effect(() => {
 		const handleScroll = () => {
-			if (target && !isLoading && hasMore) {
+			if (target && !resp.isLoading && resp.hasMore) {
 				const rect = target.getBoundingClientRect();
 				const isInViewport = rect.top <= window.innerHeight;
 				if (isInViewport) {
-					loadPosts(currentPage + 1);
+					loadPosts(resp.currentPage + 1);
 				}
 			}
 		};
 
 		window.addEventListener('scroll', handleScroll);
 
-		if (currentPage === 0 && posts.length === 0) {
+		if (!resp.isInitialized) {
 			loadPosts(0);
 		}
 

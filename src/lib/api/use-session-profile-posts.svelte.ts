@@ -13,6 +13,7 @@ class ProfilePosts {
 
 	isSumbmittingNewPost = $state(false);
 	isSubmittingPostDeleting = $state(false);
+	isInitialized = $state(false);
 }
 
 export function useSessionProfilePosts(authToken: string) {
@@ -20,6 +21,8 @@ export function useSessionProfilePosts(authToken: string) {
 	const api = authAPI(authToken);
 
 	async function loadPosts(page: number) {
+		if (resp.isLoading || (!resp.hasMore && resp.isInitialized)) return;
+
 		resp.isLoading = true;
 		try {
 			const response = await api.get<PostsPagableResponse>(`posts/session?page=${page}`, {}).json();
@@ -30,6 +33,7 @@ export function useSessionProfilePosts(authToken: string) {
 			}
 			resp.currentPage = page;
 			resp.hasMore = !response.last;
+			resp.isInitialized = true;
 		} catch (error) {
 			console.error('Error fetching posts:', error);
 		}

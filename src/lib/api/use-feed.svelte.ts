@@ -12,6 +12,7 @@ class Feed {
 	hasMore = $state(true);
 
 	isSumbmittingNewPost = $state(false);
+	isInitialized = $state(false);
 }
 
 export function useFeed(authToken: string) {
@@ -19,20 +20,27 @@ export function useFeed(authToken: string) {
 	const api = authAPI(authToken);
 
 	async function loadFeed(page: number) {
+		if (resp.isLoading || (!resp.hasMore && resp.isInitialized)) return;
+
 		resp.isLoading = true;
 		try {
 			const response = await api.get<PostsPagableResponse>(`feed?page=${page}`, {}).json();
+
 			if (page === 0) {
 				resp.posts = response.content;
 			} else {
 				resp.posts = [...resp.posts, ...response.content];
 			}
+
 			resp.currentPage = page;
-			resp.hasMore = !response.last;
+			resp.hasMore = !response.last && response.content.length > 0;
+			resp.isInitialized = true;
 		} catch (error) {
 			console.error('Error fetching posts:', error);
+			resp.error = error as ServerErrorResponse;
+		} finally {
+			resp.isLoading = false;
 		}
-		resp.isLoading = false;
 	}
 
 	async function postLikeToggle(postId: number, isLiked: boolean) {

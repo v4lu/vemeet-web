@@ -24,9 +24,11 @@
 		};
 
 		window.addEventListener('scroll', handleScroll);
-		if (resp.currentPage === 0 && resp.posts.length === 0) {
+
+		if (!resp.isInitialized) {
 			loadPosts(0);
 		}
+
 		return () => {
 			window.removeEventListener('scroll', handleScroll);
 		};

@@ -3,10 +3,9 @@
 	import { PostCard } from '$lib/components/cards/index.js';
 	import { CreatePost } from '$lib/components/profile/index.js';
 	import { SkeletonCard } from '$lib/components/ui/skeleton/index.js';
+
 	let { data } = $props();
-
 	const { loadFeed, resp, createPost, postLikeToggle, deletePost } = useFeed(data.accessToken);
-
 	let target = $state<HTMLElement | null>(null);
 
 	$effect(() => {
@@ -21,9 +20,11 @@
 		};
 
 		window.addEventListener('scroll', handleScroll);
-		if (resp.currentPage === 0 && resp.posts.length === 0) {
+
+		if (!resp.isInitialized) {
 			loadFeed(0);
 		}
+
 		return () => {
 			window.removeEventListener('scroll', handleScroll);
 		};
@@ -36,7 +37,6 @@
 		isSubmittingCreatePost={resp.isSumbmittingNewPost}
 		{createPost}
 	/>
-
 	<div class="posts-container">
 		{#each resp.posts as post (post.id)}
 			<PostCard {post} {postLikeToggle} {deletePost} />

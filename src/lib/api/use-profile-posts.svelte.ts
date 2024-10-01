@@ -13,6 +13,7 @@ class ProfilePosts {
 
 	isSumbmittingNewPost = $state(false);
 	isSubmittingPostDeleting = $state(false);
+	isInitialized = $state(false);
 }
 
 export function useProfilePosts(authToken: string, userId: number) {
@@ -20,6 +21,8 @@ export function useProfilePosts(authToken: string, userId: number) {
 	const api = authAPI(authToken);
 
 	async function loadPosts(page: number) {
+		if (resp.isLoading || (!resp.hasMore && resp.isInitialized)) return;
+
 		resp.isLoading = true;
 		try {
 			const response = await api
@@ -32,6 +35,7 @@ export function useProfilePosts(authToken: string, userId: number) {
 			}
 			resp.currentPage = page;
 			resp.hasMore = !response.last;
+			resp.isInitialized = true;
 		} catch (error) {
 			console.error('Error fetching posts:', error);
 		}
