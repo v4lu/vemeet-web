@@ -8,6 +8,9 @@
 	<header class="container flex justify-between py-3">
 		<a href="/" class="text-lg font-bold text-primary">Vemeet</a>
 		<div class="flex items-center justify-center gap-2">
+			<a href="/swiper" class={buttonVariants({ variant: 'ghost', size: 'icon-sm' })}>
+				<Icon icon="solar:flame-bold-duotone" class="size-5" />
+			</a>
 			<a href="/settings" class={buttonVariants({ variant: 'ghost', size: 'icon-sm' })}>
 				<Icon icon="solar:settings-bold" class="size-5" />
 			</a>

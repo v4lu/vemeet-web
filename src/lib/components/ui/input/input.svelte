@@ -6,13 +6,19 @@
 
 	type Variant = VariantProps<typeof inputVariants>['variant'];
 
-	type InputProps = HTMLInputAttributes & {
+	type InputProps = Omit<HTMLInputAttributes, 'value'> & {
 		class?: string;
-		value?: string;
+		value?: string | number;
 		variant?: Variant;
 	};
 
 	let { variant, class: className, value = $bindable(), ...rest }: InputProps = $props();
+
+	$effect(() => {
+		if (typeof value === 'number') {
+			value = value.toString();
+		}
+	});
 </script>
 
 <input bind:value class={cn(inputVariants({ variant, className }))} {...rest} />

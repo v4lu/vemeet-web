@@ -27,3 +27,24 @@ export type User = {
 	cityLng?: number;
 	profileImage?: ProfileImage;
 };
+
+export type UserSwiperPreferences = {
+	id: number;
+	userId: number;
+	minAge: number;
+	maxAge: number;
+	maxDistance: number;
+	preferredGender: string;
+};
+
+export type SetupUserSwiperPreferences = Omit<UserSwiperPreferences, 'id' | 'userId'>;
+
+export type PotencialMatchResponse = {
+	matches: PotencialMatch[];
+	hasNextPage: true;
+};
+
+export type PotencialMatch = {
+	distance: number;
+	user: User;
+};
