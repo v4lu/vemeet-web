@@ -12,6 +12,7 @@ export type User = {
 	createdAt: string;
 	verified: boolean;
 	isPrivate: boolean;
+	swiperMode: boolean;
 	inboxLocked: boolean;
 	gender?: string;
 	bio?: string;
