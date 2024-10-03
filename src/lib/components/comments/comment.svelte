@@ -4,6 +4,7 @@
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { Comment as CommentType } from '$lib/types/comment.types';
 	import Icon from '@iconify/svelte';
+	import { Avatar } from '../ui/avatar';
 	import { Button } from '../ui/button';
 	import { Dropdown } from '../ui/dropdown';
 	import { ConfirmModal } from '../ui/modals';
@@ -72,55 +73,62 @@
 	}
 </script>
 
-<div class="mb-4 rounded border-l-2 border-border pl-4" style="margin-left: {depth * 20}px;">
-	<div class="flex items-center space-x-3">
-		<img
-			src={comment.user.profileImage ? comment.user.profileImage.url : '/placeholder-user.webp'}
-			alt={comment.user.username}
-			class="h-8 w-8 rounded-full object-cover"
-		/>
+<div class="mb-4 rounded-lg border-l-2 border-border pl-4" style="margin-left: {depth * 20}px;">
+	<div class="flex items-start space-x-3">
+		<Avatar class="size-10" user={comment.user} />
 		<div class="flex-1">
-			<div class="rounded-lg bg-accent p-3">
+			<div class="rounded-lg bg-muted/50 p-3 shadow-sm">
 				<div class="flex items-center justify-between">
-					<p class="font-semibold">{comment.user.username}</p>
+					<a
+						href={`/profile/${comment.user.id}`}
+						class="font-semibold text-foreground transition-colors duration-200 hover:text-primary"
+						>{comment.user.username}</a
+					>
 					<div class="flex items-center">
 						<p class="mr-2 text-xs text-muted-foreground">{formatTimestamp(comment.createdAt)}</p>
 						{#if comment.user.id === $sessionStore.id}
 							<Dropdown
 								triggerIcon="solar:menu-dots-bold"
 								bind:isOpen={isSettingsOpen}
-								triggerClass="size-6 flex min-w-0 p-0 justify-center"
-								triggerIconClass="m-0 p-0"
-								class="right-0 top-8"
+								triggerClass="size-8 flex min-w-0 p-0 shadow-none justify-center bg-none rounded-full hover:bg-none transition-colors border-none"
+								triggerIconClass="m-0 p-0 size-5 hover:text-primary"
+								class="right-0 top-10"
 							>
-								<div class="flex w-full flex-col gap-1">
-									<button
-										class="flex w-full items-center rounded-sm px-2 py-1 text-sm transition-colors hover:bg-accent"
+								<div class="flex w-full flex-col gap-1 p-1">
+									<Button
+										variant="ghost"
+										class="flex w-full justify-start"
+										size="sm"
 										onclick={() => {
 											isEditing = true;
 											isSettingsOpen = false;
 										}}
 									>
-										<Icon icon="lucide:pencil" class="mr-2" />
+										<Icon icon="solar:pen-bold" class="mr-2" />
 										Edit
-									</button>
-									<button
-										class="flex w-full items-center rounded-sm px-2 py-1 text-sm text-destructive transition-colors hover:bg-destructive/10"
+									</Button>
+									<Button
+										variant="ghost"
+										class="flex w-full justify-start text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive"
+										size="sm"
 										onclick={() => {
 											isDeleteModalConfirmOpen = true;
 											isSettingsOpen = false;
 										}}
 									>
-										<Icon icon="lucide:trash-2" class="mr-2" />
+										<Icon icon="solar:trash-bin-2-bold" class="mr-2" />
 										Delete
-									</button>
+									</Button>
 								</div>
 							</Dropdown>
 						{/if}
 					</div>
 				</div>
 				{#if isEditing}
-					<textarea bind:value={editContent} class="mt-2 w-full rounded border p-2" rows="3"
+					<textarea
+						bind:value={editContent}
+						class="mt-2 w-full rounded-lg border-2 border-transparent bg-background p-2 text-sm transition-all duration-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+						rows="3"
 					></textarea>
 					<div class="mt-2 flex justify-end space-x-2">
 						<Button size="sm" variant="outline" onclick={() => (isEditing = false)}>Cancel</Button>
@@ -133,7 +141,7 @@
 						</Button>
 					</div>
 				{:else}
-					<p class="mt-1 text-sm">{comment.content}</p>
+					<p class="mt-1 text-sm text-foreground">{comment.content}</p>
 				{/if}
 				<div class="mt-2 flex items-center space-x-4">
 					<button
@@ -141,7 +149,7 @@
 							handleCommentLike(isLiked, comment.id);
 							isLiked = !isLiked;
 						}}
-						class="flex items-center text-sm"
+						class="group flex items-center text-sm transition-colors"
 					>
 						<Icon
 							icon={isLiked ? 'solar:heart-angle-bold' : 'solar:heart-angle-line-duotone'}
@@ -150,24 +158,24 @@
 								isLiked ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
 							)}
 						/>
-						{comment.reactions.length}
+						<span class="font-medium">{comment.reactions.length}</span>
 					</button>
 				</div>
 			</div>
 			{#if depth === 0}
 				<button
-					class="mt-1 text-xs text-primary hover:underline"
+					class="mt-2 text-sm text-primary transition-colors hover:text-primary/80"
 					onclick={() => (isReplying = !isReplying)}
 				>
 					Reply
 				</button>
 			{/if}
 			{#if isReplying}
-				<div class="mt-2 pr-4">
+				<div class="mt-3 pr-4">
 					<textarea
 						bind:value={replyContent}
 						placeholder="Write a reply..."
-						class="w-full rounded border p-2 text-sm"
+						class="w-full rounded-lg border-2 border-transparent bg-muted/50 p-2 text-sm transition-all duration-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
 						rows="2"
 					></textarea>
 					<div class="mt-2 flex justify-end space-x-2">
@@ -185,7 +193,7 @@
 		</div>
 	</div>
 	{#if comment.replies && comment.replies.length > 0}
-		<div class="mt-2">
+		<div class="mt-3">
 			{#each comment.replies as reply (reply.id)}
 				<svelte:self
 					comment={reply}

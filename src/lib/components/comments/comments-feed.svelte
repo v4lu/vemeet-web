@@ -29,7 +29,7 @@
 
 <div class="border-t border-border pb-4">
 	<h4 class="p-4 font-semibold">Comments</h4>
-	<div class="space-y-4">
+	<div class="space-y-4 px-4">
 		{#each topLevelComments as comment (comment.id)}
 			<Comment
 				{handleCommentLike}

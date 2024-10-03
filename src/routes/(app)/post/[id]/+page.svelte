@@ -3,6 +3,8 @@
 	import { CommentsFeed, CreateComment } from '$lib/components/comments';
 	import { PostGallery, PostLikes } from '$lib/components/post';
 	import { PostSkeleton } from '$lib/components/skeleton';
+	import { Avatar } from '$lib/components/ui/avatar/index.js';
+	import { Button } from '$lib/components/ui/button/index.js';
 	import Dropdown from '$lib/components/ui/dropdown/dropdown.svelte';
 	import { ConfirmModal } from '$lib/components/ui/modals/index.js';
 	import { formatTimestamp } from '$lib/date.js';
@@ -29,47 +31,44 @@
 	{#if res.isLoading}
 		<PostSkeleton />
 	{:else if res.post}
-		<div class="mb-4 overflow-hidden rounded-lg border border-border bg-card shadow">
+		<div
+			class="mb-6 overflow-hidden rounded-xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
+		>
 			<div class="relative">
 				{#if res.post.user.id === $sessionStore.id}
-					<div class="absolute right-2 top-2 z-10">
+					<div class="absolute right-3 top-3 z-10">
 						<Dropdown
 							triggerIcon="solar:menu-dots-bold"
 							bind:isOpen={isSettingsOpen}
-							triggerClass="size-6 flex min-w-0 p-0 justify-center"
-							triggerIconClass="m-0 p-0"
-							class="right-0 top-8"
+							triggerClass="size-8 flex min-w-0 p-0 shadow-none justify-center bg-none rounded-full hover:bg-none transition-colors border-none"
+							triggerIconClass="m-0 p-0 size-5 hover:text-primary"
+							class="right-0 top-10"
 						>
-							<div class="flex w-full flex-col gap-1">
-								<button
-									class="flex w-full items-center rounded-sm px-2 py-1 text-sm text-destructive transition-colors hover:bg-destructive/10"
+							<div class="flex w-full flex-col gap-1 p-1">
+								<Button variant="ghost" class="flex w-full justify-start" size="sm">
+									<Icon icon="solar:pen-bold" class="mr-2" />
+									Edit
+								</Button>
+								<Button
+									variant="ghost"
+									class="flex w-full justify-start text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive"
+									size="sm"
 									onclick={() => {
 										isDeleteModalConfirmOpen = true;
 										isSettingsOpen = false;
 									}}
 								>
-									<Icon icon="lucide:trash-2" class="mr-2" />
+									<Icon icon="solar:trash-bin-2-bold" class="mr-2" />
 									Delete
-								</button>
-								<button
-									class="flex w-full items-center rounded-sm px-2 py-1 text-sm transition-colors hover:bg-accent"
-								>
-									<Icon icon="lucide:pencil" class="mr-2" />
-									Edit
-								</button>
+								</Button>
 							</div>
 						</Dropdown>
 					</div>
 				{/if}
-				<div class="relative mb-4 flex items-center justify-between px-4 pt-4">
+
+				<div class="relative mb-4 flex items-center justify-between p-4">
 					<div class="flex items-center">
-						<img
-							src={res.post.user.profileImage
-								? res.post.user.profileImage.url
-								: '/placeholder-user.webp'}
-							alt={res.post.user.username}
-							class="mr-3 h-10 w-10 rounded-full object-cover"
-						/>
+						<Avatar class="mr-3 size-12" user={res.post.user} />
 						<div>
 							<h3 class="font-semibold text-foreground">{res.post.user.username}</h3>
 							<p class="text-xs text-muted-foreground">{formatTimestamp(res.post.createdAt)}</p>
@@ -80,12 +79,16 @@
 				{#if res.post.images && res.post.images.length > 0}
 					<PostGallery images={res.post.images} />
 				{/if}
+
 				<p class="mb-4 px-4 text-foreground">{res.post.content}</p>
-				<div class="flex items-center justify-between border-t border-border p-4 pt-3">
+
+				<div class="flex items-center justify-between border-t border-border p-4">
 					<PostLikes reactions={res.reactions} {handlePostLike} />
 				</div>
 			</div>
+
 			<CreateComment isSubmitting={res.isCreateCommentSubmitting} {postComment} />
+
 			<CommentsFeed
 				{handleCommentLike}
 				{deleteComment}
@@ -103,7 +106,7 @@
 {#if isDeleteModalConfirmOpen}
 	<ConfirmModal
 		title="Delete Content"
-		desc="Deleting content is a permanent action.Post will be removed and cannot be recovered."
+		desc="Deleting content is a permanent action. Post will be removed and cannot be recovered."
 		onClose={() => (isDeleteModalConfirmOpen = false)}
 		onConfirm={deletePost}
 		submitting={res.isPostDeletionSubmitting}
