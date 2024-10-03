@@ -4,7 +4,7 @@ import type { User } from '$lib/types/user.types';
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async ({ cookies }) => {
+export const load: LayoutServerLoad = async ({ cookies, url }) => {
 	const accessToken = cookies.get(ACCESS_TOKEN);
 
 	if (!accessToken) {
@@ -17,6 +17,7 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
 
 	return {
 		user,
-		accessToken
+		accessToken,
+		path: url.pathname
 	};
 };
