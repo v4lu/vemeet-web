@@ -137,41 +137,43 @@
 	});
 </script>
 
-<div class="flex items-start justify-between pt-4">
-	<div class="flex items-center">
-		<div class="relative">
-			<button
-				aria-label="Upload profile picture"
-				class="relative cursor-pointer rounded-full border-[3px] border-white shadow-xl"
-				onclick={handleInputFileClick}
-				onmouseenter={(): boolean => (isHovering = true)}
-				onmouseleave={(): boolean => (isHovering = false)}
-			>
-				{#if imageUrl || $sessionStore.profileImage}
-					<img
-						height="80"
-						width="80"
-						class="size-20 rounded-full bg-cover bg-center object-cover object-center"
-						src={imageUrl || $sessionStore.profileImage?.url}
-						alt={$sessionStore.username}
-					/>
-				{:else}
-					<Avatar class="size-20" user={$sessionStore} />
-				{/if}
-				{#if isHovering && !imageUploadLoading}
-					<div
-						class="absolute inset-0 flex items-center justify-center rounded-full bg-neutral-900/30 text-neutral-50"
-					>
-						<Icon icon="solar:upload-linear" class="size-8" />
-					</div>
-				{/if}
-				{#if imageUploadLoading}
-					<div
-						class="absolute inset-0 flex items-center justify-center rounded-full bg-neutral-900/30 text-neutral-50"
-					>
-						<Icon icon="eos-icons:loading" class="size-8 animate-spin" />
-					</div>
-				{/if}
+<div class="rounded-t-xl">
+	<div class="flex flex-col items-start px-6 pt-6 sm:flex-row sm:items-center sm:justify-between">
+		<div class="flex items-center">
+			<div class="relative">
+				<button
+					aria-label="Upload profile picture"
+					class="relative cursor-pointer rounded-full transition-transform duration-300 hover:scale-105"
+					onclick={handleInputFileClick}
+					onmouseenter={() => (isHovering = true)}
+					onmouseleave={() => (isHovering = false)}
+				>
+					{#if imageUrl || $sessionStore.profileImage}
+						<img
+							height="96"
+							width="96"
+							class="size-24 rounded-full bg-cover bg-center object-cover object-center"
+							src={imageUrl || $sessionStore.profileImage?.url}
+							alt={$sessionStore.username}
+						/>
+					{:else}
+						<Avatar class="size-24" user={$sessionStore} />
+					{/if}
+					{#if isHovering && !imageUploadLoading}
+						<div
+							class="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-white transition-opacity duration-300"
+						>
+							<Icon icon="solar:upload-linear" class="size-8" />
+						</div>
+					{/if}
+					{#if imageUploadLoading}
+						<div
+							class="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-white"
+						>
+							<Icon icon="eos-icons:loading" class="size-8 animate-spin" />
+						</div>
+					{/if}
+				</button>
 				<input
 					type="file"
 					accept="image/*,.heic,.heif"
@@ -179,61 +181,61 @@
 					bind:this={fileInput}
 					onchange={handleFileChange}
 				/>
-			</button>
-			{#if imageUrl}
-				<div class="absolute -right-1 bottom-0 z-20 flex space-x-1">
-					<Button
-						size="icon-xs"
-						variant="default"
-						onclick={saveImage}
-						aria-label="Save new profile picture"
-					>
-						<Icon icon="mdi:check" class="size-4" />
-					</Button>
-				</div>
-			{/if}
-		</div>
-		<div class="ml-4">
-			<h1 class="text-2xl font-bold">@{$sessionStore.username}</h1>
-
-			{#if $sessionStore?.name}
-				<p class="text-sm text-muted-foreground">{$sessionStore.name}</p>
-			{/if}
+				{#if imageUrl}
+					<div class="absolute -right-1 bottom-0 z-20 flex space-x-1">
+						<Button
+							size="icon-sm"
+							variant="default"
+							onclick={saveImage}
+							aria-label="Save new profile picture"
+						>
+							<Icon icon="mdi:check" class="size-4" />
+						</Button>
+					</div>
+				{/if}
+			</div>
+			<div class="ml-4">
+				<h1 class="text-2xl font-bold text-foreground">@{$sessionStore.username}</h1>
+				{#if $sessionStore?.name}
+					<p class="text-sm text-muted-foreground">{$sessionStore.name}</p>
+				{/if}
+			</div>
 		</div>
 	</div>
-</div>
 
-{#if $sessionStore.bio}
-	<p class="mt-4 max-w-md text-sm">{$sessionStore.bio}</p>
-{/if}
-<div class="mt-4 flex space-x-6 text-sm text-muted-foreground">
-	{#if $sessionStore?.cityName || $sessionStore?.countryName}
-		<span class="flex items-center">
-			<Icon icon="solar:map-point-bold" class="mr-2 size-5" />
-			{#if $sessionStore.cityName && $sessionStore.countryName}
-				{$sessionStore.cityName}, {$sessionStore.countryName}
-			{:else if $sessionStore.cityName}
-				{$sessionStore.cityName}
-			{:else if $sessionStore.countryName}
-				{$sessionStore.countryName}
-			{/if}
-		</span>
+	{#if $sessionStore.bio}
+		<p class="mt-4 max-w-2xl px-6 text-sm text-muted-foreground">{$sessionStore.bio}</p>
 	{/if}
 
-	{#if $sessionStore?.birthday}
-		<span class="flex items-center">
-			<Icon icon="ph:egg-crack-duotone" class="mr-2 size-5" />
-			{formattedDate}</span
-		>
-	{/if}
-</div>
-<div class="mt-4 flex items-center pb-2">
-	<div class="mr-8">
+	<div class="mt-4 flex flex-wrap gap-4 px-6 text-sm text-muted-foreground">
+		{#if $sessionStore?.cityName || $sessionStore?.countryName}
+			<span class="flex items-center">
+				<Icon icon="solar:map-point-bold" class="mr-2 size-5 text-primary" />
+				{#if $sessionStore.cityName && $sessionStore.countryName}
+					{$sessionStore.cityName}, {$sessionStore.countryName}
+				{:else if $sessionStore.cityName}
+					{$sessionStore.cityName}
+				{:else if $sessionStore.countryName}
+					{$sessionStore.countryName}
+				{/if}
+			</span>
+		{/if}
+
+		{#if $sessionStore?.birthday}
+			<span class="flex items-center">
+				<Icon icon="ph:egg-crack-duotone" class="mr-2 size-5 text-primary" />
+				{formattedDate}
+			</span>
+		{/if}
+	</div>
+
+	<div class="mt-6 flex items-center space-x-6 border-t border-border px-6 py-3">
 		{#if followStatsLoading}
-			<Skeleton class="h-6 w-20" />
+			<Skeleton class="h-8 w-24" />
+			<Skeleton class="h-8 w-24" />
 		{:else}
 			<button
-				class="group cursor-pointer"
+				class="group flex items-center"
 				disabled={!followStats || followStats.followerCount === 0}
 				onclick={() => {
 					if (followStats && followStats.followerCount > 0) {
@@ -241,26 +243,24 @@
 					}
 				}}
 			>
-				<span class="font-semibold group-hover:text-primary">{followStats?.followerCount}</span>
-				<span class="text-sm text-muted-foreground group-hover:text-primary">Followers</span>
+				<span class="text-lg font-semibold text-foreground group-hover:text-primary"
+					>{followStats?.followerCount}</span
+				>
+				<span class="ml-2 text-sm text-muted-foreground group-hover:text-primary">Followers</span>
 			</button>
-		{/if}
-	</div>
-	<div class="mr-6">
-		{#if followStatsLoading}
-			<Skeleton class="h-6 w-20" />
-		{:else}
 			<button
+				class="group flex items-center"
 				disabled={!followStats || followStats.followingCount === 0}
-				class="group cursor-pointer"
 				onclick={() => {
 					if (followStats && followStats.followingCount > 0) {
 						isFollowingModalOpen = true;
 					}
 				}}
 			>
-				<span class="font-semibold group-hover:text-primary">{followStats?.followingCount}</span>
-				<span class="text-sm text-muted-foreground group-hover:text-primary">Following</span>
+				<span class="text-lg font-semibold text-foreground group-hover:text-primary"
+					>{followStats?.followingCount}</span
+				>
+				<span class="ml-2 text-sm text-muted-foreground group-hover:text-primary">Following</span>
 			</button>
 		{/if}
 	</div>
@@ -302,10 +302,10 @@
 
 <style lang="postcss">
 	.hide-scrollbar {
-		-ms-overflow-style: none; /* IE and Edge */
-		scrollbar-width: none; /* Firefox */
+		-ms-overflow-style: none;
+		scrollbar-width: none;
 	}
 	.hide-scrollbar::-webkit-scrollbar {
-		display: none; /* Chrome, Safari and Opera */
+		display: none;
 	}
 </style>

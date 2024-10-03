@@ -70,7 +70,11 @@
 					<div class="flex items-center">
 						<Avatar class="mr-3 size-12" user={res.post.user} />
 						<div>
-							<h3 class="font-semibold text-foreground">{res.post.user.username}</h3>
+							<a
+								href={`/profile/${res.post.user.id}`}
+								class="font-semibold text-foreground transition-colors duration-200 hover:text-primary"
+								>{res.post.user.username}</a
+							>
 							<p class="text-xs text-muted-foreground">{formatTimestamp(res.post.createdAt)}</p>
 						</div>
 					</div>

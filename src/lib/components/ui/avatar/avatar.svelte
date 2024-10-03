@@ -20,7 +20,7 @@
 		/>
 	{:else}
 		<div
-			class="flex aspect-square items-center justify-center rounded-full border-2 border-white bg-gradient-to-tr from-primary/10 via-cyan-300 to-emerald-600 text-primary-foreground shadow-md"
+			class="flex aspect-square items-center justify-center rounded-full border-[3px] border-white bg-gradient-to-tr from-primary/10 via-cyan-300 to-emerald-600 text-primary-foreground shadow-md"
 		>
 			<span class="font-medium text-primary">
 				{getInitial(user.username)}

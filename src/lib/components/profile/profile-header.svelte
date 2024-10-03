@@ -22,55 +22,74 @@
 	let isFollowingModalOpen = $state(false);
 </script>
 
-<div class="flex items-start justify-between pt-4">
-	<div class="flex items-center">
-		<div class="relative">
-			<div
-				aria-label="Upload profile picture"
-				class="relative size-fit rounded-full border-[3px] border-white shadow-xl"
-			>
-				<Avatar class="size-20" {user} />
+<div class="rounded-t-xl">
+	<div class="flex flex-col items-start px-6 pt-6 sm:flex-row sm:items-center sm:justify-between">
+		<div class="flex items-center">
+			<div class="relative">
+				<Avatar class="size-24 " {user} />
+			</div>
+			<div class="ml-4">
+				<h1 class="text-2xl font-bold text-foreground">@{user.username}</h1>
+				{#if user?.name}
+					<p class="text-sm text-muted-foreground">{user.name}</p>
+				{/if}
 			</div>
 		</div>
-		<div class="ml-4">
-			<h1 class="text-2xl font-bold">@{user.username}</h1>
-
-			{#if user?.name}
-				<p class="text-sm text-muted-foreground">{user.name}</p>
-			{/if}
+		<div class="mt-4 flex flex-wrap gap-3 py-1 sm:mt-0">
+			<Button
+				onclick={() => (isFollowing ? unfollowUser() : followUser())}
+				size="sm"
+				variant={isFollowing ? 'outline' : 'default'}
+				class="min-w-[120px] transition-all duration-300 ease-in-out hover:shadow-md"
+			>
+				<Icon
+					icon={isFollowing ? 'solar:user-block-bold' : 'solar:users-group-rounded-bold'}
+					class="mr-2 size-4"
+				/>
+				<span class="font-medium">
+					{isFollowing ? 'Unfollow' : 'Follow'}
+				</span>
+			</Button>
+			<Button
+				size="sm"
+				variant="outline"
+				class="min-w-[120px] transition-all duration-300 ease-in-out hover:bg-primary hover:text-primary-foreground hover:shadow-md"
+			>
+				<Icon icon="solar:chat-line-bold" class="mr-2 size-4" />
+				<span class="font-medium">Message</span>
+			</Button>
 		</div>
 	</div>
-</div>
 
-{#if user.bio}
-	<p class="mt-4 max-w-md text-sm">{user.bio}</p>
-{/if}
-<div class="mt-4 flex space-x-6 text-sm text-muted-foreground">
-	{#if user?.cityName || user?.countryName}
-		<span class="flex items-center">
-			<Icon icon="solar:map-point-bold" class="mr-2 size-5" />
-			{#if user.cityName && user.countryName}
-				{user.cityName}, {user.countryName}
-			{:else if user.cityName}
-				{user.cityName}
-			{:else if user.countryName}
-				{user.countryName}
-			{/if}
-		</span>
+	{#if user.bio}
+		<p class="mt-4 max-w-2xl px-6 text-sm text-muted-foreground">{user.bio}</p>
 	{/if}
 
-	{#if user?.birthday}
-		<span class="flex items-center">
-			<Icon icon="ph:egg-crack-duotone" class="mr-2 size-5" />
-			{formattedDate}</span
-		>
-	{/if}
-</div>
+	<div class="mt-4 flex flex-wrap gap-4 px-6 text-sm text-muted-foreground">
+		{#if user?.cityName || user?.countryName}
+			<span class="flex items-center">
+				<Icon icon="solar:map-point-bold" class="mr-2 size-5 text-primary" />
+				{#if user.cityName && user.countryName}
+					{user.cityName}, {user.countryName}
+				{:else if user.cityName}
+					{user.cityName}
+				{:else if user.countryName}
+					{user.countryName}
+				{/if}
+			</span>
+		{/if}
 
-<div class="mt-4 flex items-center pb-2">
-	<div class="mr-8">
+		{#if user?.birthday}
+			<span class="flex items-center">
+				<Icon icon="ph:egg-crack-duotone" class="mr-2 size-5 text-primary" />
+				{formattedDate}
+			</span>
+		{/if}
+	</div>
+
+	<div class="mt-6 flex items-center space-x-6 border-t border-border px-6 py-3">
 		<button
-			class="group cursor-pointer"
+			class="group flex items-center"
 			disabled={followers.length === 0}
 			onclick={() => {
 				if (followers.length > 0) {
@@ -78,38 +97,26 @@
 				}
 			}}
 		>
-			<span class="font-semibold group-hover:text-primary">{followers.length}</span>
-			<span class="text-sm text-muted-foreground group-hover:text-primary">Followers</span>
+			<span class="text-lg font-semibold text-foreground group-hover:text-primary"
+				>{followers.length}</span
+			>
+			<span class="ml-2 text-sm text-muted-foreground group-hover:text-primary">Followers</span>
 		</button>
-	</div>
-	<div class="mr-6">
 		<button
+			class="group flex items-center"
 			disabled={following.length === 0}
-			class="group cursor-pointer"
 			onclick={() => {
 				if (following.length > 0) {
 					isFollowingModalOpen = true;
 				}
 			}}
 		>
-			<span class="font-semibold group-hover:text-primary">{following.length}</span>
-			<span class="text-sm text-muted-foreground group-hover:text-primary">Following</span>
+			<span class="text-lg font-semibold text-foreground group-hover:text-primary"
+				>{following.length}</span
+			>
+			<span class="ml-2 text-sm text-muted-foreground group-hover:text-primary">Following</span>
 		</button>
 	</div>
-</div>
-
-<div class="mt-4 flex items-center gap-4 pb-2">
-	<Button onclick={() => (isFollowing ? unfollowUser() : followUser())} size="sm" variant="outline">
-		<Icon
-			icon={isFollowing ? 'solar:user-block-bold' : 'solar:users-group-rounded-bold'}
-			class="mr-2 size-4"
-		/>
-		{isFollowing ? 'Unfollow' : 'Follow'}
-	</Button>
-	<Button size="sm" variant="outline">
-		<Icon icon="solar:chat-line-bold" class="mr-2 size-4" />
-		Message</Button
-	>
 </div>
 
 {#if isFollowersModalOpen}
@@ -140,10 +147,10 @@
 
 <style lang="postcss">
 	.hide-scrollbar {
-		-ms-overflow-style: none; /* IE and Edge */
-		scrollbar-width: none; /* Firefox */
+		-ms-overflow-style: none;
+		scrollbar-width: none;
 	}
 	.hide-scrollbar::-webkit-scrollbar {
-		display: none; /* Chrome, Safari and Opera */
+		display: none;
 	}
 </style>
