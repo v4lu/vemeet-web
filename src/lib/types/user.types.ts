@@ -46,5 +46,20 @@ export type PotencialMatchResponse = {
 
 export type PotencialMatch = {
 	distance: number;
+	swiperUserProfile: SwipeProfile;
+};
+
+export type SwipeProfile = {
 	user: User;
+	id: number;
+	userId: number;
+	description?: string;
+	mainImageUrl?: string;
+	otherImages?: string[];
+};
+
+export type SwipeProfileUpdate = {
+	description?: string;
+	mainImageUrl?: string;
+	otherImages?: string[];
 };

@@ -1,1 +1,2 @@
-export { default as SwipperHome } from './swipper-home.svelte';
+export { default as SwiperHome } from './swiper-home.svelte';
+export { default as SwiperIsland } from './swiper-island.svelte';

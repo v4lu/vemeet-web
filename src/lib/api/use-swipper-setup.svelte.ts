@@ -9,6 +9,7 @@ import type {
 
 class UserProfile {
 	error = $state<ServerErrorResponse | null>(null);
+	isLoading = $state(false);
 
 	isConfigurated = $state(false);
 	isSwiperMode = $state(false);
@@ -18,13 +19,14 @@ class UserProfile {
 	isUserReady = $state(false);
 
 	isLoadingConfigurateSwiperPreferences = $state(false);
+	isLoadingUpdateSwiperPreferences = $state(false);
 }
 
 export function useSwiperModeSetup(
 	authToken: string,
 	sessionUser: User,
 	isConfigurated: boolean,
-	preferences: UserSwiperPreferences | null
+	preferences: UserSwiperPreferences
 ) {
 	const resp = new UserProfile();
 	const api = authAPI(authToken);
@@ -75,10 +77,33 @@ export function useSwiperModeSetup(
 			toast.error('Something went wrong please try again later');
 			console.error(e);
 		}
+		resp.isLoadingConfigurateSwiperPreferences = false;
+	}
+
+	async function updateSwiperPreferences(payload: SetupUserSwiperPreferences) {
+		resp.isLoadingUpdateSwiperPreferences = true;
+		try {
+			const response = await api
+				.patch<UserSwiperPreferences>('user-preferences', {
+					json: { ...payload }
+				})
+				.json();
+			resp.preferences = response;
+			resp.isConfigurated = true;
+			if (resp.isSwiperMode && resp.hasEverythingSetup) {
+				resp.isUserReady = true;
+			}
+			toast.success('Preferences configured successfully');
+		} catch (e) {
+			toast.error('Something went wrong please try again later');
+			console.error(e);
+		}
+		resp.isLoadingUpdateSwiperPreferences = false;
 	}
 
 	return {
 		resp,
-		configureSwiperPreferences
+		configureSwiperPreferences,
+		updateSwiperPreferences
 	};
 }

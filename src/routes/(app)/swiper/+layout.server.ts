@@ -3,9 +3,8 @@ import { ACCESS_TOKEN } from '$lib/constants';
 import type { UserSwiperPreferences } from '$lib/types/user.types';
 import { redirect } from '@sveltejs/kit';
 import type { HTTPError } from 'ky';
-import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ cookies }) => {
+export async function load({ cookies, url }) {
 	const accessToken = cookies.get(ACCESS_TOKEN);
 
 	if (!accessToken) {
@@ -19,7 +18,8 @@ export const load: PageServerLoad = async ({ cookies }) => {
 
 		return {
 			userSwiperPreferences: response,
-			userSwiperConfigurated: true
+			userSwiperConfigurated: true,
+			path: url.pathname
 		};
 	} catch (e) {
 		const error = e as HTTPError;
@@ -27,8 +27,9 @@ export const load: PageServerLoad = async ({ cookies }) => {
 		if (error.response.status === 404) {
 			return {
 				userSwiperPreferences: null,
-				userSwiperConfigurated: false
+				userSwiperConfigurated: false,
+				path: url.pathname
 			};
 		}
 	}
-};
+}

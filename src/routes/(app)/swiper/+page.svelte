@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useSwiperModeSetup } from '$lib/api/use-swipper-setup.svelte.js';
-	import { SwipperHome } from '$lib/components/swiper/index.js';
+	import { SwiperHome } from '$lib/components/swiper/index.js';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Modal } from '$lib/components/ui/modals';
@@ -132,5 +132,5 @@
 {/if}
 
 {#if resp.isUserReady}
-	<SwipperHome authToken={data.accessToken} />
+	<SwiperHome authToken={data.accessToken} />
 {/if}

@@ -13,6 +13,7 @@
 	const { resp, getPotentialMatches, swipe, loadMoreMatches } = useSwiperMode(authToken);
 
 	let currentIndex = $state(0);
+	let currentImageIndex = $state(0);
 	let draggedCard = $state<HTMLElement | null>(null);
 	let dragStartX = $state(0);
 	let dragStartY = $state(0);
@@ -69,12 +70,25 @@
 
 	async function handleSwipe(direction: 'left' | 'right') {
 		if (!currentMatch) return;
-		await swipe(direction, currentMatch.user.id);
+		await swipe(direction, currentMatch.swiperUserProfile.userId);
 		currentIndex++;
+		currentImageIndex = 0;
 		draggedDistance.set({ x: 0, y: 0 });
 		if (currentIndex >= resp.potentialMatches.length - 3) {
 			loadMoreMatches();
 		}
+	}
+
+	function nextImage() {
+		if (!currentMatch) return;
+		const totalImages = 1 + (currentMatch.swiperUserProfile.otherImages?.length || 0);
+		currentImageIndex = (currentImageIndex + 1) % totalImages;
+	}
+
+	function prevImage() {
+		if (!currentMatch) return;
+		const totalImages = 1 + (currentMatch.swiperUserProfile.otherImages?.length || 0);
+		currentImageIndex = (currentImageIndex - 1 + totalImages) % totalImages;
 	}
 
 	// Initial load of potential matches
@@ -83,31 +97,77 @@
 	});
 </script>
 
-<div class="relative mx-auto h-[600px] w-full max-w-md overflow-hidden">
-	{#each resp.potentialMatches.slice(currentIndex, currentIndex + 3) as match, index (match.user.id)}
+<div class="relative mx-auto mt-6 h-[600px] w-full max-w-md overflow-hidden">
+	{#each resp.potentialMatches.slice(currentIndex, currentIndex + 3) as match, index (match.swiperUserProfile.id)}
 		<div
 			animate:flip={{ duration: 300 }}
 			class="absolute left-0 top-0 h-full w-full"
 			style="z-index: {3 - index};"
 		>
 			<div
-				class="h-full w-full overflow-hidden rounded-lg bg-white shadow-lg"
+				tabindex="0"
+				role="button"
+				aria-roledescription="draggable card"
+				class="h-full w-full overflow-hidden rounded-lg bg-white"
 				style="transform: translate({index === 0 ? $draggedDistance.x : 0}px, {index === 0
 					? $draggedDistance.y
 					: 0}px) rotate({index === 0 ? $draggedDistance.x * 0.1 : 0}deg);"
-				on:mousedown={index === 0 ? handleDragStart : undefined}
-				on:touchstart={index === 0 ? handleDragStart : undefined}
+				onmousedown={index === 0 ? handleDragStart : undefined}
+				ontouchstart={index === 0 ? handleDragStart : undefined}
 			>
-				<img
-					src={match.user.profileImage?.url || '/default-avatar.png'}
-					alt={match.user.name || match.user.username}
-					class="h-3/4 w-full object-cover"
-				/>
+				{#if index === 0}
+					<div class="relative h-3/4 w-full">
+						{#if currentImageIndex === 0}
+							<img
+								src={match.swiperUserProfile.mainImageUrl || '/default-avatar.png'}
+								alt={match.swiperUserProfile.user.username}
+								class="h-full w-full object-cover"
+							/>
+						{:else if match.swiperUserProfile.otherImages && match.swiperUserProfile.otherImages[currentImageIndex - 1]}
+							<img
+								src={match.swiperUserProfile.otherImages[currentImageIndex - 1]}
+								alt={`${match.swiperUserProfile.user.username} - Image ${currentImageIndex}`}
+								class="h-full w-full object-cover"
+							/>
+						{:else}
+							<img
+								src="/default-avatar.png"
+								alt={match.swiperUserProfile.user.username}
+								class="h-full w-full object-cover"
+							/>
+						{/if}
+						<button
+							class="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white p-2 shadow-md"
+							onclick={prevImage}
+						>
+							<Icon icon="mdi:chevron-left" class="h-6 w-6" />
+						</button>
+						<button
+							class="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white p-2 shadow-md"
+							onclick={nextImage}
+						>
+							<Icon icon="mdi:chevron-right" class="h-6 w-6" />
+						</button>
+					</div>
+				{:else}
+					<img
+						src={match.swiperUserProfile.mainImageUrl || '/default-avatar.png'}
+						alt={match.swiperUserProfile.user.username}
+						class="h-3/4 w-full object-cover"
+					/>
+				{/if}
 				<div class="p-4">
 					<h3 class="text-xl font-semibold">
-						{match.user.name || match.user.username}, {calculateAge(match.user.birthday)}
+						{match.swiperUserProfile.user.username}, {calculateAge(
+							match.swiperUserProfile.user.birthday
+						)}
 					</h3>
-					<p class="text-gray-600">{match.user.bio || 'No bio available'}</p>
+					<p class="text-sm text-gray-500">
+						{match.swiperUserProfile.user.cityName
+							? `${match.swiperUserProfile.user.cityName}, `
+							: ''}
+						{match.swiperUserProfile.user.countryName || 'Location not specified'}
+					</p>
 					<p class="mt-2 text-sm text-gray-500">{match.distance.toFixed(1)} km away</p>
 				</div>
 			</div>
@@ -116,11 +176,21 @@
 </div>
 
 <div class="mt-4 flex justify-center space-x-4">
-	<Button onclick={() => handleSwipe('left')} class="rounded-full p-3">
-		<Icon icon="mdi:close" class="h-6 w-6 text-red-500" />
+	<Button
+		size="icon"
+		variant="outline"
+		onclick={() => handleSwipe('left')}
+		class="size-12 rounded-full p-0"
+	>
+		<Icon icon="mdi:close" class="size-8 text-red-500" />
 	</Button>
-	<Button onclick={() => handleSwipe('right')} class="rounded-full p-3">
-		<Icon icon="mdi:heart" class="h-6 w-6 text-green-500" />
+	<Button
+		variant="outline"
+		size="icon"
+		onclick={() => handleSwipe('right')}
+		class="size-12 rounded-full p-0"
+	>
+		<Icon icon="mdi:heart" class="size-8 text-green-500" />
 	</Button>
 </div>
 
