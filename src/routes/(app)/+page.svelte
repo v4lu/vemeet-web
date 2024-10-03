@@ -37,6 +37,7 @@
 		isSubmittingCreatePost={resp.isSumbmittingNewPost}
 		{createPost}
 	/>
+
 	<div class="posts-container">
 		{#each resp.posts as post (post.id)}
 			<PostCard {post} {postLikeToggle} {deletePost} />

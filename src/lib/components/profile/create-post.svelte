@@ -11,8 +11,8 @@
 		isSubmittingCreatePost: boolean;
 		authToken: string;
 	};
-	let { createPost, authToken, isSubmittingCreatePost }: CreatePostProps = $props();
 
+	let { createPost, authToken, isSubmittingCreatePost }: CreatePostProps = $props();
 	let postContent = $state('');
 	let imageUrls = $state<string[]>([]);
 	let fileInput: HTMLInputElement | null = $state(null);
@@ -66,34 +66,45 @@
 	}
 </script>
 
-<div class="my-6 rounded-lg border border-border bg-background p-4 shadow">
-	<input type="file" class="hidden" bind:this={fileInput} onchange={handleImageUpload} multiple />
-	<textarea
-		bind:value={postContent}
-		placeholder="What's on your mind?"
-		rows="4"
-		class={cn(inputVariants({ variant: 'empty' }), 'h-24 resize-none')}
-	></textarea>
+<div
+	class="my-6 rounded-lg border border-border bg-background p-6 shadow-lg transition-all duration-300 hover:shadow-xl"
+>
+	<div class="mb-4">
+		<textarea
+			bind:value={postContent}
+			placeholder="What's on your mind?"
+			rows="4"
+			class={cn(
+				inputVariants({ variant: 'empty' }),
+				'h-24 w-full resize-none rounded-lg p-3',
+				'bg-muted/50 text-foreground placeholder:text-muted-foreground/50',
+				'border-2 border-transparent',
+				'transition-all duration-300 ease-in-out',
+				'focus:border-primary focus:bg-background',
+				'focus:outline-none focus:ring-2 focus:ring-primary',
+				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+				'!shadow-none !outline-none',
+				'appearance-none'
+			)}
+		></textarea>
+	</div>
 
-	{#if imageUrls}
-		<div class="flex items-center justify-start gap-2">
+	{#if imageUrls.length > 0}
+		<div class="mb-4 flex flex-wrap gap-2">
 			{#each imageUrls as imageUrl, i}
-				<div class="relative mb-4">
+				<div class="relative h-24 w-24 overflow-hidden rounded-lg">
 					<img
 						src={imageUrl}
 						alt="Uploaded file"
-						class="size-20 rounded-lg object-cover object-center"
+						class="h-full w-full object-cover object-center transition-transform duration-300 hover:scale-110"
 					/>
 					<button
-						onclick={(): void => deleteImage(i)}
-						class="absolute right-0 top-0 rounded-full bg-black bg-opacity-50 p-1 text-white transition-colors hover:bg-opacity-75"
+						onclick={() => deleteImage(i)}
+						class="absolute right-1 top-1 rounded-full bg-black bg-opacity-50 p-1 text-white transition-colors hover:bg-opacity-75"
 						aria-label="Delete image"
 					>
-						<Icon icon="solar:close-circle-bold" class="size-5" />
+						<Icon icon="solar:close-circle-bold" class="size-4" />
 					</button>
-					{#if imageUploadLoading}
-						<Icon icon="eos-icons:loading" class="mr-2 size-4 animate-spin" />
-					{/if}
 				</div>
 			{/each}
 		</div>
@@ -106,18 +117,19 @@
 				onclick={handleInputFileClick}
 				variant="outline"
 				size="icon-sm"
+				class="rounded-full transition-all duration-300 hover:bg-primary hover:text-white"
 			>
 				<Icon icon="solar:gallery-add-bold" class="size-5" />
 			</Button>
 			<input
-				id="file-input"
+				bind:this={fileInput}
 				type="file"
 				multiple={true}
 				class="hidden"
 				onchange={handleImageUpload}
 			/>
 			{#if imageUploadLoading}
-				<Icon icon="eos-icons:loading" class="ml-2 size-5 animate-spin" />
+				<Icon icon="eos-icons:loading" class="ml-2 size-5 animate-spin text-primary" />
 			{/if}
 		</div>
 		<Button
@@ -125,7 +137,9 @@
 			size="sm"
 			isLoading={isSubmittingCreatePost}
 			disabled={isSubmittingCreatePost || (!postContent.trim() && imageUrls.length === 0)}
-			>Create :)</Button
+			class=" transition-all duration-300 "
 		>
+			Create Post
+		</Button>
 	</div>
 </div>

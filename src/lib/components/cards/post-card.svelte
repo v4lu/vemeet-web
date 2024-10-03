@@ -6,6 +6,8 @@
 	import Icon from '@iconify/svelte';
 	import { elasticOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
+	import { Avatar } from '../ui/avatar';
+	import { Button } from '../ui/button';
 	import { Dropdown } from '../ui/dropdown';
 	import { ConfirmModal, ImageModal, Modal } from '../ui/modals';
 	import UserHorizontalCard from './user-horizontal-card.svelte';
@@ -69,48 +71,49 @@
 </script>
 
 <div
-	class="mb-4 overflow-hidden rounded-lg border border-border bg-card shadow transition-shadow hover:shadow-md"
+	class="mb-6 overflow-hidden rounded-xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
 >
 	<div class="relative">
 		{#if post.user.id === $sessionStore.id}
-			<div class="absolute right-2 top-2 z-10">
+			<div class="absolute right-3 top-3 z-10">
 				<Dropdown
 					triggerIcon="solar:menu-dots-bold"
 					bind:isOpen={isSettingsOpen}
-					triggerClass="size-6 flex min-w-0 p-0 justify-center"
-					triggerIconClass="m-0 p-0"
-					class="right-0 top-8"
+					triggerClass="size-8 flex min-w-0 p-0 shadow-none justify-center bg-none rounded-full hover:bg-none transition-colors border-none"
+					triggerIconClass="m-0 p-0 size-5 hover:text-primary"
+					class="right-0 top-10"
 				>
-					<div class="flex w-full flex-col gap-1">
-						<button
-							class="flex w-full items-center rounded-sm px-2 py-1 text-sm text-destructive transition-colors hover:bg-destructive/10"
+					<div class="flex w-full flex-col gap-1 p-1">
+						<Button
+							variant="ghost"
+							class="flex w-full justify-start"
+							size="sm"
+							onclick={handleUpdate}
+						>
+							<Icon icon="solar:pen-bold" class="mr-2" />
+							Edit
+						</Button>
+						<Button
+							variant="ghost"
+							size="sm"
+							class="flex w-full justify-start text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive"
 							onclick={() => {
 								isDeleteModalConfirmOpen = true;
 								isSettingsOpen = false;
 							}}
 						>
-							<Icon icon="lucide:trash-2" class="mr-2" />
+							<Icon icon="solar:trash-bin-2-bold" class="mr-2" />
 							Delete
-						</button>
-						<button
-							class="flex w-full items-center rounded-sm px-2 py-1 text-sm transition-colors hover:bg-accent"
-							onclick={handleUpdate}
-						>
-							<Icon icon="lucide:pencil" class="mr-2" />
-							Edit
-						</button>
+						</Button>
 					</div>
 				</Dropdown>
 			</div>
 		{/if}
 
-		<div class="relative mb-4 flex items-center justify-between px-4 pt-4">
+		<div class="relative mb-4 flex items-center justify-between p-4">
 			<div class="flex items-center">
-				<img
-					src={post.user.profileImage ? post.user.profileImage.url : '/placeholder-user.webp'}
-					alt={post.user.username}
-					class="mr-3 h-10 w-10 rounded-full object-cover"
-				/>
+				<Avatar class="mr-3 size-12" user={post.user} />
+
 				<div>
 					<a
 						href={`/profile/${post.user.id}`}
@@ -131,13 +134,13 @@
 					aria-describedby="image-description"
 					onkeydown={(e) => e.key === 'Enter' && (isImageModalOpen = true)}
 					onclick={() => (isImageModalOpen = true)}
-					class="h-[15rem] w-full overflow-hidden"
+					class="h-[20rem] w-full overflow-hidden"
 				>
 					{#key currentImageIndex}
 						<img
 							src={post.images[currentImageIndex].url}
 							alt="Post"
-							class="h-[15rem] w-full object-cover object-center"
+							class="h-full w-full object-cover object-center transition-transform duration-300 hover:scale-105"
 							in:slide={{
 								duration: 300,
 								axis: 'x'
@@ -149,27 +152,27 @@
 				{#if post.images.length > 1}
 					{#if hasPrevImage}
 						<button
-							class="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
+							class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
 							onclick={prevImage}
 						>
-							<Icon class="size-4" icon="lucide:chevron-left" />
+							<Icon class="size-5" icon="lucide:chevron-left" />
 						</button>
 					{/if}
 					{#if hasNextImage}
 						<button
-							class="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
+							class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
 							onclick={nextImage}
 						>
-							<Icon class="size-4" icon="lucide:chevron-right" />
+							<Icon class="size-5" icon="lucide:chevron-right" />
 						</button>
 					{/if}
 				{/if}
 			</div>
 			{#if post.images.length > 1}
-				<div class="mb-2 flex justify-center space-x-1">
+				<div class="mb-3 flex justify-center space-x-1.5">
 					{#each post.images as _, index}
 						<button
-							class="h-2 w-2 rounded-full transition-colors"
+							class="h-2.5 w-2.5 rounded-full transition-colors"
 							class:bg-primary={index === currentImageIndex}
 							class:bg-gray-300={index !== currentImageIndex}
 							onclick={() => setImage(index)}
@@ -179,48 +182,40 @@
 			{/if}
 		{/if}
 		<p class="mb-4 px-4 text-foreground">{post.content}</p>
-		<div class="flex items-center justify-between border-t border-border p-4 pt-3">
-			<div class="flex items-center">
+		<div class="flex items-center justify-between border-t border-border p-4">
+			<div class="flex w-full items-center justify-between">
+				<div class="flex items-center space-x-4">
+					<button
+						class="group flex items-center text-sm transition-colors"
+						onclick={handleToggleLike}
+						disabled={submittingLike}
+					>
+						<Icon
+							icon={isLiked ? 'solar:heart-angle-bold' : 'solar:heart-angle-line-duotone'}
+							class={cn(
+								'size-6 transition-colors',
+								isLiked ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
+							)}
+						/>
+						<span class="ml-1.5 font-medium">{post.reactions.length}</span>
+					</button>
+					<a
+						href={`/post/${post.id}`}
+						class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
+					>
+						<Icon icon="solar:chat-round-line-bold" class="size-6" />
+						<span class="ml-1.5 font-medium">
+							{post.comments.length ?? '0'}
+						</span>
+					</a>
+				</div>
 				<button
-					class="group mr-2 flex items-center text-sm transition-colors"
-					onclick={handleToggleLike}
-					disabled={submittingLike}
+					class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
 				>
-					<Icon
-						icon={isLiked ? 'solar:heart-angle-bold' : 'solar:heart-angle-line-duotone'}
-						class={cn(
-							'size-5 transition-colors',
-							isLiked ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
-						)}
-					/>
-				</button>
-				<button
-					class="text-sm text-muted-foreground hover:text-primary"
-					onclick={() => {
-						if (post.reactions.length > 0) {
-							isLikeModalOpen = true;
-						}
-					}}
-				>
-					{post.reactions.length} Likes
+					<Icon icon="solar:square-share-line-broken" class="size-6" />
+					<span class="ml-1.5 font-medium">Share</span>
 				</button>
 			</div>
-			<a
-				href={`/post/${post.id}`}
-				class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
-			>
-				<Icon icon="solar:chat-round-line-bold" class="mr-1.5" />
-				<span>
-					{post.comments.length ?? '0'}
-					Comments</span
-				>
-			</a>
-			<button
-				class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
-			>
-				<Icon icon="solar:square-share-line-broken" class="mr-1.5" />
-				<span>Share</span>
-			</button>
 		</div>
 	</div>
 </div>
@@ -236,7 +231,7 @@
 {#if isDeleteModalConfirmOpen}
 	<ConfirmModal
 		title="Delete Content"
-		desc="Deleting content is a permanent action.Post will be removed and cannot be recovered."
+		desc="Deleting content is a permanent action. Post will be removed and cannot be recovered."
 		onClose={() => (isDeleteModalConfirmOpen = false)}
 		onConfirm={handleDeletePost}
 		submitting={isPostDeleteing}
@@ -259,11 +254,11 @@
 
 <style lang="postcss">
 	.hide-scrollbar {
-		-ms-overflow-style: none; /* IE and Edge */
-		scrollbar-width: none; /* Firefox */
+		-ms-overflow-style: none;
+		scrollbar-width: none;
 	}
 
 	.hide-scrollbar::-webkit-scrollbar {
-		display: none; /* Chrome, Safari and Opera */
+		display: none;
 	}
 </style>

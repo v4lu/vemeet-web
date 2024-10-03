@@ -41,7 +41,7 @@
 	{/each}
 </div>
 {#if resp.isLoading}
-	{#each Array(8) as _}
+	{#each Array(10) as _}
 		<SkeletonCard />
 	{/each}
 {:else if !resp.hasMore && resp.posts.length > 0}

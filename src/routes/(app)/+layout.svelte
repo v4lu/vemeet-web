@@ -10,7 +10,7 @@
 	class="flex min-h-dvh flex-1 flex-col bg-gradient-to-r from-primary/10 via-primary/5 to-transparent"
 >
 	<Header pathname={data.path} />
-	<main class="container mt-[56px] flex-1 px-4 pb-4">
+	<main class="container mb-10 mt-14 flex-1 px-4 pb-4">
 		{@render children()}
 	</main>
 	<Island pathname={data.path} />
