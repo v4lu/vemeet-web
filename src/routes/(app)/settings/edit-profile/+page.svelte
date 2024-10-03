@@ -41,49 +41,57 @@
 	}
 </script>
 
-<button class="mt-6 flex items-center text-sm font-medium" onclick={(): void => history.back()}>
-	<Icon icon="solar:arrow-left-linear" class="mr-2 size-6" />
-	Back
-</button>
+<div class="mx-auto my-12 max-w-2xl space-y-6">
+	<button
+		class="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+		onclick={() => history.back()}
+	>
+		<Icon icon="solar:arrow-left-linear" class="mr-2 size-5" />
+		Back
+	</button>
 
-<h1 class="mb-6 mt-6 text-2xl font-bold">Edit Profile</h1>
+	<form class="space-y-6 rounded-lg bg-card p-6 shadow-lg" onsubmit={handleSubmit}>
+		<h1 class="text-2xl font-bold text-foreground">Edit Profile</h1>
+		<Field name="Username">
+			<Input
+				id="username"
+				placeholder="Username"
+				bind:value={username}
+				required
+				class="bg-background"
+			/>
+		</Field>
 
-<form class="space-y-6" onsubmit={handleSubmit}>
-	<Field name="Username">
-		<Input id="username" placeholder="Username" bind:value={username} required />
-	</Field>
+		<div class="grid gap-6 sm:grid-cols-2">
+			<Field name="Name" optional>
+				<Input id="name" placeholder="Name" bind:value={name} class="bg-background" />
+			</Field>
+			<Field name="Gender" optional>
+				<Input id="gender" placeholder="Gender" bind:value={gender} class="bg-background" />
+			</Field>
+		</div>
 
-	<Field name="Name" optional>
-		<Input id="name" placeholder="Name" bind:value={name} />
-	</Field>
+		<div class="grid gap-6 sm:grid-cols-2">
+			<Field name="Country" optional>
+				<Input id="country" placeholder="Country" bind:value={countryName} class="bg-background" />
+			</Field>
+			<Field name="City" optional>
+				<Input id="city" placeholder="City" bind:value={cityName} class="bg-background" />
+			</Field>
+		</div>
 
-	<Field name="Gender" optional>
-		<Input id="gender" placeholder="Gender" bind:value={gender} />
-	</Field>
+		<Field name="Bio" optional>
+			<textarea
+				id="bio"
+				rows="4"
+				class={cn(inputVariants(), 'resize-none bg-background')}
+				placeholder="Tell us about yourself..."
+				bind:value={bio}
+			></textarea>
+		</Field>
 
-	<Field name="Country" optional>
-		<Input id="country" placeholder="Country" bind:value={countryName} />
-	</Field>
-
-	<Field name="City" optional>
-		<Input id="city" placeholder="City" bind:value={cityName} />
-	</Field>
-
-	<Field name="Bio" optional>
-		<textarea
-			id="bio"
-			rows="4"
-			class={cn(inputVariants(), 'resize-none')}
-			placeholder="Bio"
-			bind:value={bio}
-		></textarea>
-	</Field>
-
-	<Button type="submit" class="w-full" isLoading={isSubmitting} disabled={isSubmitting}>
-		{#if isSubmitting}
-			Saving...
-		{:else}
-			Save
-		{/if}
-	</Button>
-</form>
+		<Button type="submit" class="w-full" isLoading={isSubmitting} disabled={isSubmitting}>
+			{isSubmitting ? 'Saving...' : 'Save Changes'}
+		</Button>
+	</form>
+</div>

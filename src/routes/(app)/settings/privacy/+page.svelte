@@ -91,41 +91,61 @@
 			sessionStore.setUser(res);
 		} catch (error) {
 			console.error(error);
-			throw error; // Re-throw the error so it can be caught in confirmToggle
 		}
 	}
 </script>
 
-<button class="mt-6 flex items-center text-sm font-medium" onclick={(): void => history.back()}>
-	<Icon icon="solar:arrow-left-linear" class="mr-2 size-6" />
-	Back
-</button>
+<div class="mx-auto mt-12 max-w-2xl space-y-6">
+	<button
+		class="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+		onclick={() => history.back()}
+	>
+		<Icon icon="solar:arrow-left-linear" class="mr-2 size-5" />
+		Back
+	</button>
 
-<h1 class="mb-6 mt-6 text-2xl font-bold">Privacy Profile</h1>
+	<div class="rounded-lg bg-card p-6 shadow-lg">
+		<h1 class="text-2xl font-bold text-foreground">Privacy Settings</h1>
+		<div class="mt-2 space-y-6">
+			<div class="flex items-center justify-between">
+				<div>
+					<h3 class="text-lg font-semibold text-foreground">Private Profile</h3>
+					<p class="text-sm text-muted-foreground">Only approved followers can see your profile</p>
+				</div>
+				<Toggle checked={isPrivate} onchange={() => openModal('isPrivate')} />
+			</div>
 
-<div class="space-y-4">
-	<div class="flex items-center justify-between">
-		<span>Private Profile</span>
-		<Toggle checked={isPrivate} onChange={() => openModal('isPrivate')} />
-	</div>
-	<div class="flex items-center justify-between">
-		<span>Swiper Mode</span>
-		<Toggle checked={swiperMode} onChange={() => openModal('swiperMode')} />
-	</div>
-	<div class="flex items-center justify-between">
-		<span>Locked Inbox</span>
-		<Toggle checked={inboxLocked} onChange={() => openModal('inboxLocked')} />
+			<div class="flex items-center justify-between">
+				<div>
+					<h3 class="text-lg font-semibold text-foreground">Swiper Mode</h3>
+					<p class="text-sm text-muted-foreground">
+						Allow your profile to be discovered in Swiper mode
+					</p>
+				</div>
+				<Toggle checked={swiperMode} onchange={() => openModal('swiperMode')} />
+			</div>
+
+			<div class="flex items-center justify-between">
+				<div>
+					<h3 class="text-lg font-semibold text-foreground">Locked Inbox</h3>
+					<p class="text-sm text-muted-foreground">
+						Only receive messages from approved connections
+					</p>
+				</div>
+				<Toggle checked={inboxLocked} onchange={() => openModal('inboxLocked')} />
+			</div>
+		</div>
 	</div>
 </div>
 
 {#if showModal}
 	<Modal onClose={() => (showModal = false)}>
-		<h2 class="mb-4 text-lg font-semibold">Confirm Change</h2>
-		<p>{modalContent}</p>
+		<h2 class="mb-4 text-xl font-semibold text-foreground">Confirm Change</h2>
+		<p class="text-muted-foreground">{modalContent}</p>
 		<div class="mt-6 flex justify-end space-x-4">
-			<Button variant="outline" onclick={() => (showModal = false)} disabled={isSubmitting}
-				>Cancel</Button
-			>
+			<Button variant="outline" onclick={() => (showModal = false)} disabled={isSubmitting}>
+				Cancel
+			</Button>
 			<Button onclick={confirmToggle} disabled={isSubmitting}>
 				{isSubmitting ? 'Updating...' : 'Confirm'}
 			</Button>
