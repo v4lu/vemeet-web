@@ -63,3 +63,18 @@ export type SwipeProfileUpdate = {
 	mainImageUrl?: string;
 	otherImages?: string[];
 };
+
+export type UserUpdateFormData = {
+	username: string;
+	bio?: string;
+	name?: string;
+	gender?: string;
+	countryName?: string;
+	countryFlag?: string;
+	countryIsoCode?: string;
+	countryLat?: number;
+	countryLng?: number;
+	cityName?: string;
+	cityLat?: number;
+	cityLng?: number;
+};

@@ -2,17 +2,8 @@ import { authAPI } from '$lib/api';
 import { sessionStore } from '$lib/stores/session.store';
 import { toast } from '$lib/stores/toast.store';
 import type { ServerErrorResponse } from '$lib/types/ky.types';
-import type { User } from '$lib/types/user.types';
+import type { User, UserUpdateFormData } from '$lib/types/user.types';
 import { HTTPError } from 'ky';
-
-type UserUpdateFormData = {
-	username: string;
-	bio: string | null;
-	name: string | null;
-	gender: string | null;
-	countryName: string | null;
-	cityName: string | null;
-};
 
 class UpdateUser {
 	error = $state<ServerErrorResponse | null>(null);

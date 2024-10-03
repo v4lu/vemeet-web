@@ -5,27 +5,44 @@
 	import { Field } from '$lib/components/ui/field';
 	import { Input, inputVariants } from '$lib/components/ui/input';
 	import { sessionStore } from '$lib/stores/session.store';
+	import type { DBCity, DBCountry } from '$lib/types/geo.types.js';
+	import type { UserUpdateFormData } from '$lib/types/user.types.js';
 	import Icon from '@iconify/svelte';
 
 	let { data } = $props();
 
-	type UserUpdateFormData = {
-		username: string;
-		bio: string | null;
-		name: string | null;
-		gender: string | null;
-		countryName: string | null;
-		cityName: string | null;
-	};
-
 	let username = $state($sessionStore.username);
 	let name = $state($sessionStore.name ?? '');
 	let gender = $state($sessionStore.gender || '');
-	let countryName = $state($sessionStore.countryName || '');
-	let cityName = $state($sessionStore.cityName || '');
+	let country = $state<DBCountry>({
+		countryFlag: $sessionStore.countryFlag,
+		countryIsoCode: $sessionStore.countryIsoCode,
+		countryLat: $sessionStore.countryLat,
+		countryLng: $sessionStore.countryLng,
+		countryName: $sessionStore.countryName
+	});
+	let city = $state<DBCity>({
+		cityLat: $sessionStore.cityLat,
+		cityLng: $sessionStore.cityLng,
+		cityName: $sessionStore.cityName
+	});
 	let bio = $state($sessionStore.bio || '');
 
 	const { isSubmitting, updateUser } = useUpdateUser(data.accessToken);
+
+	function handleCountryChange(event: Event) {
+		const select = event.target as HTMLSelectElement;
+		const selectedCountry = data.countries.find((c) => c.code === select.value);
+		if (selectedCountry) {
+			country = {
+				countryFlag: selectedCountry.flag,
+				countryIsoCode: selectedCountry.code,
+				countryLat: selectedCountry.coordinates.lat,
+				countryLng: selectedCountry.coordinates.lng,
+				countryName: selectedCountry.name
+			};
+		}
+	}
 
 	async function handleSubmit(event: Event): Promise<void> {
 		event.preventDefault();
@@ -34,8 +51,14 @@
 			bio,
 			name,
 			gender,
-			countryName,
-			cityName
+			countryName: country.countryName,
+			countryFlag: country.countryFlag,
+			countryIsoCode: country.countryIsoCode,
+			countryLat: country.countryLat,
+			countryLng: country.countryLng,
+			cityName: city.cityName,
+			cityLat: city.cityLat,
+			cityLng: city.cityLng
 		};
 		await updateUser(payload);
 	}
@@ -52,6 +75,7 @@
 
 	<form class="space-y-6 rounded-lg bg-card p-6 shadow-lg" onsubmit={handleSubmit}>
 		<h1 class="text-2xl font-bold text-foreground">Edit Profile</h1>
+
 		<Field name="Username">
 			<Input
 				id="username"
@@ -73,10 +97,22 @@
 
 		<div class="grid gap-6 sm:grid-cols-2">
 			<Field name="Country" optional>
-				<Input id="country" placeholder="Country" bind:value={countryName} class="bg-background" />
+				<select
+					id="country"
+					class={cn(inputVariants(), 'bg-background')}
+					value={country.countryIsoCode}
+					onchange={handleCountryChange}
+				>
+					<option value="">Select a country</option>
+					{#each data.countries as country}
+						<option value={country.code}>
+							{country.name}
+						</option>
+					{/each}
+				</select>
 			</Field>
 			<Field name="City" optional>
-				<Input id="city" placeholder="City" bind:value={cityName} class="bg-background" />
+				<Input id="city" placeholder="City" bind:value={city.cityName} class="bg-background" />
 			</Field>
 		</div>
 
