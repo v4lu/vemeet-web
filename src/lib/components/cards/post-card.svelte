@@ -112,7 +112,9 @@
 
 		<div class="relative mb-4 flex items-center justify-between p-4">
 			<div class="flex items-center">
-				<Avatar class="mr-3 size-12" user={post.user} />
+				<a href={`/profile/${post.user.id}`}>
+					<Avatar class="mr-3 size-12" user={post.user} />
+				</a>
 
 				<div>
 					<a
@@ -212,7 +214,7 @@
 				<button
 					class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
 				>
-					<Icon icon="solar:square-share-line-broken" class="size-6" />
+					<Icon icon="ph:share-fat-fill" class="size-6" />
 					<span class="ml-1.5 font-medium">Share</span>
 				</button>
 			</div>
