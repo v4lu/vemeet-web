@@ -37,9 +37,7 @@
 	let { pathname }: Props = $props();
 </script>
 
-<div
-	class="fixed bottom-0 left-0 right-0 border-t bg-gradient-to-r from-transparent via-transparent to-primary/10 px-4 py-3 shadow-md"
->
+<div class="fixed bottom-0 left-0 right-0 border-t bg-background px-4 py-3 shadow-md">
 	<div class="container mx-auto flex items-center justify-between">
 		{#each navigation as { path, icon }}
 			<a
