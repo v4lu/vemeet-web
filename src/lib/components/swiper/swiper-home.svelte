@@ -2,7 +2,7 @@
 	import { useSwiperMode } from '$lib/api/use-swipper-mode.svelte';
 	import Icon from '@iconify/svelte';
 	import { flip } from 'svelte/animate';
-	import { fade } from 'svelte/transition';
+	import { fade, fly } from 'svelte/transition';
 	import { SwipeCard } from '../cards';
 	import SwipeCardSkeleton from '../skeleton/swipe-card-skeleton.svelte';
 	import { Button } from '../ui/button';
@@ -14,16 +14,31 @@
 	let { authToken }: Props = $props();
 	const { resp, swipe } = useSwiperMode(authToken);
 	let currentIndex = $state(0);
-
 	let hasMatches = $derived(resp.potentialMatches && resp.potentialMatches.length > 0);
 	let showNoMoreMatches = $derived(!resp.isLoading && !hasMatches && !resp.hasMore);
+	let lastSwipeDirection = $state<'left' | 'right' | null>(null);
 
 	async function handleSwipe(direction: 'left' | 'right') {
 		if (!resp.potentialMatches[currentIndex]) return;
+		lastSwipeDirection = direction;
 		const success = await swipe(direction, resp.potentialMatches[currentIndex].userId);
 		if (success) {
 			currentIndex = 0;
 		}
+	}
+
+	function cardTransition(
+		node: HTMLElement,
+		{ direction }: { direction: 'left' | 'right' | null }
+	) {
+		const dx = direction === 'left' ? -1000 : 1000;
+		return {
+			duration: 300,
+			css: (t: number, u: number) => `
+      transform: translate(${u * dx}px, 0) rotate(${u * (direction === 'left' ? -10 : 10)}deg);
+      opacity: ${t}
+    `
+		};
 	}
 </script>
 
@@ -34,6 +49,8 @@
 		{#each resp.potentialMatches as match, index (match.id)}
 			<div
 				animate:flip={{ duration: 300 }}
+				in:fly={{ y: 50, duration: 300, delay: index * 100 }}
+				out:cardTransition={{ direction: lastSwipeDirection }}
 				class="absolute left-0 top-0 h-full w-full"
 				style="z-index: {resp.potentialMatches.length - index};"
 			>
