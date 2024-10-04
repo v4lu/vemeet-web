@@ -1,13 +1,13 @@
 import { authAPI } from '$lib/api';
 import { toast } from '$lib/stores/toast.store';
 import type { ServerErrorResponse } from '$lib/types/ky.types';
-import type { PotencialMatch, PotencialMatchResponse } from '$lib/types/user.types';
+import type { PotentialSwipePagableResponse, SwipeProfile } from '$lib/types/user.types';
 
 class SwiperMode {
 	error = $state<ServerErrorResponse | null>(null);
 	isLoading = $state(false);
-	hasMore = $state(false);
-	potentialMatches = $state<PotencialMatch[]>([]);
+	hasMore = $state(true);
+	potentialMatches = $state<SwipeProfile[]>([]);
 	currentPage = $state(0);
 }
 
@@ -15,23 +15,19 @@ export function useSwiperMode(authToken: string) {
 	const resp = new SwiperMode();
 	const api = authAPI(authToken);
 
-	async function getPotentialMatches(page: number = resp.currentPage, size: number = 4) {
+	async function getPotentialMatches(size: number = 5) {
+		if (!resp.hasMore) return;
 		resp.isLoading = true;
 		try {
 			const response = await api
-				.get<PotencialMatchResponse>('swipes/potential-matches', {
-					searchParams: { page, size }
+				.get<PotentialSwipePagableResponse>('swipes/potential-matches', {
+					searchParams: { page: resp.currentPage, size }
 				})
 				.json();
 
-			if (page === 0) {
-				resp.potentialMatches = response.matches;
-			} else {
-				resp.potentialMatches = [...resp.potentialMatches, ...response.matches];
-			}
-
-			resp.hasMore = response.hasNextPage;
-			resp.currentPage = page;
+			resp.potentialMatches = [...resp.potentialMatches, ...response.content];
+			resp.hasMore = !response.last;
+			resp.currentPage = response.number;
 			resp.error = null;
 		} catch (e) {
 			resp.error = e as ServerErrorResponse;
@@ -45,23 +41,23 @@ export function useSwiperMode(authToken: string) {
 	async function swipe(direction: 'left' | 'right', userId: number) {
 		try {
 			await api.post('swipes', { json: { swipedUserId: userId, direction } });
-			toast.success('Swiped successfully');
+			resp.potentialMatches = resp.potentialMatches.filter((match) => match.userId !== userId);
+
+			if (resp.potentialMatches.length === 0) {
+				await getPotentialMatches();
+			}
+
+			return true;
 		} catch (e) {
-			toast.error('Failed to register swipe. Please try again.');
 			console.error(e);
+			return false;
 		}
 	}
 
-	function loadMoreMatches() {
-		if (resp.hasMore && !resp.isLoading) {
-			getPotentialMatches(resp.currentPage + 1);
-		}
-	}
+	getPotentialMatches();
 
 	return {
 		resp,
-		getPotentialMatches,
-		swipe,
-		loadMoreMatches
+		swipe
 	};
 }

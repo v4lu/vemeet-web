@@ -1,3 +1,5 @@
+import type { Pageable, Sort } from './page.types';
+
 export type ProfileImage = {
 	id: number;
 	url: string;
@@ -53,6 +55,7 @@ export type SwipeProfile = {
 	user: User;
 	id: number;
 	userId: number;
+	distance: number;
 	description?: string;
 	mainImageUrl?: string;
 	otherImages?: string[];
@@ -62,6 +65,20 @@ export type SwipeProfileUpdate = {
 	description?: string;
 	mainImageUrl?: string;
 	otherImages?: string[];
+};
+
+export type PotentialSwipePagableResponse = {
+	content: SwipeProfile[];
+	pageable: Pageable;
+	totalPages: number;
+	totalElements: number;
+	last: boolean;
+	first: boolean;
+	size: number;
+	number: number;
+	sort: Sort;
+	numberOfElements: number;
+	empty: boolean;
 };
 
 export type UserUpdateFormData = {

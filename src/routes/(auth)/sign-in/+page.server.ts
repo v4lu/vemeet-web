@@ -81,6 +81,6 @@ export const actions = {
 			}
 		}
 
-		return { form };
+		redirect(307, '/');
 	}
 };
