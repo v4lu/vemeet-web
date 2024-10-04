@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { ProfileMedia, ProfileSessionHeader, ProfileSessionPosts } from '$lib/components/profile';
+	import {
+		ProfileMedia,
+		ProfileSessionHeader,
+		ProfileSessionPosts,
+		ProfileSessionRecipes
+	} from '$lib/components/profile';
 	import { sessionStore } from '$lib/stores/session.store.js';
 	import { quintOut } from 'svelte/easing';
 	import { spring } from 'svelte/motion';
@@ -7,7 +12,7 @@
 
 	let { data } = $props();
 
-	let activeTab = $state('Posts');
+	let activeTab = $state('Recipes');
 	const tabs = $state(['Posts', 'Recipes', 'Media']);
 
 	function setActiveTab(tab: string) {
@@ -60,7 +65,7 @@
 			</div>
 		{:else if activeTab === 'Recipes'}
 			<div in:fade={{ duration: 300, easing: quintOut }}>
-				<h2>Recipes area</h2>
+				<ProfileSessionRecipes authToken={data.accessToken} />
 			</div>
 		{:else if activeTab === 'Media'}
 			<div in:fade={{ duration: 300, easing: quintOut }}>

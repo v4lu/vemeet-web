@@ -214,7 +214,7 @@
 				<button
 					class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
 				>
-					<Icon icon="ph:share-fat-fill" class="size-6" />
+					<Icon icon="solar:multiple-forward-right-bold" class="size-6" />
 					<span class="ml-1.5 font-medium">Share</span>
 				</button>
 			</div>

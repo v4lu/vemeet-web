@@ -35,14 +35,14 @@
 		return {
 			duration: 300,
 			css: (t: number, u: number) => `
-      transform: translate(${u * dx}px, 0) rotate(${u * (direction === 'left' ? -10 : 10)}deg);
-      opacity: ${t}
-    `
+		  transform: translate(${u * dx}px, 0) rotate(${u * (direction === 'left' ? -10 : 10)}deg);
+		  opacity: ${t}
+		`
 		};
 	}
 </script>
 
-<div class="mt-12">
+<div class="no-scrollbar relative mt-12 h-[650px] overflow-hidden px-4">
 	{#if resp.isLoading}
 		<SwipeCardSkeleton />
 	{:else if hasMatches}
@@ -51,7 +51,7 @@
 				animate:flip={{ duration: 300 }}
 				in:fly={{ y: 50, duration: 300, delay: index * 100 }}
 				out:cardTransition={{ direction: lastSwipeDirection }}
-				class="absolute left-0 top-0 h-full w-full"
+				class="no-scrollbar absolute left-0 top-0 h-full w-full"
 				style="z-index: {resp.potentialMatches.length - index};"
 			>
 				<SwipeCard {index} {match} onSwipe={handleSwipe} />
@@ -81,3 +81,13 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	.no-scrollbar {
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+	.no-scrollbar::-webkit-scrollbar {
+		display: none; /* Chrome, Safari and Opera */
+	}
+</style>
