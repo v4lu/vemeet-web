@@ -6,13 +6,13 @@ html,
 body,
 :root {
 	height: 100dvh;
-	font-family: 'Rubik Variable', sans-serif;
+	font-family: 'Exo 2 Variable', sans-serif;
 }
 
 @layer base {
 	:root {
 		--background: 216 38.46% 97.45%;
-		--foreground: 215.29 19.32% 34.51%;
+		--foreground: 215.29 19.32% 14.51%;
 		--muted: 212.73 35.48% 89.92%;
 		--muted-foreground: 211 11% 36%;
 		--popover: 211 70% 100%;
@@ -37,8 +37,5 @@ body,
 @layer base {
 	body {
 		@apply bg-background text-foreground;
-	}
-	#__nuxt {
-		@apply flex h-full flex-col;
 	}
 }

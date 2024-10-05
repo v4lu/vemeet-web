@@ -12,7 +12,7 @@
 
 	let { data } = $props();
 
-	let activeTab = $state('Recipes');
+	let activeTab = $state('Posts');
 	const tabs = $state(['Posts', 'Recipes', 'Media']);
 
 	function setActiveTab(tab: string) {

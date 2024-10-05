@@ -14,8 +14,9 @@
 		categories: RecipeCategory[];
 		createRecipe: (payload: CreateRecipe) => Promise<void>;
 		createCategory: (name: string) => Promise<void>;
+		close: () => void;
 	};
-	let { authToken, categories, createCategory, createRecipe }: Props = $props();
+	let { authToken, categories, createCategory, createRecipe, close }: Props = $props();
 
 	let title = $state('');
 	let content = $state<object>({ type: 'doc', content: [{ type: 'paragraph' }] });
@@ -43,7 +44,7 @@
 		ingredients = ingredients.filter((_, i) => i !== index);
 	}
 
-	function handleSubmit() {
+	async function handleSubmit() {
 		if (!selectedCategory) return;
 		const payload: CreateRecipe = {
 			title,
@@ -56,7 +57,18 @@
 			categoryId: selectedCategory?.id,
 			imageUrls
 		};
-		createRecipe(payload);
+		await createRecipe(payload);
+		title = '';
+		content = {};
+		ingredients = [];
+		preparationTime = 15;
+		cookingTime = 30;
+		servings = 8;
+		difficulty = 'Medium';
+		selectedCategory = null;
+		imageUrls = [];
+
+		close();
 	}
 
 	function handleContentUpdate(newContent: object) {
@@ -175,7 +187,7 @@
 		<div class="flex space-x-2">
 			{#if isAddingCategory}
 				<Input bind:value={newCategory} placeholder="New category name" />
-				<Button type="button" onclick={handleAddCategory} variant="outline">
+				<Button size="icon" type="button" onclick={handleAddCategory} variant="outline">
 					<Icon icon="mdi:check" class="size-5" />
 				</Button>
 			{:else}
@@ -191,7 +203,12 @@
 					{/each}
 				</select>
 			{/if}
-			<Button size="icon" type="button" onclick={toggleAddCategory} variant="outline">
+			<Button
+				size="icon"
+				type="button"
+				onclick={toggleAddCategory}
+				variant={isAddingCategory ? 'destructive' : 'outline'}
+			>
 				<Icon icon={isAddingCategory ? 'mdi:close' : 'mdi:plus'} class="size-5" />
 			</Button>
 		</div>
@@ -204,7 +221,7 @@
 	<Field name="Ingredients">
 		<div class="flex space-x-2">
 			<Input bind:value={newIngredient} placeholder="Enter ingredient" />
-			<Button type="button" onclick={addIngredient} variant="outline">
+			<Button type="button" onclick={addIngredient} size="icon" variant="outline">
 				<Icon icon="mdi:plus" class="size-5" />
 			</Button>
 		</div>
@@ -212,7 +229,12 @@
 			{#each ingredients as ingredient, index}
 				<li class="flex items-center space-x-2">
 					<span>{ingredient}</span>
-					<Button type="button" onclick={() => removeIngredient(index)} variant="outline" size="sm">
+					<Button
+						type="button"
+						size="icon-xs"
+						onclick={() => removeIngredient(index)}
+						variant="destructive"
+					>
 						<Icon icon="mdi:minus" class="size-4" />
 					</Button>
 				</li>

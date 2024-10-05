@@ -1,4 +1,5 @@
 import type { Pageable, Sort } from './page.types';
+import type { User } from './user.types';
 
 export type CreateRecipe = {
 	title: string;
@@ -25,6 +26,7 @@ type Image = {
 export type Recipe = {
 	id: number;
 	content: object;
+	title: string;
 	createdAt: string;
 	updatedAt: string;
 	category: RecipeCategory;
@@ -34,6 +36,7 @@ export type Recipe = {
 	difficulty: string;
 	ingredients: string[];
 	images: Image[];
+	user: User;
 	//comments
 };
 

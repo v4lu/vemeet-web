@@ -1,14 +1,19 @@
 <script lang="ts">
 	import { useProfileRecipe } from '$lib/api/use-profile-recipe.svelte';
+	import { sessionStore } from '$lib/stores/session.store';
 	import Icon from '@iconify/svelte';
 	import { CreateRecipe } from '.';
 	import { Button } from '../ui/button';
+	import ProfileSessionRecipeFeed from './profile-session-recipe-feed.svelte';
 
 	type Props = {
 		authToken: string;
 	};
 	let { authToken }: Props = $props();
-	const { createCategory, createRecipe, res } = useProfileRecipe(authToken);
+	const { createCategory, createRecipe, res, loadRecipes } = useProfileRecipe(
+		authToken,
+		$sessionStore.id
+	);
 
 	let isOpenCreateRecipe = $state(false);
 </script>
@@ -20,6 +25,19 @@
 	>
 
 	{#if isOpenCreateRecipe}
-		<CreateRecipe {authToken} {createCategory} {createRecipe} categories={res.categories} />
+		<CreateRecipe
+			close={() => (isOpenCreateRecipe = false)}
+			{authToken}
+			{createCategory}
+			{createRecipe}
+			categories={res.categories}
+		/>
 	{/if}
+	<ProfileSessionRecipeFeed
+		currentPage={res.currentPage}
+		hasMore={res.hasMore}
+		isLoading={res.isLoadingRecipes}
+		{loadRecipes}
+		recipes={res.recipes}
+	/>
 </div>

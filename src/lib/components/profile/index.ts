@@ -6,4 +6,5 @@ export { default as ProfileMedia } from './profile-media.svelte';
 export { default as ProfileSessionFeed } from './profile-session-feed.svelte';
 export { default as ProfileSessionHeader } from './profile-session-header.svelte';
 export { default as ProfileSessionPosts } from './profile-session-posts.svelte';
+export { default as ProfileSessionRecipeFeed } from './profile-session-recipe-feed.svelte';
 export { default as ProfileSessionRecipes } from './profile-session-recipes.svelte';
