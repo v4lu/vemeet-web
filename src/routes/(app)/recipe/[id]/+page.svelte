@@ -68,11 +68,11 @@
 	}
 </script>
 
-<div class="mb-8 mt-12">
+<div class="mb-12 mt-8">
 	{#if res.isLoading}
 		<p class="my-8 text-center text-gray-600">Loading...</p>
 	{:else if res.recipe}
-		<div class="mx-auto max-w-4xl rounded-lg bg-white p-8 shadow-lg">
+		<div class="mx-auto max-w-4xl rounded-lg bg-white px-5 py-8 shadow-lg">
 			<header class="mb-8">
 				<h1 class="mb-4 text-4xl font-bold">{res.recipe.title}</h1>
 				<div class="flex flex-col items-start justify-start gap-4">
@@ -171,7 +171,7 @@
 			{/if}
 
 			<div>
-				<h2 class="mb-4 text-2xl font-semibold">Ingredients</h2>
+				<h2 class="mb-4 text-3xl font-semibold">Ingredients</h2>
 				<ul class="space-y-2">
 					{#each res.recipe.ingredients as ingredient}
 						<li class="flex items-center">
@@ -184,7 +184,7 @@
 
 			<div class="mb-8 mt-6 grid grid-cols-1 gap-8 md:grid-cols-3">
 				<div class="md:col-span-2">
-					<h2 class="mb-4 text-2xl font-semibold">Instructions</h2>
+					<h2 class="mb-4 text-3xl font-semibold">Instructions</h2>
 					<div class="prose prose-sm max-w-none">
 						{#if editor}
 							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
