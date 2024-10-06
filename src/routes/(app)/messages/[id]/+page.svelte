@@ -2,6 +2,7 @@
 	import { useFetchChat } from '$lib/api/use-fetch-chat.svelte';
 	import { cn } from '$lib/cn.js';
 	import { ChatSkeleton, MessageSkeleton } from '$lib/components/skeleton/index.js';
+	import { Avatar } from '$lib/components/ui/avatar';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { inputVariants } from '$lib/components/ui/input/index.js';
 	import { formatTimestamp } from '$lib/date.js';
@@ -9,6 +10,7 @@
 	import type { Message } from '$lib/types/chat.types.js';
 	import Icon from '@iconify/svelte';
 	import { onDestroy } from 'svelte';
+	import { fade, slide } from 'svelte/transition';
 
 	let { data } = $props();
 	const { resp, fetchData, postMessage, cleanup } = useFetchChat(
@@ -140,26 +142,36 @@
 {#if resp.isLoading && resp.messages.length === 0}
 	<ChatSkeleton />
 {:else}
-	<div class="flex h-[calc(100vh-64px-65px)] flex-col pt-2.5">
-		<div class="flex items-center justify-between border-b p-4">
+	<div class="flex h-[calc(100vh-56px-65px)] flex-col bg-background">
+		<div class="flex items-center justify-between border-b p-4 shadow-sm">
 			<div class="flex items-center">
-				<img
-					src={otherUser?.profileImage?.url || '/placeholder-user.webp'}
-					alt={otherUser?.name || otherUser?.username}
-					class="mr-3 h-10 w-10 rounded-full object-cover"
-				/>
-				<h2 class="text-lg font-semibold">{otherUser?.name || otherUser?.username}</h2>
+				<a href={`/profile/${otherUser?.id}`}>
+					<Avatar user={otherUser!} class="mr-3 size-12" />
+				</a>
+				<div>
+					<a
+						href={`/profile/${otherUser?.id}`}
+						class="text-lg font-semibold transition-colors duration-200 hover:text-primary"
+					>
+						{otherUser?.username}
+					</a>
+					<p class="text-xs text-muted-foreground">
+						{true ? 'Online' : 'Offline'}
+					</p>
+				</div>
 			</div>
-			<Button variant="ghost" size="icon">
-				<Icon icon="solar:menu-dots-bold" width="24" height="24" />
+			<Button variant="ghost" size="icon" class="rounded-full">
+				<Icon icon="solar:menu-dots-bold" class="size-5" />
 			</Button>
 		</div>
 
 		<div bind:this={chatContainer} class="hide-scrollbar flex-1 overflow-y-auto p-4">
 			<div bind:this={target} class="h-1 w-full"></div>
+
 			{#if resp.isLoading}
 				<MessageSkeleton />
 			{/if}
+
 			{#if resp.messages && resp.messages.length > 0}
 				{#each resp.messages as message (message.id)}
 					<div
@@ -167,24 +179,26 @@
 							'mb-4 flex',
 							message.sender.id === $sessionStore.id ? 'justify-end' : 'justify-start'
 						)}
+						in:fade={{ duration: 150 }}
+						out:slide={{ duration: 150 }}
 					>
 						<div
 							class={cn(
-								'flex flex-col',
+								'flex max-w-[70%] flex-col',
 								message.sender.id === $sessionStore.id ? 'items-end' : 'items-start'
 							)}
 						>
 							<div
 								class={cn(
-									' rounded-lg p-3',
+									'rounded-2xl p-3 shadow-md transition-all duration-200 hover:shadow-lg',
 									message.sender.id === $sessionStore.id
 										? 'bg-primary text-primary-foreground'
-										: 'bg-accent'
+										: 'bg-accent text-accent-foreground'
 								)}
 							>
-								<p>{message.content}</p>
+								<p class="break-words">{message.content}</p>
 							</div>
-							<span class="mt-1 text-xs opacity-70">
+							<span class="mt-1 text-xs text-muted-foreground">
 								{formatTimestamp(message.createdAt)}
 							</span>
 						</div>
@@ -195,31 +209,35 @@
 			{/if}
 		</div>
 
-		<div class="border-t p-4">
+		<div class="border-t bg-card p-4 shadow-lg">
 			<form onsubmit={handleSubmit} class="flex items-center gap-4">
 				<textarea
 					onkeydown={handleKeyDown}
-					class={cn(inputVariants(), 'resize-none')}
+					class={cn(
+						inputVariants({ variant: 'empty' }),
+						'h-12 max-h-32 min-h-[3rem] flex-1 resize-none rounded-full px-4 py-2',
+						'bg-muted/50 text-foreground placeholder:text-muted-foreground/50',
+						'border-2 border-transparent transition-all duration-300 ease-in-out',
+						'focus:border-primary focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary'
+					)}
 					placeholder="Type a message..."
 					bind:value={newMessage}
 				></textarea>
-				<Button type="submit" size="icon">
-					<Icon icon="mynaui:send" class="size-4" />
+				<Button type="submit" size="icon" class="rounded-full">
+					<Icon icon="lucide:send" class="size-5" />
 				</Button>
 			</form>
 		</div>
 	</div>
 {/if}
 
-<style>
-	/* Hide scrollbar for Chrome, Safari and Opera */
-	.hide-scrollbar::-webkit-scrollbar {
-		display: none;
+<style lang="postcss">
+	.hide-scrollbar {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
 	}
 
-	/* Hide scrollbar for IE, Edge and Firefox */
-	.hide-scrollbar {
-		-ms-overflow-style: none; /* IE and Edge */
-		scrollbar-width: none; /* Firefox */
+	.hide-scrollbar::-webkit-scrollbar {
+		display: none;
 	}
 </style>
