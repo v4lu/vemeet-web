@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { usePostMessage } from '$lib/api/use-create-message.svelte.js';
 	import { useFetchChat } from '$lib/api/use-fetch-chat.svelte';
 	import { cn } from '$lib/cn.js';
 	import { ChatSkeleton, MessageSkeleton } from '$lib/components/skeleton/index.js';
@@ -9,9 +8,14 @@
 	import { sessionStore } from '$lib/stores/session.store.js';
 	import type { Message } from '$lib/types/chat.types.js';
 	import Icon from '@iconify/svelte';
+	import { onDestroy } from 'svelte';
 
 	let { data } = $props();
-	const { resp, fetchData } = useFetchChat(+data.id, data.accessToken);
+	const { resp, fetchData, postMessage, cleanup } = useFetchChat(
+		$sessionStore.id,
+		+data.id,
+		data.accessToken
+	);
 
 	let newMessage = $state('');
 
@@ -27,7 +31,6 @@
 				: resp.messages[0].sender
 			: null
 	);
-	const { postMessage } = usePostMessage(+data.id, data.accessToken);
 
 	function scrollToBottom(smooth = false) {
 		if (chatContainer) {
@@ -128,12 +131,16 @@
 			chatContainer?.removeEventListener('scroll', handleScroll);
 		};
 	});
+
+	onDestroy(() => {
+		cleanup();
+	});
 </script>
 
 {#if resp.isLoading && resp.messages.length === 0}
 	<ChatSkeleton />
 {:else}
-	<div class="flex h-[calc(100vh-78px)] flex-col">
+	<div class="flex h-[calc(100vh-64px-65px)] flex-col pt-2.5">
 		<div class="flex items-center justify-between border-b p-4">
 			<div class="flex items-center">
 				<img
