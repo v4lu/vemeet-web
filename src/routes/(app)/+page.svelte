@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { useFeed } from '$lib/api/use-feed.svelte.js';
-	import { PostCard } from '$lib/components/cards/index.js';
+	import { PostCard, RecipeCard } from '$lib/components/cards/index.js';
+
 	import { CreatePost } from '$lib/components/profile/index.js';
 	import { SkeletonCard } from '$lib/components/ui/skeleton/index.js';
 
 	let { data } = $props();
-	const { loadFeed, resp, createPost, postLikeToggle, deletePost } = useFeed(data.accessToken);
+	const { loadFeed, resp, createPost, deletePost, postLikeToggle } = useFeed(data.accessToken);
+
 	let target = $state<HTMLElement | null>(null);
 
 	$effect(() => {
@@ -20,7 +22,6 @@
 		};
 
 		window.addEventListener('scroll', handleScroll);
-
 		if (!resp.isInitialized) {
 			loadFeed(0);
 		}
@@ -34,26 +35,29 @@
 <main class="container my-8">
 	<CreatePost
 		authToken={data.accessToken}
-		isSubmittingCreatePost={resp.isSumbmittingNewPost}
+		isSubmittingCreatePost={resp.isSubmittingNewPost}
 		{createPost}
 	/>
-
-	<div class="posts-container">
-		{#each resp.posts as post (post.id)}
-			<PostCard {post} {postLikeToggle} {deletePost} />
+	<div class="feed-container">
+		{#each resp.items as item (`${item.type}-${item.item.id}`)}
+			{#if item.type === 'post'}
+				<PostCard post={item.item} {postLikeToggle} {deletePost} />
+			{:else if item.type === 'recipe'}
+				<RecipeCard recipe={item.item} />
+			{/if}
 		{/each}
 	</div>
 	{#if resp.isLoading}
 		{#each Array(8) as _}
 			<SkeletonCard />
 		{/each}
-	{:else if !resp.hasMore && resp.posts.length > 0}
+	{:else if !resp.hasMore && resp.items.length > 0}
 		<div class="pt-4">
-			<p class="text-center text-muted-foreground">No more posts to show</p>
+			<p class="text-center text-muted-foreground">No more items to show</p>
 		</div>
-	{:else if !resp.hasMore && resp.posts.length === 0}
+	{:else if !resp.hasMore && resp.items.length === 0}
 		<div class="pt-4">
-			<p class="text-center text-muted-foreground">No posts available</p>
+			<p class="text-center text-muted-foreground">No items available</p>
 		</div>
 	{/if}
 	<div bind:this={target} class="h-1"></div>
