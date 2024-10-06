@@ -42,7 +42,7 @@
 	}
 </script>
 
-<div class="no-scrollbar relative mt-12 h-[650px] overflow-hidden px-4">
+<div class="no-scrollbar container relative mt-12 h-[650px] w-[92%] overflow-hidden px-4">
 	{#if resp.isLoading}
 		<SwipeCardSkeleton />
 	{:else if hasMatches}

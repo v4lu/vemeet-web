@@ -36,7 +36,7 @@
 	});
 </script>
 
-<div class="mb-12">
+<div class="container mb-12">
 	<div class="mt-8">
 		<div class="overflow-hidden rounded-xl bg-card shadow-lg">
 			{#if resp.isLoading}

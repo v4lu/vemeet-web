@@ -37,7 +37,7 @@
 	});
 </script>
 
-<div class="mb-12 mt-8">
+<div class="container mb-12 mt-8">
 	<div class=" overflow-hidden rounded-xl bg-card shadow-lg">
 		<ProfileSessionHeader authToken={data.accessToken} />
 		<nav class="relative flex border-t border-border">

@@ -143,7 +143,7 @@
 	<ChatSkeleton />
 {:else}
 	<div class="flex h-[calc(100vh-56px-65px)] flex-col bg-background">
-		<div class="flex items-center justify-between border-b p-4 shadow-sm">
+		<div class="flex items-center justify-between border-b p-4 px-6 shadow-sm">
 			<div class="flex items-center">
 				<a href={`/profile/${otherUser?.id}`}>
 					<Avatar user={otherUser!} class="mr-3 size-12" />
@@ -165,7 +165,7 @@
 			</Button>
 		</div>
 
-		<div bind:this={chatContainer} class="hide-scrollbar flex-1 overflow-y-auto p-4">
+		<div bind:this={chatContainer} class="hide-scrollbar flex-1 overflow-y-auto p-4 px-6">
 			<div bind:this={target} class="h-1 w-full"></div>
 
 			{#if resp.isLoading}
@@ -209,7 +209,7 @@
 			{/if}
 		</div>
 
-		<div class="border-t bg-card p-4 shadow-lg">
+		<div class="border-t bg-card p-4 px-6 shadow-lg">
 			<form onsubmit={handleSubmit} class="flex items-center gap-4">
 				<textarea
 					onkeydown={handleKeyDown}

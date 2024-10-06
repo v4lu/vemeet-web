@@ -95,7 +95,7 @@
 	}
 </script>
 
-<div class="mx-auto mt-12 max-w-2xl space-y-6">
+<div class="container mx-auto mt-12 max-w-2xl space-y-6">
 	<button
 		class="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
 		onclick={() => history.back()}

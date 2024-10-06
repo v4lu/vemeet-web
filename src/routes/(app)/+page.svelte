@@ -31,7 +31,7 @@
 	});
 </script>
 
-<main class="my-8">
+<main class="container my-8">
 	<CreatePost
 		authToken={data.accessToken}
 		isSubmittingCreatePost={resp.isSumbmittingNewPost}

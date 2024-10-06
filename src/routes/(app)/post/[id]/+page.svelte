@@ -32,7 +32,7 @@
 		<PostSkeleton />
 	{:else if res.post}
 		<div
-			class="mb-6 overflow-hidden rounded-xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
+			class="mx-4 mb-6 overflow-hidden rounded-xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
 		>
 			<div class="relative">
 				{#if res.post.user.id === $sessionStore.id}

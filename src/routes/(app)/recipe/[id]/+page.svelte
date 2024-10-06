@@ -68,7 +68,7 @@
 	}
 </script>
 
-<div class="mb-12 mt-8">
+<div class="container mb-12 mt-8">
 	{#if res.isLoading}
 		<p class="my-8 text-center text-gray-600">Loading...</p>
 	{:else if res.recipe}

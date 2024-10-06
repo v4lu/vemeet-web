@@ -6,7 +6,7 @@
 	const { resp } = useSwiperMessages(data.accessToken);
 </script>
 
-<div class="mt-4">
+<div class="container mb-12 mt-8">
 	<div class="mb-6 flex items-center justify-between">
 		<h1 class="text-2xl font-bold">Matches</h1>
 	</div>
