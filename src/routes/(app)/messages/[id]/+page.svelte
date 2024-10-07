@@ -224,7 +224,7 @@
 					bind:value={newMessage}
 				></textarea>
 				<Button type="submit" size="icon" class="rounded-full">
-					<Icon icon="lucide:send" class="size-5" />
+					<Icon icon="solar:plain-bold" class="size-5" />
 				</Button>
 			</form>
 		</div>
