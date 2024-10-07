@@ -78,12 +78,48 @@ export function useFeed(authToken: string) {
 		}
 	}
 
+	async function recipeLikeToggle(recipeId: number, isLiked: boolean) {
+		try {
+			let updatedPost: Recipe;
+			if (isLiked) {
+				updatedPost = await api.delete<Recipe>(`recipes/${recipeId}/reactions`, {}).json();
+			} else {
+				updatedPost = await api
+					.post<Recipe>(`recipes/${recipeId}/reactions`, {
+						json: { reactionType: 'LIKE' }
+					})
+					.json();
+			}
+			resp.items = resp.items.map((item) =>
+				item.type === 'recipe' && item.item.id === recipeId
+					? { type: 'recipe', item: updatedPost }
+					: item
+			);
+
+			toast.success(`Recipe ${isLiked ? 'unliked' : 'liked'} successfully!`);
+		} catch (error) {
+			console.error('Error toggling like:', error);
+			toast.error('Failed to update like status. Please try again.');
+		}
+	}
+
 	async function deletePost(id: number) {
 		try {
 			await api.delete(`posts/${id}`).json();
 			resp.posts = resp.posts.filter((post) => post.id !== id);
 			resp.items = resp.items.filter((item) => !(item.type === 'post' && item.item.id === id));
 			toast.success('Post deleted successfully!');
+		} catch (error) {
+			console.error('Error deleting post:', error);
+			toast.error('Failed to delete post. Please try again.');
+		}
+	}
+
+	async function deleteRecipe(id: number) {
+		try {
+			await api.delete(`recipes/${id}`, {}).json();
+			resp.items = resp.items.filter((item) => !(item.type === 'recipe' && item.item.id === id));
+			toast.success('Recipe deleted successfully!');
 		} catch (error) {
 			console.error('Error deleting post:', error);
 			toast.error('Failed to delete post. Please try again.');
@@ -116,7 +152,9 @@ export function useFeed(authToken: string) {
 		loadFeed,
 		resp,
 		deletePost,
+		deleteRecipe,
 		createPost,
-		postLikeToggle
+		postLikeToggle,
+		recipeLikeToggle
 	};
 }

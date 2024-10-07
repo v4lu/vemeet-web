@@ -6,7 +6,8 @@
 	import { SkeletonCard } from '$lib/components/ui/skeleton/index.js';
 
 	let { data } = $props();
-	const { loadFeed, resp, createPost, deletePost, postLikeToggle } = useFeed(data.accessToken);
+	const { loadFeed, resp, createPost, deletePost, postLikeToggle, deleteRecipe, recipeLikeToggle } =
+		useFeed(data.accessToken);
 
 	let target = $state<HTMLElement | null>(null);
 
@@ -43,7 +44,7 @@
 			{#if item.type === 'post'}
 				<PostCard post={item.item} {postLikeToggle} {deletePost} />
 			{:else if item.type === 'recipe'}
-				<RecipeCard recipe={item.item} />
+				<RecipeCard recipe={item.item} {recipeLikeToggle} {deleteRecipe} />
 			{/if}
 		{/each}
 	</div>

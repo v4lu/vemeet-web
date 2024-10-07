@@ -9,9 +9,19 @@
 		isLoading: boolean;
 		hasMore: boolean;
 		loadRecipes: (page: number) => Promise<void>;
+		recipeLikeToggle: (recipeId: number, isLiked: boolean) => Promise<void>;
+		deleteRecipe: (recipeId: number) => Promise<void>;
 	};
 
-	let { currentPage, hasMore, isLoading, loadRecipes, recipes }: Props = $props();
+	let {
+		currentPage,
+		hasMore,
+		isLoading,
+		loadRecipes,
+		recipes,
+		recipeLikeToggle,
+		deleteRecipe
+	}: Props = $props();
 
 	let target = $state<HTMLElement | null>(null);
 
@@ -38,7 +48,7 @@
 
 <div class="posts-container">
 	{#each recipes as recipe (recipe.id)}
-		<RecipeCard {recipe} />
+		<RecipeCard {recipe} {recipeLikeToggle} {deleteRecipe} />
 	{/each}
 </div>
 {#if isLoading}

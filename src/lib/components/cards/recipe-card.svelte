@@ -7,18 +7,29 @@
 	import { elasticOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 	import { Avatar } from '../ui/avatar';
-	import { Button } from '../ui/button';
+	import { Button, buttonVariants } from '../ui/button';
 	import { Dropdown } from '../ui/dropdown';
-	import { ImageModal } from '../ui/modals';
+	import { ConfirmModal, ImageModal } from '../ui/modals';
 
 	type Props = {
 		recipe: Recipe;
+		recipeLikeToggle: (recipeId: number, isLiked: boolean) => Promise<void>;
+		deleteRecipe: (recipeId: number) => Promise<void>;
 	};
 
-	let { recipe }: Props = $props();
+	let { recipe, recipeLikeToggle, deleteRecipe }: Props = $props();
 	let currentImageIndex = $state(0);
 	let isSettingsOpen = $state(false);
 	let isImageModalOpen = $state(false);
+	let submittingLike = $state(false);
+	let isDeleteModalConfirmOpen = $state(false);
+	let isSubmittingDelete = $state(false);
+
+	let isLiked = $state(
+		recipe.reactions.some(
+			(reaction) => reaction.user.id === $sessionStore.id && reaction.reactionType === 'LIKE'
+		)
+	);
 
 	let hasNextImage = $derived(currentImageIndex < recipe.images.length - 1);
 	let hasPrevImage = $derived(currentImageIndex > 0);
@@ -38,10 +49,26 @@
 	function setImage(index: number) {
 		currentImageIndex = index;
 	}
+
+	async function handleToggleLike() {
+		submittingLike = true;
+		await recipeLikeToggle(recipe.id, isLiked);
+		submittingLike = false;
+		isLiked = !isLiked;
+	}
+
+	async function handleDeletePost() {
+		if (deleteRecipe) {
+			isSubmittingDelete = true;
+			await deleteRecipe(recipe.id);
+			isDeleteModalConfirmOpen = false;
+			isSubmittingDelete = false;
+		}
+	}
 </script>
 
 <div
-	class="mb-6 overflow-hidden rounded-xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
+	class="relative mb-6 overflow-hidden rounded-xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
 >
 	{#if recipe.user.id === $sessionStore.id}
 		<div class="absolute right-3 top-3 z-10">
@@ -53,15 +80,27 @@
 				class="right-0 top-10"
 			>
 				<div class="flex w-full flex-col gap-1 p-1">
-					<Button variant="ghost" class="flex w-full justify-start" size="sm">
+					<a
+						href={`/recipe/${recipe.id}`}
+						class={cn(
+							buttonVariants({
+								variant: 'ghost',
+								size: 'sm'
+							}),
+							'flex w-full justify-start'
+						)}
+					>
 						<Icon icon="solar:pen-bold" class="mr-2" />
 						Edit
-					</Button>
+					</a>
 					<Button
 						variant="ghost"
 						size="sm"
 						class="flex w-full justify-start text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive"
-						onclick={() => {}}
+						onclick={() => {
+							isDeleteModalConfirmOpen = true;
+							isSettingsOpen = false;
+						}}
 					>
 						<Icon icon="solar:trash-bin-2-bold" class="mr-2" />
 						Delete
@@ -152,15 +191,19 @@
 	<div class="mt-2 flex items-center justify-between border-t border-border p-4">
 		<div class="flex w-full items-center justify-between">
 			<div class="flex items-center space-x-4">
-				<button class="group flex items-center text-sm transition-colors">
+				<button
+					class="group flex items-center text-sm transition-colors"
+					onclick={handleToggleLike}
+					disabled={submittingLike}
+				>
 					<Icon
-						icon={true ? 'solar:heart-angle-bold' : 'solar:heart-angle-line-duotone'}
+						icon={isLiked ? 'solar:heart-angle-bold' : 'solar:heart-angle-line-duotone'}
 						class={cn(
 							'size-6 transition-colors',
-							true ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
+							isLiked ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
 						)}
 					/>
-					0
+					<span class="ml-1.5 font-medium">{recipe.reactions.length}</span>
 				</button>
 				<a
 					href={`/post/${recipe.id}`}
@@ -185,5 +228,26 @@
 		src={recipe.images[currentImageIndex].imageUrl}
 		alt="Full size post image"
 		onClose={() => (isImageModalOpen = false)}
+	/>
+{/if}
+
+{#if isDeleteModalConfirmOpen}
+	<ConfirmModal
+		title="Delete Content"
+		desc="Deleting content is a permanent action. Recipe will be removed and cannot be recovered."
+		onClose={() => (isDeleteModalConfirmOpen = false)}
+		onConfirm={handleDeletePost}
+		submitting={isSubmittingDelete}
+		confirmText="Delete Recipe"
+	/>
+{/if}
+{#if isDeleteModalConfirmOpen}
+	<ConfirmModal
+		title="Delete Content"
+		desc="Deleting content is a permanent action. Recipe will be removed and cannot be recovered."
+		onClose={() => (isDeleteModalConfirmOpen = false)}
+		onConfirm={handleDeletePost}
+		submitting={isSubmittingDelete}
+		confirmText="Delete REcipe"
 	/>
 {/if}

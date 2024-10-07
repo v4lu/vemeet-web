@@ -58,7 +58,7 @@
 	}
 
 	async function handleToggleLike() {
-		postLikeToggle(post.id, isLiked);
+		await postLikeToggle(post.id, isLiked);
 		isLiked = !isLiked;
 	}
 

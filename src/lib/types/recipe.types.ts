@@ -1,4 +1,5 @@
 import type { Pageable, Sort } from './page.types';
+import type { Reaction } from './reaction.types';
 import type { User } from './user.types';
 
 export type CreateRecipe = {
@@ -35,6 +36,7 @@ export type Recipe = {
 	servings: number;
 	difficulty: string;
 	ingredients: string[];
+	reactions: Reaction[];
 	images: Image[];
 	user: User;
 	//comments

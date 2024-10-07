@@ -6,6 +6,7 @@ export type ProfileImage = {
 	createdAt: string;
 };
 
+// TOOD add missing fields for Reaction
 export type Reaction = {
 	id: number;
 	user: User;

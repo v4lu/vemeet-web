@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useProfileRecipe } from '$lib/api/use-profile-recipe.svelte';
+	import { useRecipes } from '$lib/api/use-recipes.svelte';
 	import { sessionStore } from '$lib/stores/session.store';
 	import Icon from '@iconify/svelte';
 	import { CreateRecipe } from '.';
@@ -10,10 +10,8 @@
 		authToken: string;
 	};
 	let { authToken }: Props = $props();
-	const { createCategory, createRecipe, res, loadRecipes } = useProfileRecipe(
-		authToken,
-		$sessionStore.id
-	);
+	const { createCategory, createRecipe, res, loadRecipes, recipeLikeToggle, deleteRecipe } =
+		useRecipes(authToken, $sessionStore.id);
 
 	let isOpenCreateRecipe = $state(false);
 </script>
@@ -39,5 +37,7 @@
 		isLoading={res.isLoadingRecipes}
 		{loadRecipes}
 		recipes={res.recipes}
+		{recipeLikeToggle}
+		{deleteRecipe}
 	/>
 </div>

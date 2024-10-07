@@ -21,9 +21,11 @@ class Recipe {
 	isSubmittingCategory = $state(false);
 	isLoadingCategories = $state(false);
 	isLoadingRecipes = $state(false);
+	isSubmittingLike = $state(false);
+	isEditSubmitting = $state(false);
 }
 
-export function useProfileRecipe(authToken: string, userId: number) {
+export function useRecipes(authToken: string, userId: number) {
 	const res = new Recipe();
 	const api = authAPI(authToken);
 
@@ -111,7 +113,46 @@ export function useProfileRecipe(authToken: string, userId: number) {
 		res.isLoadingRecipes = false;
 	}
 
+	async function recipeLikeToggle(recipeId: number, isLiked: boolean) {
+		try {
+			let updatedPost: RecipeType;
+			if (isLiked) {
+				updatedPost = await api.delete<RecipeType>(`recipes/${recipeId}/reactions`, {}).json();
+			} else {
+				updatedPost = await api
+					.post<RecipeType>(`recipes/${recipeId}/reactions`, {
+						json: { reactionType: 'LIKE' }
+					})
+					.json();
+			}
+			res.recipes = res.recipes.map((r) => (r.id === recipeId ? updatedPost : r));
+
+			toast.success(`Recipe ${isLiked ? 'unliked' : 'liked'} successfully!`);
+		} catch (error) {
+			console.error('Error toggling like:', error);
+			toast.error('Failed to update like status. Please try again.');
+		}
+	}
+
+	async function deleteRecipe(id: number) {
+		try {
+			await api.delete(`recipes/${id}`, {}).json();
+			res.recipes = res.recipes.filter((r) => r.id !== id);
+			toast.success('Recipe deleted successfully!');
+		} catch (error) {
+			console.error('Error deleting post:', error);
+			toast.error('Failed to delete post. Please try again.');
+		}
+	}
+
 	getCategories();
 
-	return { createCategory, createRecipe, res, loadRecipes };
+	return {
+		createCategory,
+		createRecipe,
+		res,
+		loadRecipes,
+		recipeLikeToggle,
+		deleteRecipe
+	};
 }
