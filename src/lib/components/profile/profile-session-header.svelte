@@ -204,13 +204,14 @@
 	</div>
 
 	{#if $sessionStore.bio}
-		<p class="mt-4 max-w-2xl px-6 text-sm text-muted-foreground">{$sessionStore.bio}</p>
+		<p class="mt-4 max-w-2xl px-6 text-muted-foreground">{$sessionStore.bio}</p>
 	{/if}
 
 	<div class="mt-4 flex flex-wrap gap-4 px-6 text-sm text-muted-foreground">
 		{#if $sessionStore?.cityName || $sessionStore?.countryName}
-			<span class="flex items-center">
-				<Icon icon="solar:map-point-bold" class="mr-2 size-5 text-primary" />
+			<span class="flex items-center font-semibold">
+				<Icon icon="solar:map-point-bold" class="mr-2 size-6 text-primary" />
+				<span class="mr-1 text-xl">{$sessionStore.countryFlag}</span>
 				{#if $sessionStore.cityName && $sessionStore.countryName}
 					{$sessionStore.cityName}, {$sessionStore.countryName}
 				{:else if $sessionStore.cityName}
@@ -222,8 +223,8 @@
 		{/if}
 
 		{#if $sessionStore?.birthday}
-			<span class="flex items-center">
-				<Icon icon="ph:egg-crack-duotone" class="mr-2 size-5 text-primary" />
+			<span class="flex items-center font-semibold">
+				<Icon icon="ph:egg-crack-duotone" class="mr-2 size-6 text-primary" />
 				{formattedDate}
 			</span>
 		{/if}

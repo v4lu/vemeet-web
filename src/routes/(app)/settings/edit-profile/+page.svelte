@@ -1,11 +1,12 @@
 <script lang="ts">
+	import { useLocations } from '$lib/api/use-locations.svelte.js';
 	import { useUpdateUser } from '$lib/api/use-update-user.svelte.js';
 	import { cn } from '$lib/cn';
 	import { Button } from '$lib/components/ui/button';
 	import { Field } from '$lib/components/ui/field';
 	import { Input, inputVariants } from '$lib/components/ui/input';
 	import { sessionStore } from '$lib/stores/session.store';
-	import type { DBCity, DBCountry } from '$lib/types/geo.types.js';
+	import type { City, Country } from '$lib/types/geo.types.js';
 	import type { UserUpdateFormData } from '$lib/types/user.types.js';
 	import Icon from '@iconify/svelte';
 
@@ -14,34 +15,81 @@
 	let username = $state($sessionStore.username);
 	let name = $state($sessionStore.name ?? '');
 	let gender = $state($sessionStore.gender || '');
-	let country = $state<DBCountry>({
+	let country = $state<Country>({
 		countryFlag: $sessionStore.countryFlag,
 		countryIsoCode: $sessionStore.countryIsoCode,
 		countryLat: $sessionStore.countryLat,
 		countryLng: $sessionStore.countryLng,
 		countryName: $sessionStore.countryName
 	});
-	let city = $state<DBCity>({
+	let city = $state<City>({
 		cityLat: $sessionStore.cityLat,
 		cityLng: $sessionStore.cityLng,
-		cityName: $sessionStore.cityName
+		cityName: $sessionStore.cityName,
+		countryIsoCode: $sessionStore.countryIsoCode
 	});
 	let bio = $state($sessionStore.bio || '');
 
+	let citySearch = $state($sessionStore.cityName || '');
+
 	const { isSubmitting, updateUser } = useUpdateUser(data.accessToken);
+	const { fetchCities, resp: locationsResp } = useLocations(data.accessToken);
+
+	let showCityDropdown = $state(false);
+
+	function debounce<F extends (...args: any[]) => any>(
+		func: F,
+		delay: number
+	): (...args: Parameters<F>) => void {
+		let timeoutId: ReturnType<typeof setTimeout>;
+		return (...args: Parameters<F>) => {
+			clearTimeout(timeoutId);
+			timeoutId = setTimeout(() => func(...args), delay);
+		};
+	}
+
+	const debouncedFetchCities = debounce((countryIsoCode: string, search: string) => {
+		fetchCities(countryIsoCode, search);
+		showCityDropdown = true;
+	}, 300);
 
 	function handleCountryChange(event: Event) {
 		const select = event.target as HTMLSelectElement;
-		const selectedCountry = data.countries.find((c) => c.code === select.value);
+		const selectedCountry = data.countries.find((c) => c.countryIsoCode === select.value);
 		if (selectedCountry) {
 			country = {
-				countryFlag: selectedCountry.flag,
-				countryIsoCode: selectedCountry.code,
-				countryLat: selectedCountry.coordinates.lat,
-				countryLng: selectedCountry.coordinates.lng,
-				countryName: selectedCountry.name
+				countryFlag: selectedCountry.countryFlag,
+				countryIsoCode: selectedCountry.countryIsoCode,
+				countryLat: selectedCountry.countryLat,
+				countryLng: selectedCountry.countryLng,
+				countryName: selectedCountry.countryName
 			};
+			city = {} as City;
+			citySearch = '';
+			showCityDropdown = false;
+			locationsResp.cities = [];
+			fetchCities(selectedCountry.countryIsoCode!);
+		} else {
+			country = {} as Country;
+			city = {} as City;
+			citySearch = '';
+			showCityDropdown = false;
+			locationsResp.cities = [];
 		}
+	}
+
+	function handleCitySearch(event: Event) {
+		const input = event.target as HTMLInputElement;
+		citySearch = input.value;
+		if (country.countryIsoCode) {
+			debouncedFetchCities(country.countryIsoCode, citySearch);
+		}
+	}
+
+	function selectCity(selectedCity: City) {
+		city = selectedCity;
+		citySearch = selectedCity.cityName || '';
+		showCityDropdown = false;
 	}
 
 	async function handleSubmit(event: Event): Promise<void> {
@@ -51,17 +99,35 @@
 			bio,
 			name,
 			gender,
-			countryName: country.countryName,
-			countryFlag: country.countryFlag,
-			countryIsoCode: country.countryIsoCode,
-			countryLat: country.countryLat,
-			countryLng: country.countryLng,
-			cityName: city.cityName,
-			cityLat: city.cityLat,
-			cityLng: city.cityLng
+			countryName: country.countryName || '',
+			countryFlag: country.countryFlag || '',
+			countryIsoCode: country.countryIsoCode || '',
+			countryLat: country.countryLat || null,
+			countryLng: country.countryLng || null,
+			cityName: city.cityName || '',
+			cityLat: city.cityLat || null,
+			cityLng: city.cityLng || null
 		};
+
 		await updateUser(payload);
 	}
+
+	$effect(() => {
+		country = {
+			countryFlag: $sessionStore.countryFlag,
+			countryIsoCode: $sessionStore.countryIsoCode,
+			countryLat: $sessionStore.countryLat,
+			countryLng: $sessionStore.countryLng,
+			countryName: $sessionStore.countryName
+		};
+		city = {
+			cityLat: $sessionStore.cityLat,
+			cityLng: $sessionStore.cityLng,
+			cityName: $sessionStore.cityName,
+			countryIsoCode: $sessionStore.countryIsoCode
+		};
+		citySearch = $sessionStore.cityName || '';
+	});
 </script>
 
 <div class="container mx-auto my-12 max-w-2xl space-y-6">
@@ -100,19 +166,42 @@
 				<select
 					id="country"
 					class={cn(inputVariants(), 'bg-background')}
-					value={country.countryIsoCode}
+					bind:value={country.countryIsoCode}
 					onchange={handleCountryChange}
 				>
 					<option value="">Select a country</option>
-					{#each data.countries as country}
-						<option value={country.code}>
-							{country.name}
+					{#each data.countries as countryOption}
+						<option value={countryOption.countryIsoCode}>
+							{countryOption.countryName}
 						</option>
 					{/each}
 				</select>
 			</Field>
 			<Field name="City" optional>
-				<Input id="city" placeholder="City" bind:value={city.cityName} class="bg-background" />
+				<div class="relative">
+					<Input
+						id="city"
+						placeholder="Search for a city"
+						bind:value={citySearch}
+						oninput={handleCitySearch}
+						disabled={!country.countryIsoCode}
+						class="bg-background"
+					/>
+					{#if showCityDropdown && locationsResp.cities.length > 0}
+						<ul
+							class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+						>
+							{#each locationsResp.cities as cityOption}
+								<li
+									class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 hover:bg-indigo-600 hover:text-white"
+									onclick={() => selectCity(cityOption)}
+								>
+									{cityOption.cityName}
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				</div>
 			</Field>
 		</div>
 

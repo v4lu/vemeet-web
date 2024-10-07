@@ -1,22 +1,15 @@
-import type { Country, CountryResponse } from '$lib/types/geo.types';
-import ky from 'ky';
+import { authAPI } from '$lib/api.js';
+import { ACCESS_TOKEN } from '$lib/constants.js';
+import type { Country } from '$lib/types/geo.types';
+import { redirect } from '@sveltejs/kit';
 
-export async function load() {
-	const response = await ky.get<CountryResponse[]>('https://restcountries.com/v3.1/all').json();
-
-	const countries: Country[] = response
-		.sort((a, b) => a.name.common.localeCompare(b.name.common))
-		.map((country) => ({
-			name: country.name.common,
-			code: country.cca2,
-			coordinates: {
-				lat: country.latlng[0],
-				lng: country.latlng[1]
-			},
-			flag: country.flag
-		}));
+export async function load({ cookies }) {
+	const authToken = cookies.get(ACCESS_TOKEN);
+	if (!authToken) throw redirect(307, 'sign-in');
+	const api = authAPI(authToken);
+	const response = await api.get<Country[]>('locations/countries').json();
 
 	return {
-		countries
+		countries: response
 	};
 }

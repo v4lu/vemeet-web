@@ -62,13 +62,14 @@
 	</div>
 
 	{#if user.bio}
-		<p class="mt-4 max-w-2xl px-6 text-sm text-muted-foreground">{user.bio}</p>
+		<p class="mt-4 max-w-2xl px-6 text-muted-foreground">{user.bio}</p>
 	{/if}
 
 	<div class="mt-4 flex flex-wrap gap-4 px-6 text-sm text-muted-foreground">
 		{#if user?.cityName || user?.countryName}
 			<span class="flex items-center">
-				<Icon icon="solar:map-point-bold" class="mr-2 size-5 text-primary" />
+				<Icon icon="solar:map-point-bold" class="mr-2 size-6 text-primary" />
+				<span class="mr-1 text-xl">{user.countryFlag}</span>
 				{#if user.cityName && user.countryName}
 					{user.cityName}, {user.countryName}
 				{:else if user.cityName}
@@ -81,7 +82,7 @@
 
 		{#if user?.birthday}
 			<span class="flex items-center">
-				<Icon icon="ph:egg-crack-duotone" class="mr-2 size-5 text-primary" />
+				<Icon icon="ph:egg-crack-duotone" class="mr-2 size-6 text-primary" />
 				{formattedDate}
 			</span>
 		{/if}
