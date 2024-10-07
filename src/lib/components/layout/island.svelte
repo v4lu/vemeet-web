@@ -21,6 +21,10 @@
 			icon: 'solar:rounded-magnifer-bold'
 		},
 		{
+			path: '/map',
+			icon: 'solar:map-point-bold'
+		},
+		{
 			path: '/swiper',
 			icon: 'solar:flame-bold-duotone'
 		},
