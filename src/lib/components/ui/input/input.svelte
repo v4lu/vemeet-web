@@ -8,7 +8,7 @@
 
 	type InputProps = Omit<HTMLInputAttributes, 'value'> & {
 		class?: string;
-		value?: string | number;
+		value?: string | number | undefined | null;
 		variant?: Variant;
 	};
 

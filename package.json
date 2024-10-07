@@ -53,6 +53,7 @@
 		"date-fns": "^3.6.0",
 		"ky": "^1.7.2",
 		"leaflet": "^1.9.4",
+		"leaflet-control-geocoder": "^2.4.0",
 		"mode-watcher": "^0.4.1",
 		"reconnecting-websocket": "^4.4.0",
 		"tailwind-merge": "^2.5.2"

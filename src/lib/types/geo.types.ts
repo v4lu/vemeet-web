@@ -1,3 +1,5 @@
+import type { User } from './user.types';
+
 export type Country = {
 	id?: number;
 	countryName?: string;
@@ -13,4 +15,62 @@ export type City = {
 	cityName?: string;
 	cityLat?: number;
 	cityLng?: number;
+};
+
+export type CreateLocation = {
+	name: string;
+	description?: string;
+	address: string;
+	city: string;
+	country: string;
+	latitude: number;
+	longitude: number;
+	type: string;
+	websiteUrl?: string;
+	phoneNumber?: string;
+	openingHours?: string;
+	priceRange?: string;
+	images?: string[];
+};
+
+type LocationImageResponse = {
+	id: number;
+	url: string;
+};
+
+type ReviewImageResponse = {
+	id: number;
+	url: string;
+};
+
+type LocationReviewResponse = {
+	id: number;
+	user: User;
+	rating: number;
+	comment: string | null;
+	createdAt: string;
+	updatedAt: string;
+	images: ReviewImageResponse[];
+};
+
+export type VeganLocation = {
+	id: number;
+	name: string;
+	description: string | null;
+	address: string;
+	city: string;
+	country: string;
+	latitude: number;
+	longitude: number;
+	type: string;
+	websiteUrl: string | null;
+	phoneNumber: string | null;
+	openingHours: string | null;
+	priceRange: string | null;
+	user: User;
+	isVerified: boolean;
+	createdAt: string;
+	updatedAt: string;
+	images: LocationImageResponse[];
+	reviews: LocationReviewResponse[];
 };
