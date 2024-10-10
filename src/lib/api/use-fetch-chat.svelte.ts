@@ -34,7 +34,8 @@ export function useFetchChat(userId: number, chatId: number, authToken: string) 
 		resp.socket = new ReconnectingWebSocket(wsUrl, [], {
 			maxReconnectionDelay: 10000,
 			minReconnectionDelay: 1000,
-			reconnectionDelayGrowFactor: 1.3
+			reconnectionDelayGrowFactor: 1.3,
+			debug: true
 		});
 		resp.socket.onmessage = (event) => {
 			const newMessage = JSON.parse(event.data) as Message;

@@ -3,7 +3,7 @@
 	import Icon from '@iconify/svelte';
 </script>
 
-<div class="flex items-start justify-between pt-4">
+<div class="flex items-start justify-between p-6 pt-4">
 	<div class="flex items-center">
 		<div class="relative">
 			<div
@@ -19,9 +19,9 @@
 	</div>
 </div>
 
-<Skeleton class="mt-4 h-4 w-3/4 max-w-md" />
+<Skeleton class="ml-4 mt-4 h-4 w-3/4 max-w-md" />
 
-<div class="mt-4 flex space-x-6">
+<div class="mt-4 flex space-x-6 px-4">
 	<span class="flex items-center">
 		<Icon icon="solar:map-point-bold" class="mr-2 size-5 text-muted" />
 		<Skeleton class="h-4 w-32" />
@@ -32,7 +32,7 @@
 	</span>
 </div>
 
-<div class="mt-4 flex items-center pb-2">
+<div class="mt-4 flex items-center px-4 pb-2">
 	<div class="mr-8">
 		<Skeleton class="h-6 w-20" />
 	</div>

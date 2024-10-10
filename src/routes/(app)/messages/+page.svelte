@@ -5,6 +5,7 @@
 	import { formatTimestamp } from '$lib/date.js';
 	import type { Chat } from '$lib/types/chat.types';
 	import Icon from '@iconify/svelte';
+	import { sessionStore } from '$lib/stores/session.store';
 
 	let { data } = $props();
 	const { resp } = useFetchChats(data.accessToken);
@@ -33,7 +34,7 @@
 		<div class="space-y-2">
 			{#each resp.chats as chat (chat.id)}
 				<a
-					href={`/messages/${chat.id}`}
+					href={`/messages/${$sessionStore.id}/${chat.id}`}
 					class="flex cursor-pointer items-center rounded-md p-3 hover:bg-accent"
 				>
 					<div class="relative mr-4">

@@ -6,7 +6,7 @@
 	const skeletonMessageCount = $state(6);
 </script>
 
-<div class="flex h-[calc(100vh-78px)] flex-col">
+<div class="flex h-[calc(100vh-130px)] flex-col">
 	<div class="flex items-center justify-between border-b p-4">
 		<div class="flex items-center">
 			<Skeleton class="h-10 w-10 rounded-full" />

@@ -4,8 +4,10 @@
 	import Icon from '@iconify/svelte';
 	import { UserHorizontalCard } from '../cards';
 	import { Avatar } from '../ui/avatar';
-	import { Button } from '../ui/button';
+	import { Button, buttonVariants } from '../ui/button';
 	import Modal from '../ui/modals/modal.svelte';
+	import { cn } from '$lib/cn';
+	import { sessionStore } from '$lib/stores/session.store';
 
 	type ProfileHeaderProps = {
 		user: User;
@@ -50,14 +52,16 @@
 					{isFollowing ? 'Unfollow' : 'Follow'}
 				</span>
 			</Button>
-			<Button
-				size="sm"
-				variant="outline"
-				class="min-w-[120px] transition-all duration-300 ease-in-out hover:bg-primary hover:text-primary-foreground hover:shadow-md"
+			<a
+				href={`/messages/${$sessionStore.id}/${user.id}`}
+				class={cn(
+					buttonVariants({ variant: 'outline', size: 'sm' }),
+					'min-w-[120px] transition-all duration-300 ease-in-out hover:bg-primary hover:text-primary-foreground hover:shadow-md'
+				)}
 			>
 				<Icon icon="solar:chat-line-bold" class="mr-2 size-4" />
 				<span class="font-medium">Message</span>
-			</Button>
+			</a>
 		</div>
 	</div>
 

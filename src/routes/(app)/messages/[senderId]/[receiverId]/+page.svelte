@@ -13,9 +13,10 @@
 	import { fade, slide } from 'svelte/transition';
 
 	let { data } = $props();
+
 	const { resp, fetchData, postMessage, cleanup } = useFetchChat(
 		$sessionStore.id,
-		+data.id,
+		+data.receiverId,
 		data.accessToken
 	);
 
