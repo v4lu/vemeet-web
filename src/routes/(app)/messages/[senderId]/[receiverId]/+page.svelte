@@ -10,7 +10,7 @@
 	import type { Message } from '$lib/types/chat.types.js';
 	import Icon from '@iconify/svelte';
 	import { onDestroy } from 'svelte';
-	import { fade, slide } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 
 	let { data } = $props();
 	let newMessage = $state('');
@@ -174,8 +174,8 @@
 							'mb-4 flex',
 							message.sender.id === $sessionStore.id ? 'justify-end' : 'justify-start'
 						)}
-						in:fade={{ duration: 150 }}
-						out:slide={{ duration: 150 }}
+						in:fly={{ y: message.sender.id === $sessionStore.id ? 50 : -50, duration: 300 }}
+						out:fly={{ y: message.sender.id === $sessionStore.id ? 50 : -50, duration: 300 }}
 					>
 						<div
 							class={cn(
