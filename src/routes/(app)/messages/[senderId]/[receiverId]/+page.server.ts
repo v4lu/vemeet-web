@@ -3,6 +3,7 @@ import { ACCESS_TOKEN } from '$lib/constants';
 import { redirect } from '@sveltejs/kit';
 import type { Chat } from '$lib/types/chat.types';
 import { HTTPError } from 'ky';
+import type { User } from '$lib/types/user.types.js';
 
 export async function load({ params, cookies }) {
 	const authToken = cookies.get(ACCESS_TOKEN);
@@ -19,20 +20,18 @@ export async function load({ params, cookies }) {
 		return {
 			receiverId: params.receiverId,
 			senderId: params.senderId,
+			otherUser: response.otherUser,
+			firstTime: false,
 			chat: response
 		};
 	} catch (e) {
 		if (e instanceof HTTPError && e.response.status === 404) {
-			const chat = await api
-				.post<Omit<Chat, 'lastMessage'>>('chats/create', {
-					json: { otherUserId: params.receiverId }
-				})
-				.json();
-
+			const response = await api.get<User>(`users/${params.receiverId}`).json();
 			return {
 				receiverId: params.receiverId,
 				senderId: params.senderId,
-				chat
+				otherUser: response,
+				firstTime: true
 			};
 		}
 		throw e;

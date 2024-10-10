@@ -14,6 +14,17 @@ type MessagePayload = {
 	isOneTime: boolean;
 };
 
+type MessagePayloadExtended = MessagePayload & {
+	firstTime: boolean;
+};
+
+type UseFetchChatArgs = {
+	userId: number;
+	chatId?: number;
+	authToken: string;
+	firstTime: boolean;
+};
+
 class Chat {
 	messages = $state<Message[]>([]);
 	error = $state<ServerErrorResponse>();
@@ -21,21 +32,23 @@ class Chat {
 	currentPage = $state(0);
 	hasMore = $state(true);
 	socket: ReconnectingWebSocket | null = $state(null);
+	firstTime = $state(true);
 }
 
-export function useFetchChat(userId: number, chatId: number, authToken: string) {
+export function useFetchChat({ authToken, chatId, userId, firstTime }: UseFetchChatArgs) {
 	const resp = new Chat();
 	const api = authAPI(authToken);
+	resp.firstTime = firstTime;
 
 	function connectWebSocket() {
+		if (!chatId) return;
 		if (!browser) return;
 		const wsUrl = `${WEBSOCKET_URL}/chat?userId=${userId}&chatId=${chatId}&token=${authToken}`;
 
 		resp.socket = new ReconnectingWebSocket(wsUrl, [], {
 			maxReconnectionDelay: 10000,
 			minReconnectionDelay: 1000,
-			reconnectionDelayGrowFactor: 1.3,
-			debug: true
+			reconnectionDelayGrowFactor: 1.3
 		});
 		resp.socket.onmessage = (event) => {
 			const newMessage = JSON.parse(event.data) as Message;
@@ -48,6 +61,7 @@ export function useFetchChat(userId: number, chatId: number, authToken: string) 
 	}
 
 	async function fetchData(page: number) {
+		if (!chatId) return;
 		resp.isLoading = true;
 		try {
 			const response = await api
@@ -71,9 +85,13 @@ export function useFetchChat(userId: number, chatId: number, authToken: string) 
 	}
 
 	async function postMessage(payload: MessagePayload) {
-		resp.isLoading = true;
 		try {
-			const res = await api.post<Message>(`chats/${chatId}/messages`, { json: payload }).json();
+			const message: MessagePayloadExtended = {
+				...payload,
+				firstTime: resp.firstTime
+			};
+			const res = await api.post<Message>(`chats/messages`, { json: message }).json();
+			resp.firstTime = false;
 			toast.success('Message sent successfully');
 			return res;
 		} catch (err) {
@@ -82,7 +100,6 @@ export function useFetchChat(userId: number, chatId: number, authToken: string) 
 				toast.error('Failed to send message. Please try again.');
 			}
 		}
-		resp.isLoading = false;
 	}
 
 	function cleanup() {

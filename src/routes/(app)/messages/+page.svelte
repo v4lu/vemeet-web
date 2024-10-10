@@ -34,7 +34,7 @@
 		<div class="space-y-2">
 			{#each resp.chats as chat (chat.id)}
 				<a
-					href={`/messages/${$sessionStore.id}/${chat.id}`}
+					href={`/messages/${$sessionStore.id}/${chat.otherUser.id}`}
 					class="flex cursor-pointer items-center rounded-md p-3 hover:bg-accent"
 				>
 					<div class="relative mr-4">
