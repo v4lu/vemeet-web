@@ -2,7 +2,9 @@
 	import { formatTimestamp } from '$lib/date';
 	import type {
 		AddressSuggestion,
+		LocationReviewRequest,
 		LocationReviewResponse,
+		LocationReviewUpdate,
 		NominatimResponse,
 		VeganLocation,
 		VeganLocationUpdateRequest
@@ -13,18 +15,21 @@
 	import { Button } from '../ui/button';
 	import { Dropdown } from '../ui/dropdown';
 	import { ConfirmModal, ImageModal, Modal } from '../ui/modals';
-	import UserHorizontalCard from './user-horizontal-card.svelte';
 	import { Input, inputVariants } from '../ui/input';
 	import { Field } from '../ui/field';
 	import { toast } from '$lib/stores/toast.store';
 	import { uploadImage } from '$lib/api';
 	import { clickOutside, debounce } from '$lib/utils';
 	import { sessionStore } from '$lib/stores/session.store';
+	import { ReviewCard } from '.';
 
 	type VeganLocationCardProps = {
 		location: VeganLocation;
 		deleteLocation: () => Promise<void>;
 		updateLocation: (payload: VeganLocationUpdateRequest) => Promise<void>;
+		createReview: (payload: LocationReviewRequest) => Promise<void>;
+		deleteReview: (reviewId: number) => Promise<void>;
+		patchReview: (payload: LocationReviewUpdate, reviewId: number) => Promise<void>;
 		isLocationDeleting: boolean;
 		authToken: string;
 	};
@@ -33,6 +38,9 @@
 		location,
 		deleteLocation,
 		updateLocation,
+		createReview,
+		deleteReview,
+		patchReview,
 		isLocationDeleting,
 		authToken
 	}: VeganLocationCardProps = $props();
@@ -40,7 +48,6 @@
 	let currentImageIndex = $state(0);
 	let isImageModalOpen = $state(false);
 	let isDeleteModalConfirmOpen = $state(false);
-	let isReviewsModalOpen = $state(false);
 	let isUpdateModalOpen = $state(false);
 	let updatePayload: VeganLocationUpdateRequest = $state({});
 
@@ -55,6 +62,13 @@
 	let addressSuggestions = $state<AddressSuggestion[]>([]);
 	let showSuggestions = $state(false);
 	let isSearching = $state(false);
+
+	let isAddReviewModalOpen = $state(false);
+	let newReview: LocationReviewRequest = $state({ rating: 0, comment: '' });
+	let editingReview: LocationReviewResponse | null = $state(null);
+	let reviewImagesToAdd: string[] = $state([]);
+	let reviewFileInput = $state<HTMLInputElement>();
+	let reviewImageIdsToRemove: number[] = $state([]);
 
 	const locationTypes = $state(['Cafe', 'Bar', 'Restaurant', 'Shop']);
 	const priceRanges = $state([
@@ -264,10 +278,121 @@
 			selectAddress(suggestion);
 		}
 	}
+
+	function handleAddReview() {
+		isAddReviewModalOpen = true;
+		newReview = { rating: 0, comment: '' };
+		reviewImagesToAdd = [];
+	}
+
+	async function handleDeleteReview(reviewId: number) {
+		try {
+			await deleteReview(reviewId);
+			toast.success('Review deleted successfully');
+		} catch (error) {
+			console.error('Error deleting review:', error);
+			toast.error('Failed to delete review');
+		}
+	}
+
+	async function handleReviewImageUpload(event: Event) {
+		const input = event.target as HTMLInputElement;
+		if (input.files?.length) {
+			try {
+				for (const file of input.files) {
+					if (reviewImagesToAdd.length < 5) {
+						await uploadImage({
+							authToken,
+							file,
+							setImageUploadLoading: (loading) => {
+								imageUploadLoading = loading;
+							},
+							setImageUrl: (url) => {
+								reviewImagesToAdd = [...reviewImagesToAdd, url];
+							}
+						});
+					} else {
+						toast.error('Maximum of 5 images allowed');
+						break;
+					}
+				}
+			} catch (error) {
+				console.error('Error uploading review image:', error);
+				toast.error('Failed to upload review image');
+			}
+		}
+	}
+
+	function handleReviewInputFileClick() {
+		if (reviewFileInput) {
+			reviewFileInput.click();
+		}
+	}
+
+	function deleteReviewImage(image: { id?: number; url: string }) {
+		if (image.id) {
+			reviewImageIdsToRemove = [...reviewImageIdsToRemove, image.id];
+		} else {
+			reviewImagesToAdd = reviewImagesToAdd.filter((url) => url !== image.url);
+		}
+	}
+
+	async function submitReview() {
+		if (newReview.rating === 0) {
+			toast.error('Please provide a rating');
+			return;
+		}
+
+		const reviewPayload: LocationReviewRequest = {
+			...newReview,
+			images: reviewImagesToAdd
+		};
+
+		try {
+			await createReview(reviewPayload);
+			isAddReviewModalOpen = false;
+			reviewImagesToAdd = [];
+			toast.success('Review added successfully');
+		} catch (error) {
+			console.error('Error adding review:', error);
+			toast.error('Failed to add review');
+		}
+	}
+
+	async function submitEditReview() {
+		if (!editingReview) return;
+
+		const reviewPayload: LocationReviewUpdate = {
+			rating: newReview.rating,
+			comment: newReview.comment,
+			imagesToAdd: reviewImagesToAdd,
+			imageIdsToRemove: reviewImageIdsToRemove
+		};
+
+		try {
+			await patchReview(reviewPayload, editingReview.id);
+			editingReview = null;
+			reviewImagesToAdd = [];
+			reviewImageIdsToRemove = [];
+			toast.success('Review updated successfully');
+		} catch (error) {
+			console.error('Error updating review:', error);
+			toast.error('Failed to update review');
+		}
+	}
+	function handleEditReview(review: LocationReviewResponse) {
+		editingReview = review;
+		newReview = {
+			rating: review.rating,
+			comment: review.comment || ''
+		};
+		reviewImagesToAdd = [];
+		reviewImageIdsToRemove = [];
+	}
 </script>
 
 <div
-	class="mb-6 overflow-hidden rounded-xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
+	class="mb-6 rounded-xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
 >
 	<div class="relative">
 		{#if $sessionStore.id === location.user.id}
@@ -421,24 +546,25 @@
 		<div class="flex items-center justify-between border-t border-border p-4">
 			<div class="flex w-full items-center justify-between">
 				<div class="flex items-center space-x-4">
-					<button
-						class="group flex items-center text-sm transition-colors"
-						onclick={() => (isReviewsModalOpen = true)}
-					>
+					<div class="group flex items-center text-sm transition-colors">
 						<Icon icon="solar:star-bold" class="size-6 text-yellow-400" />
 						<span class="ml-1.5 font-medium"
 							>{getAverageRating(location.reviews)} ({location.reviews.length})</span
 						>
-					</button>
+					</div>
 				</div>
-				<button
-					class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
-				>
-					<Icon icon="solar:multiple-forward-right-bold" class="size-6" />
-					<span class="ml-1.5 font-medium">Share</span>
-				</button>
+				<Button variant="outline" onclick={handleAddReview}>
+					<Icon icon="solar:pen-new-square-bold" class="mr-2 size-4" />
+					Add Review
+				</Button>
 			</div>
 		</div>
+	</div>
+
+	<div class="space-y-6 border-t border-border bg-card shadow-lg last:rounded-b-xl">
+		{#each location.reviews as review (review.id)}
+			<ReviewCard {review} {handleEditReview} {handleDeleteReview} />
+		{/each}
 	</div>
 </div>
 
@@ -628,35 +754,132 @@
 	</Modal>
 {/if}
 
-{#if isReviewsModalOpen}
-	<Modal onClose={() => (isReviewsModalOpen = false)}>
-		<div class="hide-scrollbar max-h-[25rem] overflow-y-auto">
-			<h2 class="mb-4 text-xl font-semibold">Reviews</h2>
-			<div class="grid gap-4">
-				{#each location.reviews as review}
-					<div class="border-b border-border pb-4 last:border-b-0">
-						<div class="flex items-center justify-between">
-							<UserHorizontalCard user={review.user} />
-							<div class="flex items-center">
-								<Icon icon="solar:star-bold" class="mr-1 size-5 text-yellow-400" />
-								<span class="font-medium">{review.rating}</span>
-							</div>
-						</div>
-						{#if review.comment}
-							<p class="mt-2 text-sm text-muted-foreground">{review.comment}</p>
-						{/if}
-						{#if review.images && review.images.length > 0}
-							<div class="mt-2 flex gap-2 overflow-x-auto">
-								{#each review.images as image}
-									<img src={image.url} alt="Review" class="h-20 w-20 rounded-md object-cover" />
-								{/each}
-							</div>
-						{/if}
-						<p class="mt-1 text-xs text-muted-foreground">{formatTimestamp(review.createdAt)}</p>
+{#if isAddReviewModalOpen || editingReview}
+	<Modal
+		onClose={() => {
+			isAddReviewModalOpen = false;
+			editingReview = null;
+			reviewImagesToAdd = [];
+			reviewImageIdsToRemove = [];
+		}}
+		class="w-full max-w-lg"
+	>
+		<h2 class="mb-6 text-2xl font-semibold">
+			{editingReview ? 'Edit Review' : 'Add Review'}
+		</h2>
+		<form onsubmit={editingReview ? submitEditReview : submitReview} class="space-y-6">
+			<Field name="Rating">
+				<div class="flex items-center gap-3">
+					{#each Array(5) as _, i}
+						<button
+							type="button"
+							onclick={() => (newReview.rating = i + 1)}
+							class="text-2xl transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+						>
+							<Icon
+								icon={i < newReview.rating ? 'solar:star-bold' : 'solar:star-line-duotone'}
+								class="size-8 text-yellow-400"
+							/>
+						</button>
+					{/each}
+				</div>
+			</Field>
+
+			<Field name="Comment" optional>
+				<textarea
+					bind:value={newReview.comment}
+					class={inputVariants({ class: 'h-32 w-full resize-none' })}
+					placeholder="Write your review here..."
+				></textarea>
+			</Field>
+
+			<Field name="Images" optional>
+				{#if editingReview}
+					<div class="mb-4 flex flex-wrap gap-2">
+						{#each editingReview.images as image}
+							{#if !reviewImageIdsToRemove.includes(image.id)}
+								<div class="relative h-24 w-24 overflow-hidden rounded-lg">
+									<img
+										src={image.url}
+										alt="Review"
+										class="h-full w-full object-cover object-center transition-transform duration-300 hover:scale-110"
+									/>
+									<button
+										onclick={() => deleteReviewImage(image)}
+										class="absolute right-1 top-1 rounded-full bg-black bg-opacity-50 p-1 text-white transition-colors hover:bg-opacity-75"
+										aria-label="Delete image"
+									>
+										<Icon icon="solar:close-circle-bold" class="size-4" />
+									</button>
+								</div>
+							{/if}
+						{/each}
 					</div>
-				{/each}
+				{/if}
+				{#if reviewImagesToAdd.length > 0}
+					<div class="mb-4 flex flex-wrap gap-2">
+						{#each reviewImagesToAdd as imageUrl}
+							<div class="relative h-24 w-24 overflow-hidden rounded-lg">
+								<img
+									src={imageUrl}
+									alt="New review"
+									class="h-full w-full object-cover object-center transition-transform duration-300 hover:scale-110"
+								/>
+								<button
+									onclick={() => deleteReviewImage({ url: imageUrl })}
+									class="absolute right-1 top-1 rounded-full bg-black bg-opacity-50 p-1 text-white transition-colors hover:bg-opacity-75"
+									aria-label="Delete image"
+								>
+									<Icon icon="solar:close-circle-bold" class="size-4" />
+								</button>
+							</div>
+						{/each}
+					</div>
+				{/if}
+				<div class="flex items-center gap-2">
+					<Button
+						type="button"
+						disabled={imageUploadLoading || reviewImagesToAdd.length >= 5}
+						onclick={handleReviewInputFileClick}
+						variant="outline"
+						size="icon-sm"
+						class="rounded-full transition-all duration-300 hover:bg-primary hover:text-white"
+					>
+						<Icon icon="solar:gallery-add-bold" class="size-5" />
+					</Button>
+					<input
+						bind:this={reviewFileInput}
+						type="file"
+						accept="image/*"
+						multiple={true}
+						class="hidden"
+						onchange={handleReviewImageUpload}
+					/>
+					{#if imageUploadLoading}
+						<Icon icon="eos-icons:loading" class="ml-2 size-5 animate-spin text-primary" />
+					{/if}
+					<span class="text-sm text-muted-foreground">
+						{reviewImagesToAdd.length}/5 images
+					</span>
+				</div>
+			</Field>
+
+			<div class="flex justify-end space-x-3 pt-4">
+				<Button
+					type="button"
+					variant="outline"
+					onclick={() => {
+						isAddReviewModalOpen = false;
+						editingReview = null;
+					}}
+				>
+					Cancel
+				</Button>
+				<Button type="submit" disabled={newReview.rating === 0}>
+					{editingReview ? 'Update Review' : 'Submit Review'}
+				</Button>
 			</div>
-		</div>
+		</form>
 	</Modal>
 {/if}
 

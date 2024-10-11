@@ -121,3 +121,16 @@ export type VeganLocationUpdateRequest = {
 	imagesToAdd?: string[];
 	imageIdsToRemove?: number[];
 };
+
+export type LocationReviewRequest = {
+	rating: number;
+	comment?: string;
+	images?: string[];
+};
+
+export type LocationReviewUpdate = {
+	rating?: number;
+	comment?: string;
+	imagesToAdd?: string[];
+	imageIdsToRemove?: number[];
+};

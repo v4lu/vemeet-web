@@ -3,7 +3,8 @@
 	import { LocationCard } from '$lib/components/cards/index.js';
 
 	let { data } = $props();
-	const { resp, deleteLocation, updateLocation } = useVeganLocation(data.accessToken, +data.id);
+	const { resp, deleteLocation, updateLocation, createReview, deleteReview, patchReview } =
+		useVeganLocation(data.accessToken, +data.id);
 </script>
 
 <main class="container mb-12 mt-8">
@@ -13,6 +14,9 @@
 			location={resp.location}
 			{deleteLocation}
 			{updateLocation}
+			{createReview}
+			{deleteReview}
+			{patchReview}
 			isLocationDeleting={resp.isLoading}
 		/>
 	{:else if resp.isLoading}
