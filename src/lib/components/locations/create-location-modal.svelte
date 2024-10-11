@@ -2,11 +2,12 @@
 	import { uploadImage } from '$lib/api';
 	import { toast } from '$lib/stores/toast.store';
 	import type { CreateLocation } from '$lib/types/geo.types';
-	import { clickOutside } from '$lib/utils';
+	import { clickOutside, debounce } from '$lib/utils';
 	import Icon from '@iconify/svelte';
 	import { Button } from '../ui/button';
-	import { Input } from '../ui/input';
+	import { Input, inputVariants } from '../ui/input';
 	import { Modal } from '../ui/modals';
+	import { Field } from '../ui/field';
 
 	type Props = {
 		createLocation: (payload: CreateLocation) => Promise<void>;
@@ -28,18 +29,30 @@
 	let openingHours = $state('');
 	let priceRange = $state('');
 	let imageUrls = $state<string[]>([]);
+	let isSearching = $state(false);
 
 	let addressSuggestions = $state<any[]>([]);
 	let showSuggestions = $state(false);
 	let fileInput: HTMLInputElement | null = $state(null);
 	let imageUploadLoading = $state(false);
 
-	async function searchAddress() {
+	const locationTypes = $state(['Cafe', 'Bar', 'Restaurant', 'Shop']);
+	const priceRanges = $state([
+		{ value: '', label: '-' },
+		{ value: '$', label: '$' },
+		{ value: '$$', label: '$$' },
+		{ value: '$$$', label: '$$$' }
+	]);
+
+	const debouncedSearchAddress = debounce(async () => {
 		if (!address || address.length < 3) {
 			addressSuggestions = [];
 			showSuggestions = false;
+			isSearching = false;
 			return;
 		}
+
+		isSearching = true;
 
 		try {
 			const response = await fetch(
@@ -50,7 +63,13 @@
 		} catch (error) {
 			console.error('Error fetching address suggestions:', error);
 			toast.error('Failed to fetch address suggestions');
+		} finally {
+			isSearching = false;
 		}
+	}, 400);
+
+	function handleAddressInput() {
+		debouncedSearchAddress();
 	}
 
 	function selectAddress(suggestion: any) {
@@ -113,8 +132,13 @@
 
 	async function handleSubmit(event: Event) {
 		event.preventDefault();
-		if (!name || !address || !type || latitude === null || longitude === null) {
+		if (!name || !address || !type) {
 			toast.error('Please fill in all required fields');
+			return;
+		}
+
+		if (!latitude || !longitude) {
+			toast.error('Please try again later, server issue');
 			return;
 		}
 
@@ -136,11 +160,17 @@
 
 		try {
 			await createLocation(newLocation);
-			toast.success('Location created successfully!');
 			onClose();
 		} catch (error) {
 			console.error('Error creating location:', error);
 			toast.error('Failed to create location');
+		}
+	}
+
+	function handleKeyDown(event: KeyboardEvent, suggestion: any) {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			selectAddress(suggestion);
 		}
 	}
 </script>
@@ -151,77 +181,114 @@
 	</div>
 	<form onsubmit={handleSubmit} class="flex flex-grow flex-col overflow-hidden">
 		<div class="flex-grow space-y-4 overflow-y-auto p-4">
-			<Input bind:value={name} placeholder="Name" required />
-			<Input bind:value={description} placeholder="Description" />
-			<div class="space-y-2" use:clickOutside={handleClickOutside}>
-				<Input bind:value={address} placeholder="Address" required oninput={searchAddress} />
-				{#if showSuggestions}
-					<ul
-						class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-popover py-1 text-sm shadow-md"
-					>
-						{#each addressSuggestions as suggestion}
-							<li
-								class="cursor-pointer px-4 py-2 hover:bg-muted"
-								onclick={() => selectAddress(suggestion)}
-							>
-								{suggestion.display_name}
-							</li>
-						{/each}
-					</ul>
-				{/if}
-			</div>
-			<Input bind:value={type} placeholder="Type (e.g., Restaurant, Cafe)" required />
-			<Input bind:value={websiteUrl} type="url" placeholder="Website URL" />
-			<Input bind:value={phoneNumber} type="tel" placeholder="Phone Number" />
-			<Input bind:value={openingHours} placeholder="Opening Hours" />
-			<Input bind:value={priceRange} placeholder="Price Range" />
-
-			<div class="space-y-2">
-				<label class="text-sm font-medium">Images</label>
-				{#if imageUrls.length > 0}
-					<div class="mb-4 flex flex-wrap gap-2">
-						{#each imageUrls as imageUrl, i}
-							<div class="relative h-24 w-24 overflow-hidden rounded-lg">
-								<img
-									src={imageUrl}
-									alt="Location"
-									class="h-full w-full object-cover object-center transition-transform duration-300 hover:scale-110"
-								/>
-								<button
-									onclick={() => deleteImage(i)}
-									class="absolute right-1 top-1 rounded-full bg-black bg-opacity-50 p-1 text-white transition-colors hover:bg-opacity-75"
-									aria-label="Delete image"
-								>
-									<Icon icon="solar:close-circle-bold" class="size-4" />
-								</button>
-							</div>
-						{/each}
-					</div>
-				{/if}
-				<div class="flex items-center gap-2">
-					<Button
-						type="button"
-						disabled={imageUploadLoading || imageUrls.length >= 5}
-						onclick={handleInputFileClick}
-						variant="outline"
-						size="icon-sm"
-						class="rounded-full transition-all duration-300 hover:bg-primary hover:text-white"
-					>
-						<Icon icon="solar:gallery-add-bold" class="size-5" />
-					</Button>
-					<input
-						bind:this={fileInput}
-						type="file"
-						multiple={true}
-						class="hidden"
-						onchange={handleImageUpload}
-						accept="image/*"
-					/>
-					{#if imageUploadLoading}
-						<Icon icon="eos-icons:loading" class="ml-2 size-5 animate-spin text-primary" />
+			<Field name="Name">
+				<Input bind:value={name} placeholder="Name" required />
+			</Field>
+			<Field name="Description" optional>
+				<Input bind:value={description} placeholder="Description" />
+			</Field>
+			<Field name="Address">
+				<div class="space-y-2" use:clickOutside={handleClickOutside}>
+					<Input bind:value={address} placeholder="Address" required oninput={handleAddressInput} />
+					{#if isSearching}
+						<div
+							class="absolute z-50 mt-1 flex max-h-60 w-full items-center justify-center overflow-auto rounded-md bg-popover py-1 text-sm shadow-md"
+						>
+							<Icon icon="eos-icons:loading" class="size-5 animate-spin text-primary" />
+						</div>
+					{:else if showSuggestions}
+						<ul
+							class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-popover py-1 text-sm shadow-md"
+							role="listbox"
+						>
+							{#each addressSuggestions as suggestion}
+								<li>
+									<button
+										type="button"
+										class="w-full cursor-pointer px-4 py-2 text-left hover:bg-muted"
+										onclick={() => selectAddress(suggestion)}
+										onkeydown={(event) => handleKeyDown(event, suggestion)}
+									>
+										{suggestion.display_name}
+									</button>
+								</li>
+							{/each}
+						</ul>
 					{/if}
 				</div>
-			</div>
+			</Field>
+			<Field name="Type">
+				<select class={inputVariants()} bind:value={type} required>
+					<option value="" disabled selected>Select a type</option>
+					{#each locationTypes as locationType}
+						<option value={locationType}>{locationType}</option>
+					{/each}
+				</select>
+			</Field>
+			<Field name="Website URL" optional>
+				<Input bind:value={websiteUrl} type="url" placeholder="Website URL" />
+			</Field>
+			<Field name="Phone Number" optional>
+				<Input bind:value={phoneNumber} type="tel" placeholder="Phone Number" />
+			</Field>
+			<Field name="Opening Hours" optional>
+				<Input bind:value={openingHours} placeholder="Opening Hours" />
+			</Field>
+			<Field name="Price Range" optional>
+				<select class={inputVariants()} bind:value={priceRange}>
+					{#each priceRanges as range}
+						<option value={range.value}>{range.label}</option>
+					{/each}
+				</select>
+			</Field>
+
+			<Field name="Images" optional>
+				<div class="space-y-2">
+					{#if imageUrls.length > 0}
+						<div class="mb-4 flex flex-wrap gap-2">
+							{#each imageUrls as imageUrl, i}
+								<div class="relative h-24 w-24 overflow-hidden rounded-lg">
+									<img
+										src={imageUrl}
+										alt="Location"
+										class="h-full w-full object-cover object-center transition-transform duration-300 hover:scale-110"
+									/>
+									<button
+										onclick={() => deleteImage(i)}
+										class="absolute right-1 top-1 rounded-full bg-black bg-opacity-50 p-1 text-white transition-colors hover:bg-opacity-75"
+										aria-label="Delete image"
+									>
+										<Icon icon="solar:close-circle-bold" class="size-4" />
+									</button>
+								</div>
+							{/each}
+						</div>
+					{/if}
+					<div class="flex items-center gap-2">
+						<Button
+							type="button"
+							disabled={imageUploadLoading || imageUrls.length >= 5}
+							onclick={handleInputFileClick}
+							variant="outline"
+							size="icon-sm"
+							class="rounded-full transition-all duration-300 hover:bg-primary hover:text-white"
+						>
+							<Icon icon="solar:gallery-add-bold" class="size-5" />
+						</Button>
+						<input
+							bind:this={fileInput}
+							type="file"
+							multiple={true}
+							class="hidden"
+							onchange={handleImageUpload}
+							accept="image/*"
+						/>
+						{#if imageUploadLoading}
+							<Icon icon="eos-icons:loading" class="ml-2 size-5 animate-spin text-primary" />
+						{/if}
+					</div>
+				</div>
+			</Field>
 		</div>
 		<div class="flex-shrink-0 border-t border-border bg-card p-4">
 			<div class="flex justify-end space-x-2">
