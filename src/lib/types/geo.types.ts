@@ -43,7 +43,7 @@ type ReviewImageResponse = {
 	url: string;
 };
 
-type LocationReviewResponse = {
+export type LocationReviewResponse = {
 	id: number;
 	user: User;
 	rating: number;
@@ -56,21 +56,38 @@ type LocationReviewResponse = {
 export type VeganLocation = {
 	id: number;
 	name: string;
-	description: string | null;
+	description?: string;
 	address: string;
 	city: string;
 	country: string;
 	latitude: number;
 	longitude: number;
 	type: string;
-	websiteUrl: string | null;
-	phoneNumber: string | null;
-	openingHours: string | null;
-	priceRange: string | null;
+	websiteUrl?: string;
+	phoneNumber?: string;
+	openingHours?: string;
+	priceRange?: string;
 	user: User;
 	isVerified: boolean;
 	createdAt: string;
 	updatedAt: string;
 	images: LocationImageResponse[];
 	reviews: LocationReviewResponse[];
+};
+
+export type VeganLocationUpdateRequest = {
+	name?: string;
+	description?: string;
+	address?: string;
+	city?: string;
+	country?: string;
+	latitude?: number;
+	longitude?: number;
+	type?: string;
+	websiteUrl?: string;
+	phoneNumber?: string;
+	openingHours?: string;
+	priceRange?: string;
+	imagesToAdd?: string[];
+	imageIdsToRemove?: number[];
 };

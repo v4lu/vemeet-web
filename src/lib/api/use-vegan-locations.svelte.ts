@@ -1,3 +1,4 @@
+import { goto } from '$app/navigation';
 import { authAPI } from '$lib/api';
 import { toast } from '$lib/stores/toast.store';
 import type { CreateLocation, VeganLocation } from '$lib/types/geo.types';
@@ -10,6 +11,7 @@ class VeganLocations {
 	isCreatingLoading = $state(false);
 	locations = $state<VeganLocation[]>([]);
 	isFetched = $state(false);
+	location = $state<VeganLocation | null>(null);
 }
 
 export function useVeganLocations(authToken: string) {
@@ -54,11 +56,26 @@ export function useVeganLocations(authToken: string) {
 		resp.isLoading = false;
 	}
 
+	async function getLocation(id: number) {
+		resp.isLoading = true;
+		try {
+			const response = await api.get<VeganLocation>(`vegan-locations/${id}`).json();
+			resp.location = response;
+		} catch (err) {
+			if (err instanceof HTTPError) {
+				resp.error = (await err.response.json()) as ServerErrorResponse;
+			}
+		}
+		resp.isLoading = false;
+		return null;
+	}
+
 	getLocations(0, '');
 
 	return {
 		resp,
 		createLocation,
-		getLocations
+		getLocations,
+		getLocation
 	};
 }
