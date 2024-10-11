@@ -40,3 +40,16 @@ export function debounce<T extends (...args: never[]) => unknown>(
 		timeout = setTimeout(later, wait);
 	};
 }
+
+export function scrollToSection(event: Event, id: string, offset: number) {
+	event.preventDefault();
+	const element = document.getElementById(id);
+	if (element) {
+		const offsetTop = element.getBoundingClientRect().top + window.scrollY;
+
+		window.scroll({
+			top: offsetTop + offset,
+			behavior: 'smooth'
+		});
+	}
+}

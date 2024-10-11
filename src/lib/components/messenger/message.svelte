@@ -30,7 +30,7 @@
 					: 'bg-accent text-accent-foreground'
 			)}
 		>
-			<p class="break-words">{message.content}</p>
+			<p class="max-w-[18rem] text-balance break-words text-sm">{message.content}</p>
 		</div>
 		<span class="mt-1 text-xs text-muted-foreground">
 			{formatTimestamp(message.createdAt)}

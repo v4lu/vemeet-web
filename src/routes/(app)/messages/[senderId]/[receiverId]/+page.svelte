@@ -22,7 +22,8 @@
 	let messageContainer: HTMLDivElement;
 	let isLoadingMore = $state(false);
 	let isInitialLoad = $state(true);
-	let prevScrollHeight = 0;
+	let prevScrollHeight = $state(0);
+	let isNearBottom = $state(true);
 
 	function updateMessages(newMessages: TMessage[]) {
 		const uniqueMessages = newMessages.filter(
@@ -32,6 +33,9 @@
 			resp.messages = [...resp.messages, ...uniqueMessages].sort(
 				(a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
 			);
+			if (isNearBottom) {
+				setTimeout(scrollToBottom, 0);
+			}
 		}
 	}
 
@@ -50,7 +54,7 @@
 			if (res) {
 				updateMessages([res]);
 				newMessage = '';
-				scrollToBottom();
+				setTimeout(scrollToBottom, 0);
 			}
 			isSubmittingMessage = false;
 		}
@@ -75,7 +79,6 @@
 		prevScrollHeight = messageContainer.scrollHeight;
 		await fetchData(resp.currentPage + 1);
 		isLoadingMore = false;
-		// keep position after loading more messages
 		messageContainer.scrollTop = messageContainer.scrollHeight - prevScrollHeight;
 	}
 
@@ -85,8 +88,10 @@
 
 	function handleScroll() {
 		if (messageContainer) {
-			// check if user has scrolled to the top
-			if (messageContainer.scrollTop === 0 && !isLoadingMore && resp.hasMore) {
+			const { scrollTop, scrollHeight, clientHeight } = messageContainer;
+			isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+
+			if (scrollTop === 0 && !isLoadingMore && resp.hasMore) {
 				debouncedLoadMoreMessages();
 			}
 		}
@@ -96,11 +101,20 @@
 		if (!resp.firstTime) {
 			fetchData(0).then(() => {
 				isInitialLoad = false;
-				scrollToBottom();
+				setTimeout(scrollToBottom, 0);
 			});
 		}
 		if (messageContainer) {
 			messageContainer.addEventListener('scroll', handleScroll);
+		}
+	});
+
+	$effect(() => {
+		if (resp.messages.length > 0 && !isLoadingMore) {
+			const lastMessage = resp.messages[resp.messages.length - 1];
+			if (lastMessage.sender.id !== data.user.id && isNearBottom) {
+				setTimeout(scrollToBottom, 0);
+			}
 		}
 	});
 
@@ -136,14 +150,17 @@
 	</div>
 
 	<div class="h-[calc(100dvh-64px-81px-65px-70px)] overflow-hidden">
-		<div bind:this={messageContainer} class="container h-full overflow-y-scroll pt-4">
+		<div
+			bind:this={messageContainer}
+			class="hide-scrollbar container h-full overflow-y-scroll pt-4"
+		>
 			{#if isLoadingMore}
 				<MessageSkeleton />
 			{/if}
 			{#if !resp.firstTime && (isInitialLoad || resp.isLoading) && resp.messages.length === 0}
 				<MessageSkeleton />
 			{:else}
-				{#each resp.messages as message (message.id)}
+				{#each resp.messages as message}
 					<Message {message} />
 				{/each}
 			{/if}
@@ -151,3 +168,14 @@
 	</div>
 	<ChatFooter {handleSubmit} {handleKeyDown} bind:newMessage isSubmitting={isSubmittingMessage} />
 </div>
+
+<style lang="postcss">
+	.hide-scrollbar {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+
+	.hide-scrollbar::-webkit-scrollbar {
+		display: none;
+	}
+</style>
