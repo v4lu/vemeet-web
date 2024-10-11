@@ -19,7 +19,8 @@
 
 	let newMessage = $state('');
 	let isSubmittingMessage = $state(false);
-	let messageContainer: HTMLDivElement;
+	let scrollContainer: HTMLDivElement;
+	let messageList: HTMLDivElement;
 	let isLoadingMore = $state(false);
 	let isInitialLoad = $state(true);
 	let prevScrollHeight = $state(0);
@@ -68,18 +69,18 @@
 	}
 
 	function scrollToBottom() {
-		if (messageContainer) {
-			messageContainer.scrollTop = messageContainer.scrollHeight;
+		if (scrollContainer) {
+			scrollContainer.scrollTop = scrollContainer.scrollHeight;
 		}
 	}
 
 	async function loadMoreMessages() {
 		if (!resp.hasMore || isLoadingMore) return;
 		isLoadingMore = true;
-		prevScrollHeight = messageContainer.scrollHeight;
+		prevScrollHeight = scrollContainer.scrollHeight;
 		await fetchData(resp.currentPage + 1);
 		isLoadingMore = false;
-		messageContainer.scrollTop = messageContainer.scrollHeight - prevScrollHeight;
+		scrollContainer.scrollTop = scrollContainer.scrollHeight - prevScrollHeight;
 	}
 
 	const debouncedLoadMoreMessages = debounce(() => {
@@ -87,8 +88,8 @@
 	}, 200);
 
 	function handleScroll() {
-		if (messageContainer) {
-			const { scrollTop, scrollHeight, clientHeight } = messageContainer;
+		if (scrollContainer) {
+			const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
 			isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
 
 			if (scrollTop === 0 && !isLoadingMore && resp.hasMore) {
@@ -104,8 +105,8 @@
 				setTimeout(scrollToBottom, 0);
 			});
 		}
-		if (messageContainer) {
-			messageContainer.addEventListener('scroll', handleScroll);
+		if (scrollContainer) {
+			scrollContainer.addEventListener('scroll', handleScroll);
 		}
 	});
 
@@ -120,14 +121,14 @@
 
 	onDestroy(() => {
 		cleanup();
-		if (messageContainer) {
-			messageContainer.removeEventListener('scroll', handleScroll);
+		if (scrollContainer) {
+			scrollContainer.removeEventListener('scroll', handleScroll);
 		}
 	});
 </script>
 
 <div class="grid flex-1 bg-background">
-	<div class="container flex items-center justify-between border-b p-4 px-6 shadow-sm">
+	<div class="container flex items-center justify-between border-b p-4 px-6 shadow-sm lg:bg-card">
 		<div class="flex items-center">
 			<a href={`/profile/${data.otherUser.id}`}>
 				<Avatar user={data.otherUser} class="mr-3 size-12" />
@@ -151,19 +152,23 @@
 
 	<div class="h-[calc(100dvh-64px-81px-65px-70px)] overflow-hidden">
 		<div
-			bind:this={messageContainer}
-			class="hide-scrollbar container h-full overflow-y-scroll pt-4"
+			bind:this={scrollContainer}
+			class="hide-scrollbar container h-full overflow-y-auto lg:border-x lg:border-border lg:bg-card"
 		>
-			{#if isLoadingMore}
-				<MessageSkeleton />
-			{/if}
-			{#if !resp.firstTime && (isInitialLoad || resp.isLoading) && resp.messages.length === 0}
-				<MessageSkeleton />
-			{:else}
-				{#each resp.messages as message}
-					<Message {message} />
-				{/each}
-			{/if}
+			<div bind:this={messageList} class="flex min-h-full flex-col justify-end">
+				<div class="mt-auto pt-4">
+					{#if isLoadingMore}
+						<MessageSkeleton />
+					{/if}
+					{#if !resp.firstTime && (isInitialLoad || resp.isLoading) && resp.messages.length === 0}
+						<MessageSkeleton />
+					{:else}
+						{#each resp.messages as message}
+							<Message {message} />
+						{/each}
+					{/if}
+				</div>
+			</div>
 		</div>
 	</div>
 	<ChatFooter {handleSubmit} {handleKeyDown} bind:newMessage isSubmitting={isSubmittingMessage} />
