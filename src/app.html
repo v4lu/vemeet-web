@@ -4,6 +4,20 @@
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com;
+    style-src 'self' 'unsafe-inline' https://unpkg.com;
+    img-src 'self' data: https://*.tile.openstreetmap.org;
+    font-src 'self';
+    connect-src 'self' https://*.tile.openstreetmap.org http://localhost:8070;
+    frame-src 'none';
+    object-src 'none'
+"
+		/>
+
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
