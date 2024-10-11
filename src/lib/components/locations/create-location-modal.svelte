@@ -8,6 +8,37 @@
 	import { Input, inputVariants } from '../ui/input';
 	import { Modal } from '../ui/modals';
 	import { Field } from '../ui/field';
+	import { sessionStore } from '$lib/stores/session.store';
+
+	type AddressComponent = {
+		house_number?: string;
+		road?: string;
+		pedestrian?: string;
+		city?: string;
+		town?: string;
+		village?: string;
+		country?: string;
+	};
+
+	type AddressSuggestion = {
+		display_name: string;
+		lat: number;
+		lon: number;
+		address: {
+			house_number?: string;
+			road?: string;
+			pedestrian?: string;
+			city?: string;
+			country?: string;
+		};
+	};
+
+	type NominatimResponse = {
+		display_name: string;
+		lat: string;
+		lon: string;
+		address: AddressComponent;
+	};
 
 	type Props = {
 		createLocation: (payload: CreateLocation) => Promise<void>;
@@ -31,7 +62,7 @@
 	let imageUrls = $state<string[]>([]);
 	let isSearching = $state(false);
 
-	let addressSuggestions = $state<any[]>([]);
+	let addressSuggestions = $state<AddressSuggestion[]>([]);
 	let showSuggestions = $state(false);
 	let fileInput: HTMLInputElement | null = $state(null);
 	let imageUploadLoading = $state(false);
@@ -55,10 +86,31 @@
 		isSearching = true;
 
 		try {
-			const response = await fetch(
-				`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=5`
-			);
-			addressSuggestions = await response.json();
+			let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=5&addressdetails=1`;
+			if ($sessionStore?.cityLat && $sessionStore?.cityLng) {
+				url += `&viewbox=${$sessionStore.cityLng - 0.1},${$sessionStore.cityLat - 0.1},${$sessionStore.cityLng + 0.1},${$sessionStore.cityLat + 0.1}`;
+			}
+
+			const response = await fetch(url, {
+				headers: {
+					'Accept-Language': 'en'
+				}
+			});
+			const data: NominatimResponse[] = await response.json();
+
+			addressSuggestions = data.map((item: NominatimResponse) => ({
+				display_name: item.display_name,
+				lat: Number.parseFloat(item.lat),
+				lon: Number.parseFloat(item.lon),
+				address: {
+					house_number: item.address.house_number,
+					road: item.address.road,
+					pedestrian: item.address.pedestrian,
+					city: item.address.city || item.address.town || item.address.village,
+					country: item.address.country
+				}
+			}));
+
 			showSuggestions = addressSuggestions.length > 0;
 		} catch (error) {
 			console.error('Error fetching address suggestions:', error);
@@ -67,24 +119,34 @@
 			isSearching = false;
 		}
 	}, 400);
-
 	function handleAddressInput() {
 		debouncedSearchAddress();
 	}
 
-	function selectAddress(suggestion: any) {
-		address = suggestion.display_name;
-		latitude = Number.parseFloat(suggestion.lat);
-		longitude = Number.parseFloat(suggestion.lon);
+	function selectAddress(suggestion: AddressSuggestion) {
+		const addressParts = [];
 
-		if (suggestion.address) {
-			city = suggestion.address.city || suggestion.address.town || suggestion.address.village || '';
-			country = suggestion.address.country || '';
-		} else {
-			const parts = suggestion.display_name.split(', ');
-			city = parts[parts.length - 3] || '';
-			country = parts[parts.length - 1] || '';
+		const street = suggestion.address.road || suggestion.address.pedestrian;
+		if (suggestion.address.house_number && street) {
+			addressParts.push(`${street} ${suggestion.address.house_number}`);
+		} else if (street) {
+			addressParts.push(street);
 		}
+
+		if (suggestion.address.city) {
+			addressParts.push(suggestion.address.city);
+		}
+
+		if (suggestion.address.country) {
+			addressParts.push(suggestion.address.country);
+		}
+
+		address = addressParts.join(', ');
+		latitude = suggestion.lat;
+		longitude = suggestion.lon;
+
+		city = suggestion.address.city || '';
+		country = suggestion.address.country || '';
 
 		showSuggestions = false;
 	}
