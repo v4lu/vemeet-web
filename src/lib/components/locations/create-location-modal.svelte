@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { uploadImage } from '$lib/api';
 	import { toast } from '$lib/stores/toast.store';
-	import type { CreateLocation } from '$lib/types/geo.types';
+	import type { AddressSuggestion, CreateLocation, NominatimResponse } from '$lib/types/geo.types';
 	import { clickOutside, debounce } from '$lib/utils';
 	import Icon from '@iconify/svelte';
 	import { Button } from '../ui/button';
@@ -9,36 +9,6 @@
 	import { Modal } from '../ui/modals';
 	import { Field } from '../ui/field';
 	import { sessionStore } from '$lib/stores/session.store';
-
-	type AddressComponent = {
-		house_number?: string;
-		road?: string;
-		pedestrian?: string;
-		city?: string;
-		town?: string;
-		village?: string;
-		country?: string;
-	};
-
-	type AddressSuggestion = {
-		display_name: string;
-		lat: number;
-		lon: number;
-		address: {
-			house_number?: string;
-			road?: string;
-			pedestrian?: string;
-			city?: string;
-			country?: string;
-		};
-	};
-
-	type NominatimResponse = {
-		display_name: string;
-		lat: string;
-		lon: string;
-		address: AddressComponent;
-	};
 
 	type Props = {
 		createLocation: (payload: CreateLocation) => Promise<void>;

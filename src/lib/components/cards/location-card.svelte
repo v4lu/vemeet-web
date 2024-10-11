@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { formatTimestamp } from '$lib/date';
 	import type {
+		AddressSuggestion,
 		LocationReviewResponse,
+		NominatimResponse,
 		VeganLocation,
 		VeganLocationUpdateRequest
 	} from '$lib/types/geo.types';
@@ -16,6 +18,8 @@
 	import { Field } from '../ui/field';
 	import { toast } from '$lib/stores/toast.store';
 	import { uploadImage } from '$lib/api';
+	import { clickOutside, debounce } from '$lib/utils';
+	import { sessionStore } from '$lib/stores/session.store';
 
 	type VeganLocationCardProps = {
 		location: VeganLocation;
@@ -38,7 +42,7 @@
 	let isDeleteModalConfirmOpen = $state(false);
 	let isReviewsModalOpen = $state(false);
 	let isUpdateModalOpen = $state(false);
-	let updatePayload: VeganLocationUpdateRequest = {};
+	let updatePayload: VeganLocationUpdateRequest = $state({});
 
 	let hasNextImage = $derived(currentImageIndex < location.images.length - 1);
 	let hasPrevImage = $derived(currentImageIndex > 0);
@@ -47,6 +51,10 @@
 	let imageUploadLoading = $state(false);
 	let imagesToAdd: string[] = $state([]);
 	let imageIdsToRemove: number[] = $state([]);
+
+	let addressSuggestions = $state<AddressSuggestion[]>([]);
+	let showSuggestions = $state(false);
+	let isSearching = $state(false);
 
 	const locationTypes = $state(['Cafe', 'Bar', 'Restaurant', 'Shop']);
 	const priceRanges = $state([
@@ -172,46 +180,131 @@
 		const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
 		return Math.round((sum / reviews.length) * 10) / 10;
 	}
+
+	const debouncedSearchAddress = debounce(async () => {
+		if (!updatePayload.address || updatePayload.address.length < 3) {
+			addressSuggestions = [];
+			showSuggestions = false;
+			isSearching = false;
+			return;
+		}
+
+		isSearching = true;
+
+		try {
+			let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(updatePayload.address)}&limit=5&addressdetails=1`;
+			if ($sessionStore?.cityLat && $sessionStore?.cityLng) {
+				url += `&viewbox=${$sessionStore.cityLng - 0.1},${$sessionStore.cityLat - 0.1},${$sessionStore.cityLng + 0.1},${$sessionStore.cityLat + 0.1}`;
+			}
+
+			const response = await fetch(url, {
+				headers: {
+					'Accept-Language': 'en'
+				}
+			});
+			const data: NominatimResponse[] = await response.json();
+
+			addressSuggestions = data.map((item: NominatimResponse) => ({
+				display_name: item.display_name,
+				lat: Number.parseFloat(item.lat),
+				lon: Number.parseFloat(item.lon),
+				address: {
+					house_number: item.address.house_number,
+					road: item.address.road,
+					pedestrian: item.address.pedestrian,
+					city: item.address.city || item.address.town || item.address.village,
+					country: item.address.country
+				}
+			}));
+
+			showSuggestions = addressSuggestions.length > 0;
+		} catch (error) {
+			console.error('Error fetching address suggestions:', error);
+			toast.error('Failed to fetch address suggestions');
+		} finally {
+			isSearching = false;
+		}
+	}, 400);
+
+	function handleAddressInput() {
+		debouncedSearchAddress();
+	}
+
+	function selectAddress(suggestion: AddressSuggestion) {
+		const addressParts = [];
+
+		const street = suggestion.address.road || suggestion.address.pedestrian;
+		if (suggestion.address.house_number && street) {
+			addressParts.push(`${street} ${suggestion.address.house_number}`);
+		} else if (street) {
+			addressParts.push(street);
+		}
+
+		if (suggestion.address.city) {
+			addressParts.push(suggestion.address.city);
+		}
+
+		if (suggestion.address.country) {
+			addressParts.push(suggestion.address.country);
+		}
+
+		updatePayload.address = addressParts.join(', ');
+		updatePayload.latitude = suggestion.lat;
+		updatePayload.longitude = suggestion.lon;
+
+		updatePayload.city = suggestion.address.city || '';
+		updatePayload.country = suggestion.address.country || '';
+
+		showSuggestions = false;
+	}
+
+	function handleKeyDown(event: KeyboardEvent, suggestion: AddressSuggestion) {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			selectAddress(suggestion);
+		}
+	}
 </script>
 
 <div
 	class="mb-6 overflow-hidden rounded-xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
 >
 	<div class="relative">
-		<div class="absolute right-3 top-3 z-10">
-			<Dropdown
-				triggerIcon="solar:menu-dots-bold"
-				bind:isOpen={isSettingsOpen}
-				triggerClass="size-8 flex min-w-0 p-0 shadow-none justify-center bg-none rounded-full hover:bg-none transition-colors border-none"
-				triggerIconClass="m-0 p-0 size-5 hover:text-primary"
-				class="right-0 top-10"
-			>
-				<div class="flex w-full flex-col gap-1 p-1">
-					<Button
-						variant="ghost"
-						class="flex w-full justify-start"
-						size="sm"
-						onclick={handleUpdate}
-					>
-						<Icon icon="solar:pen-bold" class="mr-2" />
-						Edit
-					</Button>
-					<Button
-						variant="ghost"
-						size="sm"
-						class="flex w-full justify-start text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive"
-						onclick={() => {
-							isDeleteModalConfirmOpen = true;
-							isSettingsOpen = false;
-						}}
-					>
-						<Icon icon="solar:trash-bin-2-bold" class="mr-2" />
-						Delete
-					</Button>
-				</div>
-			</Dropdown>
-		</div>
-
+		{#if $sessionStore.id === location.user.id}
+			<div class="absolute right-3 top-3 z-10">
+				<Dropdown
+					triggerIcon="solar:menu-dots-bold"
+					bind:isOpen={isSettingsOpen}
+					triggerClass="size-8 flex min-w-0 p-0 shadow-none justify-center bg-none rounded-full hover:bg-none transition-colors border-none"
+					triggerIconClass="m-0 p-0 size-5 hover:text-primary"
+					class="right-0 top-10"
+				>
+					<div class="flex w-full flex-col gap-1 p-1">
+						<Button
+							variant="ghost"
+							class="flex w-full justify-start"
+							size="sm"
+							onclick={handleUpdate}
+						>
+							<Icon icon="solar:pen-bold" class="mr-2" />
+							Edit
+						</Button>
+						<Button
+							variant="ghost"
+							size="sm"
+							class="flex w-full justify-start text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive"
+							onclick={() => {
+								isDeleteModalConfirmOpen = true;
+								isSettingsOpen = false;
+							}}
+						>
+							<Icon icon="solar:trash-bin-2-bold" class="mr-2" />
+							Delete
+						</Button>
+					</div>
+				</Dropdown>
+			</div>
+		{/if}
 		<div class="relative mb-4 flex items-center justify-between p-4">
 			<div class="flex flex-col">
 				<h2 class="text-xl font-semibold text-foreground">{location.name}</h2>
@@ -385,7 +478,39 @@
 					<Input bind:value={updatePayload.description} placeholder="Description" />
 				</Field>
 				<Field name="Address">
-					<Input bind:value={updatePayload.address} placeholder="Address" required />
+					<div class="space-y-2" use:clickOutside={() => (showSuggestions = false)}>
+						<Input
+							bind:value={updatePayload.address}
+							placeholder="Address"
+							required
+							oninput={handleAddressInput}
+						/>
+						{#if isSearching}
+							<div
+								class="absolute z-50 mt-1 flex max-h-60 w-full items-center justify-center overflow-auto rounded-md bg-popover py-1 text-sm shadow-md"
+							>
+								<Icon icon="eos-icons:loading" class="size-5 animate-spin text-primary" />
+							</div>
+						{:else if showSuggestions}
+							<ul
+								class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-popover py-1 text-sm shadow-md"
+								role="listbox"
+							>
+								{#each addressSuggestions as suggestion}
+									<li>
+										<button
+											type="button"
+											class="w-full cursor-pointer px-4 py-2 text-left hover:bg-muted"
+											onclick={() => selectAddress(suggestion)}
+											onkeydown={(event) => handleKeyDown(event, suggestion)}
+										>
+											{suggestion.display_name}
+										</button>
+									</li>
+								{/each}
+							</ul>
+						{/if}
+					</div>
 				</Field>
 				<Field name="City">
 					<Input bind:value={updatePayload.city} placeholder="City" required />
@@ -450,7 +575,7 @@
 								<div class="relative h-24 w-24 overflow-hidden rounded-lg">
 									<img
 										src={imageUrl}
-										alt="New location image"
+										alt="New location"
 										class="h-full w-full object-cover object-center transition-transform duration-300 hover:scale-110"
 									/>
 									<button

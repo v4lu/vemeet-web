@@ -17,6 +17,36 @@ export type City = {
 	cityLng?: number;
 };
 
+export type AddressComponent = {
+	house_number?: string;
+	road?: string;
+	pedestrian?: string;
+	city?: string;
+	town?: string;
+	village?: string;
+	country?: string;
+};
+
+export type AddressSuggestion = {
+	display_name: string;
+	lat: number;
+	lon: number;
+	address: {
+		house_number?: string;
+		road?: string;
+		pedestrian?: string;
+		city?: string;
+		country?: string;
+	};
+};
+
+export type NominatimResponse = {
+	display_name: string;
+	lat: string;
+	lon: string;
+	address: AddressComponent;
+};
+
 export type CreateLocation = {
 	name: string;
 	description?: string;
