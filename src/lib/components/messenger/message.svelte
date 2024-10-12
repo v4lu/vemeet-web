@@ -6,6 +6,7 @@
 	import { fly } from 'svelte/transition';
 	import Icon from '@iconify/svelte';
 	import { ImageModal } from '../ui/modals';
+	import { AudioPlayer } from '../ui/audio-player';
 
 	type Props = {
 		message: Message;
@@ -49,7 +50,6 @@
 				<p class="max-w-[18rem] text-balance break-words text-sm">{message.content}</p>
 			</div>
 		{/if}
-
 		{#if message.chatAssets && message.chatAssets.length > 0}
 			<div class="mt-2 flex flex-wrap gap-2">
 				{#each message.chatAssets as asset}
@@ -69,9 +69,7 @@
 							<video src={asset.fileUrl} class="h-full w-full object-cover" controls></video>
 						</div>
 					{:else if asset.fileType === 'AUDIO'}
-						<div class="w-full max-w-[18rem]">
-							<audio src={asset.fileUrl} controls class="w-full"></audio>
-						</div>
+						<AudioPlayer src={asset.fileUrl!} durationSeconds={asset.durationSeconds || 0} />
 					{:else}
 						<div class="flex items-center gap-2 rounded-lg bg-muted p-2">
 							<Icon icon="solar:file-bold" class="size-5" />
@@ -81,7 +79,6 @@
 				{/each}
 			</div>
 		{/if}
-
 		<span class="mt-1 text-xs text-muted-foreground">
 			{formatTimestamp(message.createdAt)}
 		</span>

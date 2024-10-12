@@ -66,25 +66,52 @@ export async function uploadImage({
 	setImageUploadLoading,
 	setImageUrl
 }: UploadImageType): Promise<void> {
+	if (!file) return;
 	setImageUploadLoading(true);
 	const formData = new FormData();
-	if (file) {
-		formData.append('file', file);
-		try {
-			const res = await api
-				.post<{ url: string }>('files/image-avif', {
-					headers: {
-						Authorization: `Bearer ${authToken}`
-					},
-					body: formData
-				})
-				.json();
+	formData.append('file', file);
+	try {
+		const res = await api
+			.post<{ url: string }>('files/image-avif', {
+				headers: {
+					Authorization: `Bearer ${authToken}`
+				},
+				body: formData
+			})
+			.json();
 
-			setImageUrl(res.url);
-			setImageUploadLoading(false);
-		} catch (error) {
-			//TODO toast
-			console.error(error);
-		}
+		setImageUrl(res.url);
+		setImageUploadLoading(false);
+	} catch (error) {
+		//TODO toast
+		console.error(error);
 	}
+}
+
+type UploadType = {
+	file: File | Blob | null;
+	authToken: string;
+};
+
+type UplaodRespose = {
+	url: string;
+};
+
+export async function uploadFile({
+	file,
+	authToken
+}: UploadType): Promise<UplaodRespose | undefined> {
+	if (!file) return;
+	const formData = new FormData();
+	formData.append('file', file);
+	const res = await api
+		.post<UplaodRespose>('files/single', {
+			headers: {
+				Authorization: `Bearer ${authToken}`
+			},
+			body: formData
+		})
+		.json();
+
+	return res;
 }

@@ -4,7 +4,7 @@
 	import { Button } from '../ui/button';
 	import { inputVariants } from '../ui/input';
 	import { cn } from '$lib/cn';
-	import { uploadImage } from '$lib/api';
+	import { uploadFile, uploadImage } from '$lib/api';
 	import type { ChatAssetReq, CreateMessage } from '$lib/types/chat.types';
 
 	type Props = {
@@ -19,6 +19,111 @@
 	let imageUrls = $state<string[]>([]);
 	let fileInput: HTMLInputElement | null = $state(null);
 	let imageUploadLoading = $state(false);
+
+	// Audio recording states
+	let mediaRecorder: MediaRecorder | null = $state(null);
+	let audioChunks = $state<Blob[]>([]);
+	let audioUrl = $state('');
+	let isRecording = $state(false);
+	let permissionStatus = $state<PermissionState>('prompt');
+	let errorMessage = $state('');
+	let audioElement: HTMLAudioElement | null = $state(null);
+
+	$effect(() => {
+		checkPermission();
+	});
+
+	async function checkPermission(): Promise<void> {
+		try {
+			const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+			permissionStatus = result.state;
+			result.onchange = () => {
+				permissionStatus = result.state;
+			};
+		} catch (error) {
+			console.error('Error checking permission:', error);
+			permissionStatus = 'prompt';
+		}
+	}
+
+	async function requestPermissionAndSetup(): Promise<void> {
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			setupMediaRecorder(stream);
+			permissionStatus = 'granted';
+			errorMessage = '';
+		} catch (error) {
+			console.error('Error accessing microphone:', error);
+			permissionStatus = 'denied';
+			errorMessage = 'Microphone access denied. Please grant permission in your browser settings.';
+		}
+	}
+
+	function setupMediaRecorder(stream: MediaStream): void {
+		mediaRecorder = new MediaRecorder(stream);
+		mediaRecorder.ondataavailable = (event: BlobEvent) => {
+			audioChunks = [...audioChunks, event.data];
+		};
+		mediaRecorder.onstop = () => {
+			const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+			audioUrl = URL.createObjectURL(audioBlob);
+			audioChunks = [];
+		};
+	}
+
+	async function toggleRecording(): Promise<void> {
+		if (permissionStatus === 'granted' && mediaRecorder) {
+			if (isRecording) {
+				mediaRecorder.stop();
+				isRecording = false;
+				await uploadAudio();
+			} else {
+				audioChunks = [];
+				mediaRecorder.start();
+				isRecording = true;
+			}
+		} else {
+			await requestPermissionAndSetup();
+		}
+	}
+
+	async function uploadAudio(): Promise<void> {
+		if (!audioUrl) return;
+		try {
+			const response = await fetch(audioUrl);
+			const blob = await response.blob();
+			const file = new File([blob], 'audio.mp3', { type: 'audio/mpeg' });
+
+			//@ts-ignore
+			const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+			const arrayBuffer = await file.arrayBuffer();
+			const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+			const durationSeconds = audioBuffer.duration;
+
+			const uploadedFile = await uploadFile({ file, authToken });
+			if (uploadedFile) {
+				const chatAsset: ChatAssetReq = {
+					assetUrl: uploadedFile.url,
+					fileSize: file.size,
+					fileType: 'AUDIO',
+					durationSeconds: Math.round(durationSeconds),
+					mimeType: file.type
+				};
+				const messageData: Omit<CreateMessage, 'firstTime'> = {
+					recipientId: receipantId,
+					messageType: 'AUDIO',
+					content: null,
+					isOneTime: false,
+					chatAssets: [chatAsset]
+				};
+				await handleSubmit(messageData);
+				audioUrl = '';
+			}
+		} catch (error) {
+			console.error('Error uploading audio:', error);
+			errorMessage = 'Failed to upload audio. Please try again.';
+		}
+	}
 
 	function handleInputFileClick(): void {
 		if (!fileInput) return;
@@ -48,8 +153,7 @@
 					imageUploadLoading = false;
 				}
 			} else {
-				// TODO: Use toast for this error message
-				console.error('You can upload a maximum of 5 images.');
+				errorMessage = 'You can upload a maximum of 5 images.';
 			}
 		}
 	}
@@ -132,7 +236,7 @@
 				onclick={handleInputFileClick}
 				variant="outline"
 				size="icon-sm"
-				class="rounded-full transition-all duration-300 hover:bg-primary hover:text-white"
+				class="transition-all duration-300 hover:bg-primary hover:text-white"
 				type="button"
 			>
 				<Icon icon="solar:gallery-add-bold" class="size-5" />
@@ -145,7 +249,19 @@
 				onchange={handleImageUpload}
 				accept="image/*"
 			/>
-			{#if newMessage.length > 0 || imageUrls.length > 0}
+			<Button
+				onclick={toggleRecording}
+				variant="outline"
+				size="icon-sm"
+				class=" transition-all duration-300 hover:bg-primary hover:text-white"
+				type="button"
+			>
+				<Icon
+					icon={isRecording ? 'solar:microphone-3-bold' : 'solar:microphone-bold'}
+					class="size-5"
+				/>
+			</Button>
+			{#if newMessage.length > 0 || imageUrls.length > 0 || audioUrl}
 				<div in:fly={{ x: 20, duration: 300 }} out:fade={{ duration: 200 }}>
 					<Button disabled={isSubmitting} type="submit" size="icon" class="rounded-full">
 						{#if !isSubmitting}
@@ -158,4 +274,10 @@
 			{/if}
 		</div>
 	</form>
+	{#if errorMessage}
+		<p class="error mt-2 text-red-500">{errorMessage}</p>
+	{/if}
+	{#if audioUrl}
+		<audio bind:this={audioElement} controls src={audioUrl} class="mt-2 w-full"></audio>
+	{/if}
 </div>

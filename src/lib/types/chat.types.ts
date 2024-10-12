@@ -65,7 +65,7 @@ export type ChatAssetReq = {
 export type CreateMessage = {
 	recipientId: number;
 	messageType: MessageType;
-	content: string;
+	content: string | null;
 	isOneTime: boolean;
 	firstTime: boolean;
 	chatAssets?: ChatAssetReq[];
