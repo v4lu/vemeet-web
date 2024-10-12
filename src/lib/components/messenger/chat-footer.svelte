@@ -20,14 +20,11 @@
 	let fileInput: HTMLInputElement | null = $state(null);
 	let imageUploadLoading = $state(false);
 
-	// Audio recording states
 	let mediaRecorder: MediaRecorder | null = $state(null);
 	let audioChunks = $state<Blob[]>([]);
-	let audioUrl = $state('');
 	let isRecording = $state(false);
 	let permissionStatus = $state<PermissionState>('prompt');
 	let errorMessage = $state('');
-	let audioElement: HTMLAudioElement | null = $state(null);
 
 	$effect(() => {
 		checkPermission();
@@ -65,9 +62,7 @@
 			audioChunks = [...audioChunks, event.data];
 		};
 		mediaRecorder.onstop = () => {
-			const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
-			audioUrl = URL.createObjectURL(audioBlob);
-			audioChunks = [];
+			uploadAudio();
 		};
 	}
 
@@ -76,7 +71,6 @@
 			if (isRecording) {
 				mediaRecorder.stop();
 				isRecording = false;
-				await uploadAudio();
 			} else {
 				audioChunks = [];
 				mediaRecorder.start();
@@ -88,11 +82,9 @@
 	}
 
 	async function uploadAudio(): Promise<void> {
-		if (!audioUrl) return;
 		try {
-			const response = await fetch(audioUrl);
-			const blob = await response.blob();
-			const file = new File([blob], 'audio.mp3', { type: 'audio/mpeg' });
+			const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+			const file = new File([audioBlob], 'audio.mp3', { type: 'audio/mpeg' });
 
 			//@ts-ignore
 			const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -117,7 +109,6 @@
 					chatAssets: [chatAsset]
 				};
 				await handleSubmit(messageData);
-				audioUrl = '';
 			}
 		} catch (error) {
 			console.error('Error uploading audio:', error);
@@ -253,7 +244,7 @@
 				onclick={toggleRecording}
 				variant="outline"
 				size="icon-sm"
-				class=" transition-all duration-300 hover:bg-primary hover:text-white"
+				class="transition-all duration-300 hover:bg-primary hover:text-white"
 				type="button"
 			>
 				<Icon
@@ -261,7 +252,7 @@
 					class="size-5"
 				/>
 			</Button>
-			{#if newMessage.length > 0 || imageUrls.length > 0 || audioUrl}
+			{#if newMessage.length > 0 || imageUrls.length > 0}
 				<div in:fly={{ x: 20, duration: 300 }} out:fade={{ duration: 200 }}>
 					<Button disabled={isSubmitting} type="submit" size="icon" class="rounded-full">
 						{#if !isSubmitting}
@@ -276,8 +267,5 @@
 	</form>
 	{#if errorMessage}
 		<p class="error mt-2 text-red-500">{errorMessage}</p>
-	{/if}
-	{#if audioUrl}
-		<audio bind:this={audioElement} controls src={audioUrl} class="mt-2 w-full"></audio>
 	{/if}
 </div>
