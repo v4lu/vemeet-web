@@ -12,17 +12,30 @@ export type Chat = {
 	otherUserSeenStatus: boolean;
 };
 
+export type ChatAsset = {
+	id: number;
+	messageId: number;
+	chatId: number;
+	fileType: string;
+	fileSize: number;
+	mimeType: string | null;
+	durationSeconds: number | null;
+	fileUrl: string | null;
+	createdAt: string;
+};
+
 export type Message = {
 	id: number;
 	chatId: number;
 	sender: User;
 	recipient: User;
 	messageType: string;
-	content: string;
+	content: string | null;
 	createdAt: string;
 	readAt: string;
 	isOneTime: boolean;
 	isSessionUserSender: boolean;
+	chatAssets: ChatAsset[];
 };
 
 export type MessagesPagableResponse = {
@@ -37,4 +50,23 @@ export type MessagesPagableResponse = {
 	sort: Sort;
 	numberOfElements: number;
 	empty: boolean;
+};
+
+type MessageType = 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE';
+
+export type ChatAssetReq = {
+	fileType: string;
+	fileSize: number;
+	mimeType?: string;
+	durationSeconds?: number;
+	assetUrl: string;
+};
+
+export type CreateMessage = {
+	recipientId: number;
+	messageType: MessageType;
+	content: string;
+	isOneTime: boolean;
+	firstTime: boolean;
+	chatAssets?: ChatAssetReq[];
 };

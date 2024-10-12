@@ -2,21 +2,10 @@ import { browser } from '$app/environment';
 import { authAPI } from '$lib/api';
 import { WEBSOCKET_URL } from '$lib/constants';
 import { toast } from '$lib/stores/toast.store';
-import type { Message, MessagesPagableResponse } from '$lib/types/chat.types';
+import type { CreateMessage, Message, MessagesPagableResponse } from '$lib/types/chat.types';
 import type { ServerErrorResponse } from '$lib/types/ky.types';
 import { HTTPError } from 'ky';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-
-type MessagePayload = {
-	recipientId: number;
-	messageType: string;
-	content: string;
-	isOneTime: boolean;
-};
-
-type MessagePayloadExtended = MessagePayload & {
-	firstTime: boolean;
-};
 
 type UseFetchChatArgs = {
 	userId: number;
@@ -35,7 +24,7 @@ class Chat {
 	firstTime = $state(true);
 }
 
-export function useFetchChat({ authToken, chatId, userId, firstTime }: UseFetchChatArgs) {
+export function useChat({ authToken, chatId, userId, firstTime }: UseFetchChatArgs) {
 	const resp = new Chat();
 	const api = authAPI(authToken);
 	resp.firstTime = firstTime;
@@ -84,13 +73,13 @@ export function useFetchChat({ authToken, chatId, userId, firstTime }: UseFetchC
 		resp.isLoading = false;
 	}
 
-	async function postMessage(payload: MessagePayload) {
+	async function postMessage(payload: Omit<CreateMessage, 'firstTime'>) {
 		try {
-			const message: MessagePayloadExtended = {
+			const message: CreateMessage = {
 				...payload,
 				firstTime: resp.firstTime
 			};
-			const res = await api.post<Message>(`chats/messages`, { json: message }).json();
+			const res = await api.post<Message>(`chats/message`, { json: message }).json();
 			resp.firstTime = false;
 			toast.success('Message sent successfully');
 			return res;

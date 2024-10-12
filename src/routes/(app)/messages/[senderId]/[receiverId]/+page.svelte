@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useFetchChat } from '$lib/api/use-fetch-chat.svelte';
+	import { useChat } from '$lib/api/use-chat.svelte.js';
 	import { ChatFooter, Message } from '$lib/components/messenger/index.js';
 	import { MessageSkeleton } from '$lib/components/skeleton';
 	import { Avatar } from '$lib/components/ui/avatar/index.js';
@@ -10,14 +10,13 @@
 	import { onDestroy } from 'svelte';
 
 	let { data } = $props();
-	const { resp, fetchData, postMessage, cleanup } = useFetchChat({
+	const { resp, fetchData, postMessage, cleanup } = useChat({
 		authToken: data.accessToken,
 		userId: data.user.id,
 		chatId: data.chat?.id,
 		firstTime: data.firstTime
 	});
 
-	let newMessage = $state('');
 	let isSubmittingMessage = $state(false);
 	let scrollContainer: HTMLDivElement;
 	let messageList: HTMLDivElement;
@@ -37,34 +36,6 @@
 			if (isNearBottom) {
 				setTimeout(scrollToBottom, 0);
 			}
-		}
-	}
-
-	async function handleSubmit(event: Event) {
-		event.preventDefault();
-		if (newMessage.trim().length > 0) {
-			isSubmittingMessage = true;
-			const messageData = {
-				recipientId: data.otherUser.id,
-				messageType: 'text',
-				content: newMessage,
-				isOneTime: false
-			};
-
-			const res = await postMessage(messageData);
-			if (res) {
-				updateMessages([res]);
-				newMessage = '';
-				setTimeout(scrollToBottom, 0);
-			}
-			isSubmittingMessage = false;
-		}
-	}
-
-	function handleKeyDown(event: KeyboardEvent) {
-		if (event.key === 'Enter' && !event.shiftKey) {
-			event.preventDefault();
-			handleSubmit(event);
 		}
 	}
 
@@ -171,7 +142,21 @@
 			</div>
 		</div>
 	</div>
-	<ChatFooter {handleSubmit} {handleKeyDown} bind:newMessage isSubmitting={isSubmittingMessage} />
+	<ChatFooter
+		handleSubmit={async (message) => {
+			isSubmittingMessage = true;
+			const res = await postMessage(message);
+			if (res) {
+				updateMessages([res]);
+
+				setTimeout(scrollToBottom, 0);
+			}
+			isSubmittingMessage = false;
+		}}
+		receipantId={+data.receiverId}
+		authToken={data.accessToken}
+		isSubmitting={isSubmittingMessage}
+	/>
 </div>
 
 <style lang="postcss">
