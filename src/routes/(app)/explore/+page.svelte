@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { useSearch } from '$lib/api/use-search.svelte';
 	import { cn } from '$lib/cn';
-	import { Avatar } from '$lib/components/ui/avatar';
+	import { UserHorizontalCard } from '$lib/components/cards';
 	import { Input } from '$lib/components/ui/input';
 	import { clickOutside, debounce } from '$lib/utils';
 	import Icon from '@iconify/svelte';
@@ -81,13 +81,7 @@
 				{:else if showResults}
 					{#if resp.users.length > 0}
 						{#each resp.users as user}
-							<a href={`/profile/${user.id}`} class="flex items-center gap-3 p-3 hover:bg-muted/50">
-								<Avatar {user} class="size-10" />
-								<div>
-									<p class="font-semibold">{user.username}</p>
-									<p class="text-sm text-muted-foreground">{user.name}</p>
-								</div>
-							</a>
+							<UserHorizontalCard {user} notRounded />
 						{/each}
 					{:else}
 						<div class="p-3 text-sm text-muted-foreground">

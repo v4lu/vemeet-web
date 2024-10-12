@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { useVeganLocation } from '$lib/api/use-single-vegan-location.svelte.js';
 	import { LocationCard } from '$lib/components/cards/index.js';
+	import { LocationCardSkeleton } from '$lib/components/skeleton';
 
 	let { data } = $props();
 	const { resp, deleteLocation, updateLocation, createReview, deleteReview, patchReview } =
@@ -20,8 +21,6 @@
 			isLocationDeleting={resp.isLoading}
 		/>
 	{:else if resp.isLoading}
-		<p>Loading...</p>
-	{:else if resp.error}
-		<p>Error: {resp.error.message}</p>
+		<LocationCardSkeleton />
 	{/if}
 </main>

@@ -1,24 +1,28 @@
 <script lang="ts">
+	import { cn } from '$lib/cn';
 	import type { User } from '$lib/types/user.types';
 	import { Avatar } from '../ui/avatar';
 
 	type UserHorizontalCardProps = {
 		user: User;
+		class?: string;
+		notRounded?: boolean;
 	};
 
-	let { user }: UserHorizontalCardProps = $props();
+	let { user, notRounded = false, class: className }: UserHorizontalCardProps = $props();
 </script>
 
 <a
 	href={`/profile/${user.id}`}
-	class="group flex w-full cursor-pointer items-center justify-start rounded-2xl border border-border bg-accent px-3 py-2 backdrop-blur-[10px] transition duration-150 ease-in-out hover:border-primary"
+	class={cn(
+		'flex items-center gap-3 p-3 hover:bg-muted/50',
+		!notRounded && 'rounded-lg',
+		className
+	)}
 >
-	<Avatar {user} class="size-8" />
-	<div class="ml-[10px] min-w-[14rem]">
-		<div class="flex items-center justify-between">
-			<p class="font-medium transition-colors duration-200 group-hover:text-primary">
-				{user.username}
-			</p>
-		</div>
+	<Avatar {user} class="size-10" />
+	<div>
+		<p class="font-semibold">{user.username}</p>
+		<p class="text-sm text-muted-foreground">{user.name}</p>
 	</div>
 </a>

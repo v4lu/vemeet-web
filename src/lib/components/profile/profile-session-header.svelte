@@ -269,7 +269,7 @@
 
 {#if isFollowersModalOpen}
 	<Modal onClose={() => (isFollowersModalOpen = false)}>
-		<div class="hide-scrollbar max-h-[25rem] overflow-y-auto">
+		<div class="hide-scrollbar max-h-[25rem] w-[18rem] overflow-y-auto">
 			<h2 class="mb-4 text-xl font-semibold">Followers</h2>
 			<div class="grid gap-2">
 				{#if isLoading}
@@ -286,7 +286,7 @@
 
 {#if isFollowingModalOpen}
 	<Modal onClose={() => (isFollowingModalOpen = false)}>
-		<div class="hide-scrollbar max-h-[25rem] overflow-y-auto">
+		<div class="hide-scrollbar max-h-[25rem] w-[18rem] overflow-y-auto">
 			<h2 class="mb-4 text-xl font-semibold">Following</h2>
 			<div class="grid gap-2">
 				{#if isLoading}
