@@ -115,3 +115,30 @@ export async function uploadFile({
 
 	return res;
 }
+
+// we should use this new function everywhere it is better
+
+type UploadImgType = {
+	authToken: string;
+	file: File | Blob | null;
+};
+export async function uploadImg({ authToken, file }: UploadImgType): Promise<string | undefined> {
+	if (!file) return;
+	const formData = new FormData();
+	formData.append('file', file);
+	try {
+		const res = await api
+			.post<{ url: string }>('files/image-avif', {
+				headers: {
+					Authorization: `Bearer ${authToken}`
+				},
+				body: formData
+			})
+			.json();
+
+		return res.url;
+	} catch (error) {
+		//TODO toast
+		console.error(error);
+	}
+}

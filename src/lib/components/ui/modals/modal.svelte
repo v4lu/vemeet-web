@@ -7,9 +7,10 @@
 	type ModalProps = {
 		onClose: () => void;
 		class?: string;
+		parentClass?: string;
 		children: Snippet;
 	};
-	let { onClose, children, class: className }: ModalProps = $props();
+	let { onClose, children, parentClass, class: className }: ModalProps = $props();
 
 	let modalContent = $state<HTMLDivElement>();
 
@@ -35,7 +36,10 @@
 </script>
 
 <div
-	class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-12 backdrop-blur-sm"
+	class={cn(
+		'fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-12 backdrop-blur-sm',
+		parentClass
+	)}
 	transition:fade={{ duration: 200 }}
 >
 	<div
