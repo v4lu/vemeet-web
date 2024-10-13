@@ -9,7 +9,7 @@
 <div
 	class="flex min-h-dvh flex-1 flex-col bg-gradient-to-r from-primary/10 via-primary/5 to-transparent"
 >
-	<Header pathname={data.path} />
+	<Header pathname={data.path} authToken={data.accessToken} />
 	<main class="mb-10 mt-14 flex-1 pb-4">
 		{@render children()}
 	</main>
