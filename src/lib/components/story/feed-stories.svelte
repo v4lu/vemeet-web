@@ -35,33 +35,31 @@
 	}
 </script>
 
-<div class="flex space-x-4 p-2">
-	<div class="flex flex-col items-center">
-		<Button
-			variant="outline"
-			size="icon"
-			class="size-16 rounded-full"
-			onclick={() => (isCreateStoryOpen = true)}
-		>
-			<Icon icon="solar:add-circle-bold" class="size-8 text-primary" />
-		</Button>
-		<span class="mt-1 text-xs">Add Story</span>
-	</div>
+<div class="flex flex-col items-center">
+	<Button
+		variant="outline"
+		size="icon"
+		class="size-16 rounded-full"
+		onclick={() => (isCreateStoryOpen = true)}
+	>
+		<Icon icon="solar:add-circle-bold" class="size-8 text-primary" />
+	</Button>
+	<span class="mt-1 text-xs">Add Story</span>
+</div>
 
-	{#if userStories.length > 0}
-		<button onclick={() => openStoryViewer(0)}>
-			<StoryCircle user={sessionUser} />
+{#if userStories.length > 0}
+	<button onclick={() => openStoryViewer(0)}>
+		<StoryCircle user={sessionUser} />
+	</button>
+{/if}
+
+{#each stories as userStory, index}
+	{#if userStory.user.id !== sessionUser.id}
+		<button onclick={() => openStoryViewer(userStories.length > 0 ? index + 1 : index)}>
+			<StoryCircle user={userStory.user} />
 		</button>
 	{/if}
-
-	{#each stories as userStory, index}
-		{#if userStory.user.id !== sessionUser.id}
-			<button onclick={() => openStoryViewer(userStories.length > 0 ? index + 1 : index)}>
-				<StoryCircle user={userStory.user} />
-			</button>
-		{/if}
-	{/each}
-</div>
+{/each}
 
 {#if isCreateStoryOpen}
 	<CreateStory {authToken} {createStory} onClose={() => (isCreateStoryOpen = false)} />

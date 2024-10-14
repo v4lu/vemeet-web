@@ -12,7 +12,7 @@
 <div class="flex flex-col items-center">
 	<button
 		class="mb-1 size-16 rounded-full p-0.5"
-		style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);"
+		style="background: linear-gradient(45deg, #4ade80 0%, #065f46 25%, #22c55e 50%, #34d399 75%, #047857 100%);"
 	>
 		<Avatar class="size-full border-2 border-border" {user} />
 	</button>

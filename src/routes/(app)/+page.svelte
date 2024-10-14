@@ -38,7 +38,7 @@
 
 <main class="container my-8">
 	<div class="hide-scrollbar overflow-x-auto">
-		<div class="flex space-x-4 p-2">
+		<div class="flex space-x-4">
 			{#if storiesResp.isLoading}
 				<CircleStorySkeleton />
 			{:else if storiesResp.stories}
