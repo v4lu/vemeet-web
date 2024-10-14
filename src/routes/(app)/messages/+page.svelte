@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { useFetchChats } from '$lib/api/use-fetch-chats.svelte';
-	import { Button } from '$lib/components/ui/button/index.js';
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 	import { formatTimestamp } from '$lib/date.js';
 	import type { Chat } from '$lib/types/chat.types';
-	import Icon from '@iconify/svelte';
 	import { sessionStore } from '$lib/stores/session.store';
+	import { CustomHeaderWithTitle } from '$lib/components/ui/custom-header';
 
 	let { data } = $props();
 	const { resp } = useFetchChats(data.accessToken);
@@ -16,14 +15,9 @@
 	}
 </script>
 
-<div class="container mt-4">
-	<div class="mb-6 flex items-center justify-between">
-		<h1 class="text-2xl font-bold">Messages</h1>
-		<Button variant="ghost" size="icon">
-			<Icon icon="solar:pen-new-square-bold" width="24" height="24" />
-		</Button>
-	</div>
+<CustomHeaderWithTitle title="Mesages" />
 
+<main class="mb-8 mt-4">
 	{#if resp.isLoading}
 		<div class="space-y-2">
 			{#each Array(5) as _}
@@ -66,4 +60,4 @@
 	{:else}
 		<p>No chats found.</p>
 	{/if}
-</div>
+</main>

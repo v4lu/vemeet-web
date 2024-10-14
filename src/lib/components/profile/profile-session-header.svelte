@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { api, createAuthHeaders, uploadImage } from '$lib/api';
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { formatBday } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { ResponseFollowStats } from '$lib/types/follow.types';
@@ -11,6 +11,7 @@
 	import { Avatar } from '../ui/avatar';
 	import { Modal } from '../ui/modals';
 	import { Skeleton } from '../ui/skeleton';
+	import { cn } from '$lib/cn';
 
 	type HeaderProps = {
 		authToken: string;
@@ -138,7 +139,16 @@
 </script>
 
 <div class="rounded-t-xl">
-	<div class="flex flex-col items-start px-6 pt-6 sm:flex-row sm:items-center sm:justify-between">
+	<div
+		class="relative flex flex-col items-start px-6 pt-6 sm:flex-row sm:items-center sm:justify-between"
+	>
+		<a
+			href="/settings"
+			class={cn(buttonVariants({ size: 'sm', variant: 'outline' }), 'absolute right-4 top-4')}
+		>
+			<Icon icon="solar:settings-bold" class="mr-2 size-5" />
+			Settings
+		</a>
 		<div class="flex items-center">
 			<div class="relative">
 				<button

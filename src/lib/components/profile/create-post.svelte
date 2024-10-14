@@ -67,7 +67,7 @@
 </script>
 
 <div
-	class="my-6 rounded-lg border border-border bg-background p-6 shadow-lg transition-all duration-300 hover:shadow-xl"
+	class="my-6 rounded-lg border border-border bg-background p-4 shadow-lg transition-all duration-300 hover:shadow-xl"
 >
 	<div class="mb-4">
 		<textarea

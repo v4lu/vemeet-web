@@ -4,6 +4,7 @@
 	import { MessageSkeleton } from '$lib/components/skeleton';
 	import { Avatar } from '$lib/components/ui/avatar/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import CustomHeader from '$lib/components/ui/custom-header/custom-header.svelte';
 	import type { Message as TMessage } from '$lib/types/chat.types.js';
 	import { debounce } from '$lib/utils.js';
 	import Icon from '@iconify/svelte';
@@ -98,30 +99,30 @@
 	});
 </script>
 
-<div class="grid flex-1 bg-background">
-	<div class="container flex items-center justify-between border-b p-4 px-6 shadow-sm lg:bg-card">
-		<div class="flex items-center">
-			<a href={`/profile/${data.otherUser.id}`}>
-				<Avatar user={data.otherUser} class="mr-3 size-12" />
+<CustomHeader class="flex items-center justify-between border-b p-4  shadow-sm lg:bg-card">
+	<div class="flex items-center pl-6">
+		<a href={`/profile/${data.otherUser.id}`}>
+			<Avatar user={data.otherUser} class="mr-3 size-10" />
+		</a>
+		<div>
+			<a
+				href={`/profile/${data.otherUser.id}`}
+				class="text-lg font-semibold transition-colors duration-200 hover:text-primary"
+			>
+				{data.otherUser.username}
 			</a>
-			<div>
-				<a
-					href={`/profile/${data.otherUser.id}`}
-					class="text-lg font-semibold transition-colors duration-200 hover:text-primary"
-				>
-					{data.otherUser.username}
-				</a>
-				<p class="text-xs text-muted-foreground">
-					{true ? 'Online' : 'Offline'}
-				</p>
-			</div>
+			<p class="text-xs text-muted-foreground">
+				{true ? 'Online' : 'Offline'}
+			</p>
 		</div>
-		<Button variant="ghost" size="icon" class="rounded-full">
-			<Icon icon="solar:menu-dots-bold" class="size-5" />
-		</Button>
 	</div>
+	<Button variant="ghost" size="icon" class="rounded-full">
+		<Icon icon="solar:menu-dots-bold" class="size-5" />
+	</Button>
+</CustomHeader>
 
-	<div class="h-[calc(100dvh-64px-81px-65px-70px)] overflow-hidden">
+<div class="grid flex-1 bg-background">
+	<div class="h-[calc(100dvh-81px)] overflow-hidden">
 		<div
 			bind:this={scrollContainer}
 			class="hide-scrollbar container h-full overflow-y-auto lg:border-x lg:border-border lg:bg-card"

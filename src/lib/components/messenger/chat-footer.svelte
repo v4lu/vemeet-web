@@ -17,14 +17,18 @@
 	let { handleSubmit, receipantId, authToken, isSubmitting }: Props = $props();
 	let newMessage = $state('');
 	let imageUrls = $state<string[]>([]);
-	let fileInput: HTMLInputElement | null = $state(null);
+	let fileInput = $state<HTMLInputElement | null>(null);
 	let imageUploadLoading = $state(false);
 
-	let mediaRecorder: MediaRecorder | null = $state(null);
+	let mediaRecorder = $state<MediaRecorder | null>(null);
 	let audioChunks = $state<Blob[]>([]);
 	let isRecording = $state(false);
 	let permissionStatus = $state<PermissionState>('prompt');
 	let errorMessage = $state('');
+	let recordingDuration = $state(0);
+	let recordingInterval = $state<number | null>(null);
+
+	let isMobile = $derived(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
 
 	$effect(() => {
 		checkPermission();
@@ -66,18 +70,28 @@
 		};
 	}
 
-	async function toggleRecording(): Promise<void> {
+	function startRecording(): void {
 		if (permissionStatus === 'granted' && mediaRecorder) {
-			if (isRecording) {
-				mediaRecorder.stop();
-				isRecording = false;
-			} else {
-				audioChunks = [];
-				mediaRecorder.start();
-				isRecording = true;
-			}
+			audioChunks = [];
+			mediaRecorder.start();
+			isRecording = true;
+			recordingDuration = 0;
+			recordingInterval = setInterval(() => {
+				recordingDuration++;
+			}, 1000) as unknown as number;
 		} else {
-			await requestPermissionAndSetup();
+			requestPermissionAndSetup();
+		}
+	}
+
+	function stopRecording(): void {
+		if (mediaRecorder && isRecording) {
+			mediaRecorder.stop();
+			isRecording = false;
+			if (recordingInterval) {
+				clearInterval(recordingInterval);
+				recordingInterval = null;
+			}
 		}
 	}
 
@@ -86,8 +100,7 @@
 			const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
 			const file = new File([audioBlob], 'audio.mp3', { type: 'audio/mpeg' });
 
-			//@ts-ignore
-			const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+			const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
 			const arrayBuffer = await file.arrayBuffer();
 			const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 			const durationSeconds = audioBuffer.duration;
@@ -184,6 +197,12 @@
 			onSubmit(event);
 		}
 	}
+
+	function formatDuration(seconds: number): string {
+		const minutes = Math.floor(seconds / 60);
+		const remainingSeconds = seconds % 60;
+		return `${minutes > 0 ? `${minutes}m ` : ''}${remainingSeconds}s`;
+	}
 </script>
 
 <div class="container border-t bg-card p-4 px-6 shadow-lg">
@@ -241,16 +260,26 @@
 				accept="image/*"
 			/>
 			<Button
-				onclick={toggleRecording}
+				onmousedown={isMobile ? undefined : startRecording}
+				onmouseup={isMobile ? undefined : stopRecording}
+				ontouchstart={isMobile ? startRecording : undefined}
+				ontouchend={isMobile ? stopRecording : undefined}
 				variant="outline"
 				size="icon-sm"
-				class="transition-all duration-300 hover:bg-primary hover:text-white"
+				class={cn(
+					'transition-all duration-200',
+					isRecording ? 'animate-pulse bg-red-500 text-white' : 'hover:bg-primary hover:text-white'
+				)}
 				type="button"
 			>
-				<Icon
-					icon={isRecording ? 'solar:microphone-3-bold' : 'solar:microphone-bold'}
-					class="size-5"
-				/>
+				{#if isRecording}
+					<div class="flex items-center">
+						<Icon icon="eos-icons:loading" class="mr-2 size-5 animate-spin" />
+						<span class="text-xs font-medium">{formatDuration(recordingDuration)}</span>
+					</div>
+				{:else}
+					<Icon icon="solar:microphone-bold" class="size-5" />
+				{/if}
 			</Button>
 			{#if newMessage.length > 0 || imageUrls.length > 0}
 				<div in:fly={{ x: 20, duration: 300 }} out:fade={{ duration: 200 }}>

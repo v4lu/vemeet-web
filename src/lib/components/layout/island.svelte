@@ -25,36 +25,26 @@
 			icon: 'solar:map-point-bold'
 		},
 		{
-			path: '/swiper',
-			icon: 'solar:flame-bold-duotone'
-		},
-		{
 			path: '/profile',
 			icon: 'solar:user-bold'
-		},
-		{
-			path: '/settings',
-			icon: 'solar:settings-bold'
 		}
 	]);
 
 	let { pathname }: Props = $props();
 </script>
 
-{#if !pathname.startsWith('/swiper')}
-	<div class="fixed bottom-0 left-0 right-0 z-[30] border-t bg-background py-3 shadow-md">
-		<div class="container flex items-center justify-between">
-			{#each navigation as { path, icon }}
-				<a
-					class={cn(
-						pathname === path && 'text-primary',
-						buttonVariants({ size: 'icon', variant: 'ghost' })
-					)}
-					href={path}
-				>
-					<Icon {icon} class="size-6" />
-				</a>
-			{/each}
-		</div>
+<div class="fixed bottom-0 left-0 right-0 z-[30] border-t bg-background py-3 shadow-md">
+	<div class="container flex items-center justify-between">
+		{#each navigation as { path, icon }}
+			<a
+				class={cn(
+					pathname === path && 'text-primary',
+					buttonVariants({ size: 'icon', variant: 'ghost' })
+				)}
+				href={path}
+			>
+				<Icon {icon} class="size-6" />
+			</a>
+		{/each}
 	</div>
-{/if}
+</div>
