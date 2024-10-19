@@ -7,7 +7,7 @@
 	import { sessionStore } from '$lib/stores/session.store';
 	import { clickOutside } from '$lib/utils';
 	import { slide } from 'svelte/transition';
-
+	import { Logo } from '../ui/logo';
 	type Props = {
 		authToken: string;
 	};
@@ -35,44 +35,10 @@
 
 <div class="fixed inset-x-0 top-0 z-[90] h-16 w-full border-b border-border bg-background">
 	<header class="container flex items-center justify-between py-3">
-		<div use:clickOutside={() => (isNotificationDropdownOpen = false)} class="relative">
-			<button
-				onclick={() => (isNotificationDropdownOpen = !isNotificationDropdownOpen)}
-				class="focus:outline-none"
-			>
-				<Avatar user={$sessionStore} class="size-9" />
-			</button>
-			{#if isNotificationDropdownOpen}
-				<div
-					transition:slide={{ duration: 300 }}
-					class="absolute left-0 top-12 z-[120] w-48 overflow-hidden rounded-xl border border-border bg-card shadow-lg"
-				>
-					<div class="flex flex-col">
-						{#each navigation as { name, path, icon }}
-							<a
-								href={path}
-								class={cn(
-									buttonVariants({ variant: 'ghost' }),
-									'justify-start py-2 text-sm hover:bg-muted'
-								)}
-							>
-								<Icon {icon} class="mr-2 size-4" />
-								{name}
-							</a>
-						{/each}
-						<hr class="my-1 border-border" />
-						<Button
-							variant="ghost"
-							class="justify-start py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
-						>
-							<Icon icon="solar:logout-2-bold" class="mr-2 size-4" />
-							Logout
-						</Button>
-					</div>
-				</div>
-			{/if}
-		</div>
-		<a href="/" class="text-lg font-bold text-primary">Vemeet</a>
+		<a href="/" class=" flex items-center justify-center gap-2 text-xl font-bold text-primary">
+			<Logo class="size-10" />
+			<span class="-mt-1"> vemeet </span>
+		</a>
 		<div class="flex items-center justify-center gap-2">
 			<a
 				class={cn(buttonVariants({ size: 'icon', variant: 'ghost' }), 'relative')}
@@ -87,6 +53,43 @@
 					</div>
 				{/if}
 			</a>
+			<div use:clickOutside={() => (isNotificationDropdownOpen = false)} class="relative">
+				<button
+					onclick={() => (isNotificationDropdownOpen = !isNotificationDropdownOpen)}
+					class="focus:outline-none"
+				>
+					<Avatar user={$sessionStore} class="size-9" />
+				</button>
+				{#if isNotificationDropdownOpen}
+					<div
+						transition:slide={{ duration: 300 }}
+						class="absolute right-0 top-12 z-[120] w-48 overflow-hidden rounded-xl border border-border bg-card shadow-lg"
+					>
+						<div class="flex flex-col">
+							{#each navigation as { name, path, icon }}
+								<a
+									href={path}
+									class={cn(
+										buttonVariants({ variant: 'ghost' }),
+										'justify-start py-2 text-sm hover:bg-muted'
+									)}
+								>
+									<Icon {icon} class="mr-2 size-4" />
+									{name}
+								</a>
+							{/each}
+							<hr class="my-1 border-border" />
+							<Button
+								variant="ghost"
+								class="justify-start py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
+							>
+								<Icon icon="solar:logout-2-bold" class="mr-2 size-4" />
+								Logout
+							</Button>
+						</div>
+					</div>
+				{/if}
+			</div>
 		</div>
 	</header>
 </div>
