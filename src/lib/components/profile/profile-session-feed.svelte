@@ -48,7 +48,7 @@
 	});
 </script>
 
-<div class="posts-container">
+<div>
 	{#each posts as post (post.id)}
 		<PostCard {isPostDeleteing} {post} {deletePost} {postLikeToggle} />
 	{/each}
