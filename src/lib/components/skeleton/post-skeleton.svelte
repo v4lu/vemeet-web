@@ -2,8 +2,8 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 </script>
 
-<div class="mt-6">
-	<div class="mb-6 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+<div>
+	<div class="overflow-hidden bg-card shadow-lg">
 		<div class="relative">
 			<div class="flex items-center justify-between p-4">
 				<div class="flex items-center">

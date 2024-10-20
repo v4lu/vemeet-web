@@ -77,12 +77,8 @@
 			class={cn(
 				inputVariants({ variant: 'empty' }),
 				'mt-1 h-24 w-full resize-none rounded-lg p-3',
-				'bg-muted/50 text-foreground placeholder:text-muted-foreground/50',
+				'text-foreground placeholder:text-muted-foreground/50',
 				'border-2 border-transparent',
-				'transition-all duration-300 ease-in-out',
-				'focus:border-primary focus:bg-background',
-				'focus:outline-none focus:ring-2 focus:ring-primary',
-				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
 				'!shadow-none !outline-none',
 				'appearance-none'
 			)}

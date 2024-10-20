@@ -21,3 +21,21 @@ export function calculateAge(birthday: string): number {
 
 	return age;
 }
+
+export function formatTimestampShort(timestamp: string): string {
+	const formatted = formatDistanceToNow(new Date(timestamp), { addSuffix: true })
+		.replace('about ', '')
+		.replace(' seconds', 's')
+		.replace(' minutes', 'min')
+		.replace(' minute', 'min')
+		.replace(' hours', 'h')
+		.replace(' hour', 'h')
+		.replace(' days', 'd')
+		.replace(' day', 'd')
+		.replace(' months', 'mo')
+		.replace(' month', 'mo')
+		.replace(' years', 'y')
+		.replace(' year', 'y');
+
+	return formatted;
+}

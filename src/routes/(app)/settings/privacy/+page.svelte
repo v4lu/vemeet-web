@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { api, createAuthHeaders } from '$lib/api.js';
 	import { Button } from '$lib/components/ui/button';
+	import { CustomHeaderWithTitle } from '$lib/components/ui/custom-header';
+
 	import { Modal } from '$lib/components/ui/modals';
 	import { Toggle } from '$lib/components/ui/toggle/index.js';
 	import { sessionStore } from '$lib/stores/session.store';
@@ -95,45 +97,34 @@
 	}
 </script>
 
-<div class="container mx-auto mt-12 max-w-2xl space-y-6">
-	<button
-		class="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-		onclick={() => history.back()}
-	>
-		<Icon icon="solar:arrow-left-linear" class="mr-2 size-5" />
-		Back
-	</button>
+<CustomHeaderWithTitle title="Privacy Settings" />
 
-	<div class="rounded-lg bg-card p-6 shadow-lg">
-		<h1 class="text-2xl font-bold text-foreground">Privacy Settings</h1>
-		<div class="mt-2 space-y-6">
-			<div class="flex items-center justify-between">
-				<div>
-					<h3 class="text-lg font-semibold text-foreground">Private Profile</h3>
-					<p class="text-sm text-muted-foreground">Only approved followers can see your profile</p>
-				</div>
-				<Toggle checked={isPrivate} onchange={() => openModal('isPrivate')} />
+<div class="container bg-card p-6 shadow-lg">
+	<div class="mt-2 space-y-6">
+		<div class="flex items-center justify-between">
+			<div>
+				<h3 class="text-lg font-semibold text-foreground">Private Profile</h3>
+				<p class="text-sm text-muted-foreground">Only approved followers can see your profile</p>
 			</div>
+			<Toggle checked={isPrivate} onchange={() => openModal('isPrivate')} />
+		</div>
 
-			<div class="flex items-center justify-between">
-				<div>
-					<h3 class="text-lg font-semibold text-foreground">Swiper Mode</h3>
-					<p class="text-sm text-muted-foreground">
-						Allow your profile to be discovered in Swiper mode
-					</p>
-				</div>
-				<Toggle checked={swiperMode} onchange={() => openModal('swiperMode')} />
+		<div class="flex items-center justify-between">
+			<div>
+				<h3 class="text-lg font-semibold text-foreground">Swiper Mode</h3>
+				<p class="text-sm text-muted-foreground">
+					Allow your profile to be discovered in Swiper mode
+				</p>
 			</div>
+			<Toggle checked={swiperMode} onchange={() => openModal('swiperMode')} />
+		</div>
 
-			<div class="flex items-center justify-between">
-				<div>
-					<h3 class="text-lg font-semibold text-foreground">Locked Inbox</h3>
-					<p class="text-sm text-muted-foreground">
-						Only receive messages from approved connections
-					</p>
-				</div>
-				<Toggle checked={inboxLocked} onchange={() => openModal('inboxLocked')} />
+		<div class="flex items-center justify-between">
+			<div>
+				<h3 class="text-lg font-semibold text-foreground">Locked Inbox</h3>
+				<p class="text-sm text-muted-foreground">Only receive messages from approved connections</p>
 			</div>
+			<Toggle checked={inboxLocked} onchange={() => openModal('inboxLocked')} />
 		</div>
 	</div>
 </div>

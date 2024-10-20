@@ -6,7 +6,7 @@ export const REFRESH_TOKEN = 'refresh_token';
 export const COGNITO_ID = 'cognito_id';
 export const isProduction = false;
 
-export const endpointsWithoutHeader = ['/messages'];
+export const endpointsWithoutHeader = ['/messages', '/settings', '/settings/privacy'];
 
 export function showHeader(pathname: string): boolean {
 	for (const endpoint of endpointsWithoutHeader) {

@@ -3,13 +3,13 @@
 	import { useUpdateUser } from '$lib/api/use-update-user.svelte.js';
 	import { cn } from '$lib/cn';
 	import { Button } from '$lib/components/ui/button';
+	import { CustomHeaderWithTitle } from '$lib/components/ui/custom-header';
 	import { Field } from '$lib/components/ui/field';
 	import { Input, inputVariants } from '$lib/components/ui/input';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { City, Country } from '$lib/types/geo.types.js';
 	import type { UserUpdateFormData } from '$lib/types/user.types.js';
-	import Icon from '@iconify/svelte';
-
+	import { browser } from '$app/environment';
 	let { data } = $props();
 
 	let username = $state($sessionStore.username);
@@ -113,108 +113,105 @@
 	}
 
 	$effect(() => {
-		country = {
-			countryFlag: $sessionStore.countryFlag,
-			countryIsoCode: $sessionStore.countryIsoCode,
-			countryLat: $sessionStore.countryLat,
-			countryLng: $sessionStore.countryLng,
-			countryName: $sessionStore.countryName
-		};
-		city = {
-			cityLat: $sessionStore.cityLat,
-			cityLng: $sessionStore.cityLng,
-			cityName: $sessionStore.cityName,
-			countryIsoCode: $sessionStore.countryIsoCode
-		};
-		citySearch = $sessionStore.cityName || '';
+		if (browser) {
+			username = $sessionStore.username;
+			name = $sessionStore.name ?? '';
+			gender = $sessionStore.gender || '';
+			country = {
+				countryFlag: $sessionStore.countryFlag,
+				countryIsoCode: $sessionStore.countryIsoCode,
+				countryLat: $sessionStore.countryLat,
+				countryLng: $sessionStore.countryLng,
+				countryName: $sessionStore.countryName
+			};
+			city = {
+				cityLat: $sessionStore.cityLat,
+				cityLng: $sessionStore.cityLng,
+				cityName: $sessionStore.cityName,
+				countryIsoCode: $sessionStore.countryIsoCode
+			};
+			citySearch = $sessionStore.cityName || '';
+		}
 	});
 </script>
 
-<div class="container mx-auto my-12 max-w-2xl space-y-6">
-	<button
-		class="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-		onclick={() => history.back()}
-	>
-		<Icon icon="solar:arrow-left-linear" class="mr-2 size-5" />
-		Back
-	</button>
-
-	<form class="space-y-6 rounded-lg bg-card p-6 shadow-lg" onsubmit={handleSubmit}>
-		<h1 class="text-2xl font-bold text-foreground">Edit Profile</h1>
-
-		<Field name="Username">
-			<Input
-				id="username"
-				placeholder="Username"
-				bind:value={username}
-				required
-				class="bg-background"
-			/>
-		</Field>
-
-		<div class="grid gap-6 sm:grid-cols-2">
-			<Field name="Name" optional>
-				<Input id="name" placeholder="Name" bind:value={name} class="bg-background" />
+<CustomHeaderWithTitle title="Edit Profile" />
+<div class="container grid bg-card">
+	<form class="flex flex-col justify-between space-y-6 p-6" onsubmit={handleSubmit}>
+		<div class="flex-1">
+			<Field name="Username">
+				<Input
+					id="username"
+					placeholder="Username"
+					bind:value={username}
+					required
+					class="bg-background"
+				/>
 			</Field>
-			<Field name="Gender" optional>
-				<Input id="gender" placeholder="Gender" bind:value={gender} class="bg-background" />
+
+			<div class="grid gap-6 sm:grid-cols-2">
+				<Field name="Name" optional>
+					<Input id="name" placeholder="Name" bind:value={name} class="bg-background" />
+				</Field>
+				<Field name="Gender" optional>
+					<Input id="gender" placeholder="Gender" bind:value={gender} class="bg-background" />
+				</Field>
+			</div>
+
+			<div class="grid gap-6 sm:grid-cols-2">
+				<Field name="Country" optional>
+					<select
+						id="country"
+						class={cn(inputVariants(), 'bg-background')}
+						bind:value={country.countryIsoCode}
+						onchange={handleCountryChange}
+					>
+						<option value="">Select a country</option>
+						{#each data.countries as countryOption}
+							<option value={countryOption.countryIsoCode}>
+								{countryOption.countryName}
+							</option>
+						{/each}
+					</select>
+				</Field>
+				<Field name="City" optional>
+					<div class="relative">
+						<Input
+							id="city"
+							placeholder="Search for a city"
+							bind:value={citySearch}
+							oninput={handleCitySearch}
+							disabled={!country.countryIsoCode}
+							class="bg-background"
+						/>
+						{#if showCityDropdown && locationsResp.cities.length > 0}
+							<ul
+								class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+							>
+								{#each locationsResp.cities as cityOption}
+									<li
+										class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 hover:bg-indigo-600 hover:text-white"
+										onclick={() => selectCity(cityOption)}
+									>
+										{cityOption.cityName}
+									</li>
+								{/each}
+							</ul>
+						{/if}
+					</div>
+				</Field>
+			</div>
+
+			<Field name="Bio" optional>
+				<textarea
+					id="bio"
+					rows="4"
+					class={cn(inputVariants(), 'resize-none bg-background')}
+					placeholder="Tell us about yourself..."
+					bind:value={bio}
+				></textarea>
 			</Field>
 		</div>
-
-		<div class="grid gap-6 sm:grid-cols-2">
-			<Field name="Country" optional>
-				<select
-					id="country"
-					class={cn(inputVariants(), 'bg-background')}
-					bind:value={country.countryIsoCode}
-					onchange={handleCountryChange}
-				>
-					<option value="">Select a country</option>
-					{#each data.countries as countryOption}
-						<option value={countryOption.countryIsoCode}>
-							{countryOption.countryName}
-						</option>
-					{/each}
-				</select>
-			</Field>
-			<Field name="City" optional>
-				<div class="relative">
-					<Input
-						id="city"
-						placeholder="Search for a city"
-						bind:value={citySearch}
-						oninput={handleCitySearch}
-						disabled={!country.countryIsoCode}
-						class="bg-background"
-					/>
-					{#if showCityDropdown && locationsResp.cities.length > 0}
-						<ul
-							class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
-						>
-							{#each locationsResp.cities as cityOption}
-								<li
-									class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 hover:bg-indigo-600 hover:text-white"
-									onclick={() => selectCity(cityOption)}
-								>
-									{cityOption.cityName}
-								</li>
-							{/each}
-						</ul>
-					{/if}
-				</div>
-			</Field>
-		</div>
-
-		<Field name="Bio" optional>
-			<textarea
-				id="bio"
-				rows="4"
-				class={cn(inputVariants(), 'resize-none bg-background')}
-				placeholder="Tell us about yourself..."
-				bind:value={bio}
-			></textarea>
-		</Field>
-
 		<Button type="submit" class="w-full" isLoading={isSubmitting} disabled={isSubmitting}>
 			{isSubmitting ? 'Saving...' : 'Save Changes'}
 		</Button>

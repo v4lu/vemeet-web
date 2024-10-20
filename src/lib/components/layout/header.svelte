@@ -68,6 +68,7 @@
 						<div class="flex flex-col">
 							{#each navigation as { name, path, icon }}
 								<a
+									onclick={() => (isNotificationDropdownOpen = false)}
 									href={path}
 									class={cn(
 										buttonVariants({ variant: 'ghost' }),

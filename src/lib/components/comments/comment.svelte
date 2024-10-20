@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { cn } from '$lib/cn';
-	import { formatTimestamp } from '$lib/date';
+	import { formatTimestampShort } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { Comment as CommentType } from '$lib/types/comment.types';
 	import Icon from '@iconify/svelte';
@@ -8,6 +8,8 @@
 	import { Button } from '../ui/button';
 	import { Dropdown } from '../ui/dropdown';
 	import { ConfirmModal } from '../ui/modals';
+	import { Comment } from '.';
+	import { spring } from 'svelte/motion';
 
 	type CommentProps = {
 		comment: CommentType;
@@ -39,6 +41,7 @@
 	let isDeleteModalConfirmOpen = $state(false);
 	let isEditing = $state(false);
 	let editContent = $state(comment.content);
+	const scale = spring(1);
 
 	let isLiked = $state(
 		comment.reactions.some(
@@ -71,13 +74,18 @@
 		editComment(comment.id, editContent);
 		isEditing = false;
 	}
+
+	function handleCommentLikeWithAnimation(isCurrentlyLiked: boolean, commentId: number) {
+		scale.set(1.3).then(() => scale.set(1));
+		handleCommentLike(isCurrentlyLiked, commentId);
+	}
 </script>
 
-<div class="mb-4 rounded-lg border-l-2 border-border pl-4" style="margin-left: {depth * 20}px;">
+<div class="mb-4 rounded-lg border-l-2 border-primary pl-4" style="margin-left: {depth * 20}px;">
 	<div class="flex items-start space-x-3">
 		<Avatar class="size-10" user={comment.user} />
 		<div class="flex-1">
-			<div class="rounded-lg bg-muted/50 p-3 shadow-sm">
+			<div class=" rounded-xl border border-border bg-accent/30 p-3 shadow-sm">
 				<div class="flex items-center justify-between">
 					<a
 						href={`/profile/${comment.user.id}`}
@@ -85,7 +93,9 @@
 						>{comment.user.username}</a
 					>
 					<div class="flex items-center">
-						<p class="mr-2 text-xs text-muted-foreground">{formatTimestamp(comment.createdAt)}</p>
+						<p class="mr-2 text-xs text-muted-foreground">
+							{formatTimestampShort(comment.createdAt)}
+						</p>
 						{#if comment.user.id === $sessionStore.id}
 							<Dropdown
 								triggerIcon="solar:menu-dots-bold"
@@ -146,18 +156,20 @@
 				<div class="mt-2 flex items-center space-x-4">
 					<button
 						onclick={() => {
-							handleCommentLike(isLiked, comment.id);
+							handleCommentLikeWithAnimation(isLiked, comment.id);
 							isLiked = !isLiked;
 						}}
 						class="group flex items-center text-sm transition-colors"
 					>
-						<Icon
-							icon={isLiked ? 'solar:heart-angle-bold' : 'solar:heart-angle-line-duotone'}
-							class={cn(
-								'mr-2 size-5 transition-colors',
-								isLiked ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
-							)}
-						/>
+						<div style="transform: scale({$scale})" class="transition-transform duration-300">
+							<Icon
+								icon={isLiked ? 'solar:heart-angle-bold' : 'solar:heart-angle-line-duotone'}
+								class={cn(
+									'mr-2 size-5 transition-all duration-200',
+									isLiked ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
+								)}
+							/>
+						</div>
 						<span class="font-medium">{comment.reactions.length}</span>
 					</button>
 				</div>
@@ -195,7 +207,7 @@
 	{#if comment.replies && comment.replies.length > 0}
 		<div class="mt-3">
 			{#each comment.replies as reply (reply.id)}
-				<svelte:self
+				<Comment
 					comment={reply}
 					depth={depth + 1}
 					{deleteComment}

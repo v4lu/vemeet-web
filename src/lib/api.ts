@@ -19,7 +19,6 @@ type RefreshResponse = {
 export function authAPI(authToken: string): KyInstance {
 	return ky.create({
 		prefixUrl: getBaseUrl(),
-		timeout: 10000,
 		headers: {
 			Authorization: `Bearer ${authToken}`
 		},
@@ -141,4 +140,10 @@ export async function uploadImg({ authToken, file }: UploadImgType): Promise<str
 		//TODO toast
 		console.error(error);
 	}
+}
+
+export function catchErr<T>(promise: Promise<T>): Promise<[T | null, Error | null]> {
+	return promise
+		.then((data): [T, null] => [data, null])
+		.catch((err): [null, Error] => [null, err instanceof Error ? err : new Error(String(err))]);
 }

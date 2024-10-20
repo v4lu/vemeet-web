@@ -16,6 +16,7 @@ class SinglePost {
 	isCreateReplySubmitting = $state(false);
 	isDeleteCommentSubmitting = $state(false);
 	isEditCommentSubmitting = $state(false);
+	isEditingPostSubmitting = $state(false);
 
 	post = $state<Post>();
 	comments = $state<Comment[]>([]);
@@ -28,11 +29,19 @@ export function useSignlePost(postId: number, authToken: string) {
 
 	async function fetchPost() {
 		res.isLoading = true;
-		const post = await api.get<Post>(`posts/${postId}`).json();
-		res.post = post;
-		res.comments = post.comments;
-		res.reactions = post.reactions;
-		res.isLoading = false;
+		try {
+			const post = await api.get<Post>(`posts/${postId}`).json();
+			res.post = post;
+			res.comments = post.comments;
+			res.reactions = post.reactions;
+			res.isLoading = false;
+		} catch (err) {
+			if (err instanceof HTTPError) {
+				if (err.response.status === 404) goto('/404');
+				else if (err.response.status === 401) goto('/sign-in');
+				else toast.error('Something went wrong, Please try again.');
+			}
+		}
 	}
 
 	async function deletePost() {
@@ -48,6 +57,18 @@ export function useSignlePost(postId: number, authToken: string) {
 			goto('/profile');
 		}
 		res.isPostDeletionSubmitting = false;
+	}
+
+	async function patchPost(content: string) {
+		res.isEditingPostSubmitting = true;
+		try {
+			const response = await api.patch<Post>(`posts/${postId}`, { json: { content } }).json();
+			res.post = response;
+		} catch (err) {
+			toast.error('Something went wrong. Please try again.');
+		}
+
+		res.isEditingPostSubmitting = false;
 	}
 
 	async function handlePostLike(isLiked: boolean) {
@@ -79,6 +100,7 @@ export function useSignlePost(postId: number, authToken: string) {
 					json: { content: newComment }
 				})
 				.json();
+
 			res.comments.push(response);
 		} catch (err) {
 			console.error('Error posting comment:', err);
@@ -214,6 +236,7 @@ export function useSignlePost(postId: number, authToken: string) {
 		postReply,
 		handleCommentLike,
 		handlePostLike,
+		patchPost,
 		res
 	};
 }
