@@ -37,8 +37,8 @@
 	});
 </script>
 
-<div class="container mb-12 mt-8">
-	<div class=" overflow-hidden rounded-xl bg-card shadow-lg">
+<div class="mb-12">
+	<div class=" overflow-hidden bg-card shadow-lg">
 		<ProfileSessionHeader authToken={data.accessToken} />
 		<nav class="relative flex border-t border-border">
 			{#each tabs as tab}
@@ -58,7 +58,7 @@
 		</nav>
 	</div>
 
-	<div class="mt-4">
+	<div class="container mt-4">
 		{#if activeTab === 'Posts'}
 			<div in:fade={{ duration: 300, easing: quintOut }}>
 				<ProfileSessionPosts authToken={data.accessToken} />

@@ -17,7 +17,7 @@
 		validators: zodClient(userLoginSchema),
 		onSubmit: () => {
 			if ($submitting) {
-				toast.loading('Signing in...');
+				toast.info('Signing in...');
 			}
 		}
 	});
@@ -85,6 +85,7 @@
 						<Input
 							bind:value={$form.email}
 							type="email"
+							name="email"
 							placeholder="you@example.com"
 							required
 							class="pl-10 pr-4 ring-primary/20 transition-all focus:ring-2"
@@ -104,6 +105,7 @@
 							bind:value={$form.password}
 							type={togglePassword ? 'text' : 'password'}
 							placeholder="••••••••"
+							name="password"
 							required
 							class="pl-10 pr-10 ring-primary/20 transition-all focus:ring-2"
 						/>

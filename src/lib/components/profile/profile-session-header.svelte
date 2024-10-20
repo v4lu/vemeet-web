@@ -144,7 +144,7 @@
 	>
 		<a
 			href="/settings"
-			class={cn(buttonVariants({ size: 'sm', variant: 'outline' }), 'absolute right-4 top-4')}
+			class={cn(buttonVariants({ size: 'sm', variant: 'outline' }), 'absolute right-4 top-8')}
 		>
 			<Icon icon="solar:settings-bold" class="mr-2 size-5" />
 			Settings

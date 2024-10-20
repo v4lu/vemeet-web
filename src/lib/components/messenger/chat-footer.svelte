@@ -213,7 +213,7 @@
 	}
 </script>
 
-<div class="fixed bottom-0 left-0 right-0 border-t border-border bg-background shadow-lg">
+<div class="container fixed bottom-0 left-0 right-0 border-t border-border bg-background shadow-lg">
 	<div class="container mx-auto py-4">
 		<form onsubmit={onSubmit} class="flex flex-col items-center justify-center gap-4">
 			{#if imageUrls.length > 0}

@@ -17,7 +17,7 @@
 
 <CustomHeaderWithTitle title="Mesages" />
 
-<main class="mb-8 mt-4">
+<main class="container mb-8 mt-4 min-h-max border-x border-border">
 	{#if resp.isLoading}
 		<div class="space-y-2">
 			{#each Array(5) as _}

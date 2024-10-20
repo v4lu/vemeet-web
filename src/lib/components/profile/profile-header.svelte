@@ -8,6 +8,7 @@
 	import Modal from '../ui/modals/modal.svelte';
 	import { cn } from '$lib/cn';
 	import { sessionStore } from '$lib/stores/session.store';
+	import { ConfirmDrawer } from '../drawers';
 
 	type ProfileHeaderProps = {
 		user: User;
@@ -17,11 +18,21 @@
 		followUser: () => void;
 		isFollowing: boolean;
 	};
+
 	let { user, followers, following, followUser, unfollowUser, isFollowing }: ProfileHeaderProps =
 		$props();
 	let formattedDate = $derived(formatBday(user.birthday));
 	let isFollowersModalOpen = $state(false);
 	let isFollowingModalOpen = $state(false);
+	let isUnfollowModalOpen = $state(false);
+	let isSubmitting = $state(false);
+
+	async function handleUnfollow() {
+		isSubmitting = true;
+		await unfollowUser();
+		isSubmitting = false;
+		isUnfollowModalOpen = false;
+	}
 </script>
 
 <div class="rounded-t-xl">
@@ -39,7 +50,13 @@
 		</div>
 		<div class="mt-4 flex flex-wrap gap-3 py-1 sm:mt-0">
 			<Button
-				onclick={() => (isFollowing ? unfollowUser() : followUser())}
+				onclick={() => {
+					if (isFollowing) {
+						isUnfollowModalOpen = true;
+					} else {
+						followUser();
+					}
+				}}
 				size="sm"
 				variant={isFollowing ? 'outline' : 'default'}
 				class="min-w-[120px] transition-all duration-300 ease-in-out hover:shadow-md"
@@ -148,6 +165,18 @@
 			</div>
 		</div>
 	</Modal>
+{/if}
+
+{#if isUnfollowModalOpen}
+	<ConfirmDrawer
+		showIcon={false}
+		desc={`Are you sure you want to unfollow ${user.username}`}
+		onClose={() => (isUnfollowModalOpen = false)}
+		onConfirm={handleUnfollow}
+		confirmText="Unfollow"
+		submitting={isSubmitting}
+		title={`Unfollow ${user.username}`}
+	/>
 {/if}
 
 <style lang="postcss">

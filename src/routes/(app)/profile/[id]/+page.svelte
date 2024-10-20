@@ -36,41 +36,39 @@
 	});
 </script>
 
-<div class="container mb-12">
-	<div class="mt-8">
-		<div class="overflow-hidden rounded-xl bg-card shadow-lg">
-			{#if resp.isLoading}
-				<ProfileHeaderSkeleton />
-			{:else if resp.user}
-				<ProfileHeader
-					followers={resp.followers}
-					{followUser}
-					{unfollowUser}
-					following={resp.following}
-					user={resp.user}
-					isFollowing={resp.isFollowing}
-				/>
-			{/if}
-			<nav class="relative flex border-t border-border">
-				{#each tabs as tab}
-					<button
-						class="flex-1 px-6 py-4 text-sm font-medium transition-colors hover:bg-muted/50"
-						class:text-primary={activeTab === tab}
-						class:text-muted-foreground={activeTab !== tab}
-						onclick={() => setActiveTab(tab)}
-					>
-						{tab}
-					</button>
-				{/each}
-				<div
-					class="absolute bottom-0 h-0.5 bg-primary transition-all duration-300 ease-out"
-					style="left: {$indicatorSpring.x}%; width: {$indicatorSpring.w}%;"
-				></div>
-			</nav>
-		</div>
+<div class="mb-12">
+	<div class="overflow-hidden bg-card shadow-lg">
+		{#if resp.isLoading}
+			<ProfileHeaderSkeleton />
+		{:else if resp.user}
+			<ProfileHeader
+				followers={resp.followers}
+				{followUser}
+				{unfollowUser}
+				following={resp.following}
+				user={resp.user}
+				isFollowing={resp.isFollowing}
+			/>
+		{/if}
+		<nav class="relative flex border-t border-border">
+			{#each tabs as tab}
+				<button
+					class="flex-1 px-6 py-4 text-sm font-medium transition-colors hover:bg-muted/50"
+					class:text-primary={activeTab === tab}
+					class:text-muted-foreground={activeTab !== tab}
+					onclick={() => setActiveTab(tab)}
+				>
+					{tab}
+				</button>
+			{/each}
+			<div
+				class="absolute bottom-0 h-0.5 bg-primary transition-all duration-300 ease-out"
+				style="left: {$indicatorSpring.x}%; width: {$indicatorSpring.w}%;"
+			></div>
+		</nav>
 	</div>
 
-	<div class="pt-8">
+	<div class="container pt-8">
 		{#if activeTab === 'Posts'}
 			<div in:fade={{ duration: 300, easing: quintOut }}>
 				<ProfileFeed authToken={data.accessToken} userId={data.id} />

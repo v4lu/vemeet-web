@@ -76,7 +76,7 @@
 			rows="4"
 			class={cn(
 				inputVariants({ variant: 'empty' }),
-				'h-24 w-full resize-none rounded-lg p-3',
+				'mt-1 h-24 w-full resize-none rounded-lg p-3',
 				'bg-muted/50 text-foreground placeholder:text-muted-foreground/50',
 				'border-2 border-transparent',
 				'transition-all duration-300 ease-in-out',

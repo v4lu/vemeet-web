@@ -8,9 +8,7 @@
 	sessionStore.setUser(data.user);
 </script>
 
-<div
-	class="flex min-h-dvh flex-1 flex-col bg-gradient-to-r from-primary/10 via-primary/5 to-transparent"
->
+<div class="flex min-h-dvh flex-1 flex-col">
 	{#if showHeader(data.path)}
 		<Header authToken={data.accessToken} />
 	{/if}

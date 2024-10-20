@@ -33,6 +33,8 @@
 		initialStoryIndex = storyIndex;
 		viewerOpen = true;
 	}
+
+	$effect(() => console.log(stories));
 </script>
 
 <div class="flex flex-col items-center">

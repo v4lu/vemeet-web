@@ -13,7 +13,10 @@
 		title: string;
 		desc: string;
 		submitting?: boolean;
+		showIcon?: boolean;
+		icon?: string;
 	};
+
 	let {
 		onConfirm,
 		confirmText,
@@ -21,6 +24,8 @@
 		class: className,
 		title,
 		desc,
+		icon = 'solar:trash-bin-2-bold',
+		showIcon = true,
 		submitting
 	}: ConfirmModalProps = $props();
 
@@ -69,8 +74,8 @@
 				variant="destructive"
 				size="sm"
 			>
-				{#if !submitting}
-					<Icon icon="solar:trash-bin-2-bold" class="mr-2 size-4" />
+				{#if !submitting && showIcon}
+					<Icon {icon} class="mr-2 size-4" />
 				{/if}
 				{confirmText}</Button
 			>

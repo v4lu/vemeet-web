@@ -26,5 +26,5 @@ export function showIsland(pathname: string): boolean {
 		return false;
 	}
 
-	return false;
+	return true;
 }
