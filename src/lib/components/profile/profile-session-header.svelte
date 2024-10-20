@@ -298,7 +298,7 @@
 	<Drawer class="h-2/3" onClose={() => (isFollowingModalOpen = false)}>
 		<div class="hide-scrollbar max-h-[25rem] w-[18rem] overflow-y-auto">
 			<h2 class="mb-4 text-xl font-semibold">Following</h2>
-			<div class="grid gap-2">
+			<div class="grid w-full gap-2">
 				{#if isLoading}
 					<p>Loading following...</p>
 				{:else}
