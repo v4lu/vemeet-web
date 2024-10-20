@@ -161,11 +161,11 @@
 	}
 </script>
 
-<div class="container mb-12 mt-8">
+<div class="container mb-12 bg-card">
 	{#if res.isLoading}
 		<RecipeSingleCardSkeleton />
 	{:else if res.recipe}
-		<div class="relative mx-auto max-w-4xl rounded-lg bg-card shadow-lg">
+		<div class="relative">
 			{#if res.recipe.user.id === $sessionStore.id}
 				<div class="absolute right-3 top-3 z-10">
 					<Dropdown

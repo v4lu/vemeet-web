@@ -45,7 +45,20 @@
 	}
 
 	async function handleSubmit() {
-		if (!selectedCategory) return;
+		if (!title) {
+			toast.error('Title is mandatory');
+			return;
+		}
+
+		if (imageUrls.length === 0) {
+			toast.error('Cover image(s) is mandatory');
+			return;
+		}
+
+		if (!selectedCategory) {
+			toast.error('Category is mandatory');
+			return;
+		}
 		const payload: CreateRecipe = {
 			title,
 			content,
@@ -130,7 +143,7 @@
 </script>
 
 <div
-	class="my-6 space-y-4 rounded-lg border border-border bg-background p-6 shadow-lg transition-all duration-300 hover:shadow-xl"
+	class="my-6 space-y-4 rounded-lg border border-border bg-card p-6 shadow-lg transition-all duration-300 hover:shadow-xl"
 >
 	<Field name="Title">
 		<Input id="title" bind:value={title} required />

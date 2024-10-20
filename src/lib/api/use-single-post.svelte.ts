@@ -219,8 +219,6 @@ export function useSignlePost(postId: number, authToken: string) {
 				}
 				return comment;
 			});
-
-			toast.success(`Comment ${isLiked ? 'unliked' : 'liked'} successfully!`);
 		} catch (error) {
 			console.error('Error liking/unliking comment:', error);
 			toast.error('Failed to update like status. Please try again.');

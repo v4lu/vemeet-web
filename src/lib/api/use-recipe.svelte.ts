@@ -73,8 +73,6 @@ export function useRecipe(authToken: string, recipeId: number) {
 					.json();
 			}
 			res.recipe = updatedPost;
-
-			toast.success(`Recipe ${isLiked ? 'unliked' : 'liked'} successfully!`);
 		} catch (error) {
 			console.error('Error toggling like:', error);
 			toast.error('Failed to update like status. Please try again.');

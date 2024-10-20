@@ -206,7 +206,7 @@
 					<span class="ml-1.5 font-medium">{recipe.reactions.length}</span>
 				</button>
 				<a
-					href={`/post/${recipe.id}`}
+					href={`/recipe/${recipe.id}`}
 					class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
 				>
 					<Icon icon="solar:chat-round-line-bold" class="size-6" />

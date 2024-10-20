@@ -81,7 +81,6 @@ export function useChat({ authToken, chatId, userId, firstTime }: UseFetchChatAr
 			};
 			const res = await api.post<Message>(`chats/message`, { json: message }).json();
 			resp.firstTime = false;
-			toast.success('Message sent successfully');
 			return res;
 		} catch (err) {
 			if (err instanceof HTTPError) {

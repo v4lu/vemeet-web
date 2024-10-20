@@ -64,8 +64,8 @@
 	}
 </script>
 
-<Modal {onClose} parentClass="p-0 min-w-[18rem]">
-	<div class="w-full max-w-md">
+<Modal {onClose}>
+	<div class="w-full min-w-[18rem] max-w-md">
 		<h2 class="mb-4 text-2xl font-bold">Create a New Story</h2>
 
 		{#if imagePreviewUrl}

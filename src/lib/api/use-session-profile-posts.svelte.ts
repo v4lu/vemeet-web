@@ -87,8 +87,6 @@ export function useSessionProfilePosts(authToken: string) {
 					.json();
 			}
 			resp.posts = resp.posts.map((post) => (post.id === postId ? updatedPost : post));
-
-			toast.success(`Post ${isLiked ? 'unliked' : 'liked'} successfully!`);
 		} catch (error) {
 			console.error('Error toggling like:', error);
 			toast.error('Failed to update like status. Please try again.');

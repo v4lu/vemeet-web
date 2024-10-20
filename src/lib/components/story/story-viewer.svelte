@@ -94,10 +94,10 @@
 >
 	<div class="absolute inset-0 z-[102] mx-auto max-w-md">
 		<button
-			class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'absolute right-4 top-8 ')}
+			class={cn(buttonVariants({ variant: 'outline', size: 'icon-sm' }), 'absolute right-4 top-8 ')}
 			onclick={onClose}
 		>
-			<Icon icon="lucide:x" class="size-6" />
+			<Icon icon="lucide:x" class="size-5" />
 		</button>
 	</div>
 	<div class="relative h-full w-full max-w-md overflow-hidden">
