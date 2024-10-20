@@ -71,17 +71,17 @@
 									href={path}
 									class={cn(
 										buttonVariants({ variant: 'ghost' }),
-										'justify-start py-2 text-sm hover:bg-muted'
+										'justify-start rounded-none py-2 text-sm first:rounded-t-md hover:bg-muted'
 									)}
 								>
 									<Icon {icon} class="mr-2 size-4" />
 									{name}
 								</a>
 							{/each}
-							<hr class="my-1 border-border" />
+							<hr class="border-border" />
 							<Button
 								variant="ghost"
-								class="justify-start py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
+								class="justify-start rounded-none rounded-b-md py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
 							>
 								<Icon icon="solar:logout-2-bold" class="mr-2 size-4" />
 								Logout

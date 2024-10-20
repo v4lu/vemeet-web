@@ -15,12 +15,14 @@ export const buttonVariants = cva(
 					'bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg active:shadow-sm',
 				destructive:
 					'bg-destructive text-destructive-foreground shadow-md hover:bg-destructive/90 hover:shadow-lg active:shadow-sm',
-				outline:
-					'border-2 border-input bg-background hover:border-accent hover:bg-accent hover:text-accent-foreground',
+				outline: 'border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground',
+				'outline-file':
+					'border-2 border-input bg-background transition-all duration-300 ease-in-out hover:border-primary hover:bg-primary hover:text-primary-foreground',
 				secondary:
 					'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 hover:shadow-md active:shadow-sm',
 				ghost: 'hover:bg-accent hover:text-accent-foreground',
 				link: 'text-primary underline-offset-4 hover:underline',
+
 				gradient:
 					'bg-gradient-to-r from-primary to-secondary text-white shadow-md hover:from-primary/90 hover:to-secondary/90 hover:shadow-lg active:shadow-sm'
 			},

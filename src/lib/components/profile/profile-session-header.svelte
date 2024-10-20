@@ -9,9 +9,9 @@
 	import { onMount } from 'svelte';
 	import { UserHorizontalCard } from '../cards';
 	import { Avatar } from '../ui/avatar';
-	import { Modal } from '../ui/modals';
 	import { Skeleton } from '../ui/skeleton';
 	import { cn } from '$lib/cn';
+	import { Drawer } from '../ui/drawer';
 
 	type HeaderProps = {
 		authToken: string;
@@ -278,7 +278,7 @@
 </div>
 
 {#if isFollowersModalOpen}
-	<Modal onClose={() => (isFollowersModalOpen = false)}>
+	<Drawer class="h-2/3" onClose={() => (isFollowersModalOpen = false)}>
 		<div class="hide-scrollbar max-h-[25rem] w-[18rem] overflow-y-auto">
 			<h2 class="mb-4 text-xl font-semibold">Followers</h2>
 			<div class="grid gap-2">
@@ -291,11 +291,11 @@
 				{/if}
 			</div>
 		</div>
-	</Modal>
+	</Drawer>
 {/if}
 
 {#if isFollowingModalOpen}
-	<Modal onClose={() => (isFollowingModalOpen = false)}>
+	<Drawer class="h-2/3" onClose={() => (isFollowingModalOpen = false)}>
 		<div class="hide-scrollbar max-h-[25rem] w-[18rem] overflow-y-auto">
 			<h2 class="mb-4 text-xl font-semibold">Following</h2>
 			<div class="grid gap-2">
@@ -308,7 +308,7 @@
 				{/if}
 			</div>
 		</div>
-	</Modal>
+	</Drawer>
 {/if}
 
 <style lang="postcss">

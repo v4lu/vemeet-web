@@ -53,7 +53,7 @@
 		<nav class="relative flex border-t border-border">
 			{#each tabs as tab}
 				<button
-					class="flex-1 px-6 py-4 text-sm font-medium transition-colors hover:bg-muted/50"
+					class="flex-1 px-6 py-4 text-sm font-medium transition-colors hover:bg-accent"
 					class:text-primary={activeTab === tab}
 					class:text-muted-foreground={activeTab !== tab}
 					onclick={() => setActiveTab(tab)}

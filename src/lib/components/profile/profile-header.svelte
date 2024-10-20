@@ -5,10 +5,10 @@
 	import { UserHorizontalCard } from '../cards';
 	import { Avatar } from '../ui/avatar';
 	import { Button, buttonVariants } from '../ui/button';
-	import Modal from '../ui/modals/modal.svelte';
 	import { cn } from '$lib/cn';
 	import { sessionStore } from '$lib/stores/session.store';
 	import { ConfirmDrawer } from '../drawers';
+	import { Drawer } from '../ui/drawer';
 
 	type ProfileHeaderProps = {
 		user: User;
@@ -59,7 +59,7 @@
 				}}
 				size="sm"
 				variant={isFollowing ? 'outline' : 'default'}
-				class="min-w-[120px] transition-all duration-300 ease-in-out hover:shadow-md"
+				class="min-w-[120px] "
 			>
 				<Icon
 					icon={isFollowing ? 'solar:user-block-bold' : 'solar:users-group-rounded-bold'}
@@ -71,10 +71,7 @@
 			</Button>
 			<a
 				href={`/messages/${$sessionStore.id}/${user.id}`}
-				class={cn(
-					buttonVariants({ variant: 'outline', size: 'sm' }),
-					'min-w-[120px] transition-all duration-300 ease-in-out hover:bg-primary hover:text-primary-foreground hover:shadow-md'
-				)}
+				class={cn(buttonVariants({ variant: 'outline-file', size: 'sm' }))}
 			>
 				<Icon icon="solar:chat-line-bold" class="mr-2 size-4" />
 				<span class="font-medium">Message</span>
@@ -142,7 +139,7 @@
 </div>
 
 {#if isFollowersModalOpen}
-	<Modal onClose={() => (isFollowersModalOpen = false)}>
+	<Drawer onClose={() => (isFollowersModalOpen = false)} class="h-2/3">
 		<div class="hide-scrollbar max-h-[25rem] overflow-y-auto">
 			<h2 class="mb-4 text-xl font-semibold">Followers</h2>
 			<div class="grid gap-2">
@@ -151,11 +148,11 @@
 				{/each}
 			</div>
 		</div>
-	</Modal>
+	</Drawer>
 {/if}
 
 {#if isFollowingModalOpen}
-	<Modal onClose={() => (isFollowingModalOpen = false)}>
+	<Drawer onClose={() => (isFollowingModalOpen = false)} class="h-2/3">
 		<div class="hide-scrollbar max-h-[25rem] overflow-y-auto">
 			<h2 class="mb-4 text-xl font-semibold">Following</h2>
 			<div class="grid gap-2">
@@ -164,7 +161,7 @@
 				{/each}
 			</div>
 		</div>
-	</Modal>
+	</Drawer>
 {/if}
 
 {#if isUnfollowModalOpen}

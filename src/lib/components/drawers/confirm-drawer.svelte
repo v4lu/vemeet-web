@@ -35,13 +35,14 @@
 	</div>
 
 	<div class="mt-4 flex w-full items-center justify-end gap-3">
-		<Button onclick={onClose} variant="secondary" size="sm">Cancel</Button>
+		<Button onclick={onClose} variant="secondary" size="sm" class="px-4">Cancel</Button>
 		<Button
 			isLoading={submitting}
 			disabled={submitting}
 			onclick={onConfirm}
 			variant="destructive"
 			size="sm"
+			class="px-4"
 		>
 			{#if !submitting && showIcon}
 				<Icon {icon} class="mr-2 size-4" />
