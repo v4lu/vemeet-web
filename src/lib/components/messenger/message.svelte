@@ -3,10 +3,10 @@
 	import { formatTimestamp } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { Message } from '$lib/types/chat.types';
-	import { fly } from 'svelte/transition';
 	import Icon from '@iconify/svelte';
-	import { ImageModal } from '../ui/modals';
+	import { fly } from 'svelte/transition';
 	import { AudioPlayer } from '../ui/audio-player';
+	import { ImageModal } from '../ui/modals';
 
 	type Props = {
 		message: Message;
@@ -34,52 +34,93 @@
 >
 	<div
 		class={cn(
-			'flex max-w-[70%] flex-col',
+			'group flex max-w-[85%] flex-col sm:max-w-[70%]',
 			message.sender.id === $sessionStore.id ? 'items-end' : 'items-start'
 		)}
 	>
-		{#if message.content}
-			<div
-				class={cn(
-					'rounded-2xl p-3 shadow-md transition-all duration-200 hover:shadow-lg',
-					message.sender.id === $sessionStore.id
-						? 'bg-primary text-primary-foreground'
-						: 'bg-accent text-accent-foreground'
-				)}
-			>
-				<p class="max-w-[18rem] text-balance break-words text-sm">{message.content}</p>
-			</div>
-		{/if}
-		{#if message.chatAssets && message.chatAssets.length > 0}
-			<div class="mt-2 flex flex-wrap gap-2">
-				{#each message.chatAssets as asset}
-					{#if asset.fileType === 'IMAGE' && asset.fileUrl}
-						<div
-							class="relative size-40 cursor-pointer overflow-hidden rounded-lg"
-							onclick={() => openImageModal(asset.fileUrl!)}
-						>
-							<img
-								src={asset.fileUrl}
-								alt="Chat asset"
-								class="h-full w-full object-cover object-center transition-transform duration-300 hover:scale-110"
-							/>
-						</div>
-					{:else if asset.fileType === 'VIDEO'}
-						<div class="relative h-24 w-24 overflow-hidden rounded-lg">
-							<video src={asset.fileUrl} class="h-full w-full object-cover" controls></video>
-						</div>
-					{:else if asset.fileType === 'AUDIO'}
-						<AudioPlayer src={asset.fileUrl!} durationSeconds={asset.durationSeconds || 0} />
-					{:else}
-						<div class="flex items-center gap-2 rounded-lg bg-muted p-2">
-							<Icon icon="solar:file-bold" class="size-5" />
-							<span class="text-sm">{asset.fileType} file</span>
-						</div>
-					{/if}
-				{/each}
-			</div>
-		{/if}
-		<span class="mt-1 text-xs text-muted-foreground">
+		<div class="space-y-1.5">
+			{#if message.content}
+				<div
+					class={cn(
+						'relative rounded-2xl px-4 py-2.5 shadow-sm',
+						'transform transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-md',
+						message.sender.id === $sessionStore.id
+							? 'rounded-br-sm bg-primary text-primary-foreground'
+							: 'rounded-bl-sm border bg-card text-card-foreground'
+					)}
+				>
+					<p class="break-words text-[0.9375rem] leading-relaxed">
+						{message.content}
+					</p>
+				</div>
+			{/if}
+
+			{#if message.chatAssets && message.chatAssets.length > 0}
+				<div
+					class={cn(
+						'grid gap-1',
+						message.chatAssets.length > 1 ? 'grid-cols-2' : 'grid-cols-1',
+						message.chatAssets.length >= 3 ? 'max-w-sm' : 'max-w-xs'
+					)}
+				>
+					{#each message.chatAssets as asset}
+						{#if asset.fileType === 'IMAGE' && asset.fileUrl}
+							<div
+								class="group/image relative overflow-hidden rounded-xl border bg-muted/30"
+								class:col-span-2={message.chatAssets.length === 3 &&
+									asset.fileUrl === message.chatAssets[0].fileUrl}
+								onclick={() => openImageModal(asset.fileUrl!)}
+							>
+								<div class="relative pt-[100%]">
+									<img
+										src={asset.fileUrl}
+										alt="Chat asset"
+										class="absolute inset-0 h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+									/>
+									<div
+										class="absolute inset-0 bg-black/0 transition-colors group-hover/image:bg-black/10"
+									/>
+									<div
+										class="absolute inset-0 opacity-0 transition-opacity group-hover/image:opacity-100"
+									>
+										<div class="flex h-full items-center justify-center">
+											<div class="rounded-full bg-black/50 p-2 backdrop-blur-sm">
+												<Icon icon="solar:maximize-square-bold" class="size-5 text-white" />
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						{:else if asset.fileType === 'VIDEO'}
+							<div class="relative overflow-hidden rounded-xl border bg-muted/30">
+								<video src={asset.fileUrl} class="aspect-square w-full object-cover" controls
+								></video>
+							</div>
+						{:else if asset.fileType === 'AUDIO'}
+							<div class="col-span-2">
+								<AudioPlayer
+									senderId={message.sender.id}
+									src={asset.fileUrl!}
+									durationSeconds={asset.durationSeconds || 0}
+								/>
+							</div>
+						{:else}
+							<div class="col-span-2 flex items-center gap-2 rounded-xl border bg-muted/30 p-3">
+								<Icon icon="solar:file-bold" class="size-5" />
+								<span class="text-sm font-medium">{asset.fileType} file</span>
+							</div>
+						{/if}
+					{/each}
+				</div>
+			{/if}
+		</div>
+
+		<span
+			class={cn(
+				'mt-1 px-1.5 text-xs text-muted-foreground/60',
+				message.sender.id === $sessionStore.id ? 'text-right' : 'text-left'
+			)}
+		>
 			{formatTimestamp(message.createdAt)}
 		</span>
 	</div>

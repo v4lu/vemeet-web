@@ -193,75 +193,88 @@
 
 <CustomHeaderWithTitle title="Security" />
 
-<div class="container h-full px-4 py-6 lg:border-x lg:border-border lg:bg-card lg:px-8">
-	<div class="max-w-pc mx-auto space-y-8">
+<div class="container h-full px-4 py-4 lg:border-x lg:border-border lg:bg-card lg:px-8">
+	<div class="mx-auto max-w-pc space-y-6">
 		<div class="space-y-2">
-			<h2 class="text-2xl font-semibold tracking-tight">Account Security</h2>
+			<h2 class="text-xl font-semibold tracking-tight sm:text-2xl">Account Security</h2>
 			<p class="text-sm text-muted-foreground">
 				Manage your account security settings and credentials
 			</p>
 		</div>
 
-		<div class="space-y-6 rounded-xl border bg-card p-6 shadow-sm">
-			<div class="space-y-6">
-				<div class="flex items-start space-x-4">
+		<div class="space-y-4 rounded-xl border bg-card p-4 shadow-sm sm:space-y-6 sm:p-6">
+			<div class="space-y-4 sm:space-y-6">
+				<div class="flex flex-col space-y-4 sm:flex-row sm:items-start sm:space-x-4 sm:space-y-0">
 					<div
-						class="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary"
+						class="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary sm:size-12"
 					>
-						<Icon icon="solar:letter-bold" class="size-6" />
+						<Icon icon="solar:letter-bold" class="size-5 sm:size-6" />
 					</div>
 					<div class="flex-1 space-y-1">
-						<div class="flex items-center justify-between">
+						<div
+							class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0"
+						>
 							<div>
-								<h3 class="text-lg font-medium">Email Address</h3>
+								<h3 class="text-base font-medium sm:text-lg">Email Address</h3>
 								<p class="text-sm text-muted-foreground">Change your account email</p>
+								<p class="mt-2 break-all text-sm font-medium">{email}</p>
 							</div>
-							<Button variant="outline" onclick={() => (showEmailModal = true)}>
+							<Button
+								variant="outline"
+								onclick={() => (showEmailModal = true)}
+								class="w-full sm:w-auto"
+							>
 								Change Email
 							</Button>
 						</div>
-						<p class="text-sm font-medium">{email}</p>
 					</div>
 				</div>
 			</div>
 
 			<div class="border-t"></div>
 
-			<div class="space-y-6">
-				<div class="flex items-start space-x-4">
+			<div class="space-y-4 sm:space-y-6">
+				<div class="flex flex-col space-y-4 sm:flex-row sm:items-start sm:space-x-4 sm:space-y-0">
 					<div
-						class="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary"
+						class="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary sm:size-12"
 					>
-						<Icon icon="solar:lock-password-bold" class="size-6" />
+						<Icon icon="solar:lock-password-bold" class="size-5 sm:size-6" />
 					</div>
 					<div class="flex-1 space-y-1">
-						<div class="flex items-center justify-between">
+						<div
+							class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0"
+						>
 							<div>
-								<h3 class="text-lg font-medium">Password</h3>
+								<h3 class="text-base font-medium sm:text-lg">Password</h3>
 								<p class="text-sm text-muted-foreground">Change your account password</p>
 							</div>
-							<Button variant="outline" onclick={() => (showPasswordModal = true)}>
+							<Button
+								variant="outline"
+								onclick={() => (showPasswordModal = true)}
+								class="w-full sm:w-auto"
+							>
 								Change Password
 							</Button>
 						</div>
-						<p class="text-sm text-muted-foreground">Last changed: Never</p>
 					</div>
 				</div>
 			</div>
 
 			<div class="border-t"></div>
 
-			<div class="space-y-6">
-				<div class="flex items-start space-x-4">
+			<div class="space-y-4 sm:space-y-6">
+				<div class="flex flex-col space-y-4 sm:flex-row sm:items-start sm:space-x-4 sm:space-y-0">
 					<div
-						class="flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive"
+						class="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive sm:size-12"
 					>
-						<Icon icon="solar:trash-bin-trash-bold" class="size-6" />
+						<Icon icon="solar:trash-bin-trash-bold" class="size-5 sm:size-6" />
 					</div>
 					<div class="flex-1 space-y-1">
-						<div class="flex items-center justify-between">
+						<div
+							class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0"
+						>
 							<div>
-								<h3 class="text-lg font-medium">Delete Account</h3>
+								<h3 class="text-base font-medium sm:text-lg">Delete Account</h3>
 								<p class="text-sm text-muted-foreground">
 									Permanently delete your account and all data
 								</p>
@@ -269,7 +282,7 @@
 							<Button
 								variant="destructive"
 								onclick={() => (showDeleteModal = true)}
-								class="bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+								class="w-full bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground sm:w-auto"
 							>
 								Delete Account
 							</Button>
@@ -279,9 +292,9 @@
 			</div>
 		</div>
 
-		<div class="rounded-lg border bg-card/50 p-4">
-			<div class="flex items-center space-x-3">
-				<Icon icon="solar:shield-warning-bold" class="mt-1 size-7 text-muted-foreground" />
+		<div class="rounded-lg border bg-card/50 p-3 sm:p-4">
+			<div class="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-x-3 sm:space-y-0">
+				<Icon icon="solar:shield-warning-bold" class="size-6 text-muted-foreground sm:size-7" />
 				<div class="flex-1 text-sm text-muted-foreground">
 					<p>
 						Keep your account secure by using a strong password and regularly reviewing your

@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { uploadImg } from '$lib/api';
 	import { Button } from '$lib/components/ui/button';
 	import { toast } from '$lib/stores/toast.store';
-	import Icon from '@iconify/svelte';
-	import { uploadImg } from '$lib/api';
 	import type { CreateStoryRequest } from '$lib/types/story.types';
-	import { Modal } from '$lib/components/ui/modals';
+	import Icon from '@iconify/svelte';
+	import { fade } from 'svelte/transition';
 
 	interface CreateStoryProps {
 		authToken: string;
@@ -64,23 +64,67 @@
 	}
 </script>
 
-<Modal {onClose}>
-	<div class="w-full min-w-[18rem] max-w-md">
-		<h2 class="mb-4 text-2xl font-bold">Create a New Story</h2>
-
-		{#if imagePreviewUrl}
-			<div class="mb-4 aspect-[9/16] w-full overflow-hidden rounded-lg">
-				<img src={imagePreviewUrl} alt="Story preview" class="h-full w-full object-cover" />
-			</div>
-		{:else}
+<div class="fixed inset-0 z-[100] bg-background" transition:fade={{ duration: 200 }}>
+	<div class="flex h-full flex-col">
+		<div class="flex h-14 items-center justify-between border-b px-4">
 			<button
-				class="mb-4 flex aspect-[9/16] w-full cursor-pointer items-center justify-center rounded-lg bg-muted"
-				onclick={() => fileInput?.click()}
+				onclick={onClose}
+				class="rounded-full p-2 text-foreground hover:bg-muted"
 				disabled={isUploading || isSubmitting}
 			>
-				<Icon icon="solar:camera-add-bold" class="size-16 text-muted-foreground" />
+				<Icon icon="lucide:x" class="size-6" />
 			</button>
-		{/if}
+			<h2 class="text-lg font-medium">New Story</h2>
+			<Button
+				onclick={handleSubmit}
+				disabled={!selectedFile || isUploading || isSubmitting}
+				variant="ghost"
+				class="h-auto px-3 py-1.5 font-medium"
+			>
+				{#if isUploading}
+					<Icon icon="eos-icons:loading" class="mr-2 size-4 animate-spin" />
+					Uploading...
+				{:else if isSubmitting}
+					<Icon icon="eos-icons:loading" class="mr-2 size-4 animate-spin" />
+					Sharing...
+				{:else}
+					Share
+				{/if}
+			</Button>
+		</div>
+
+		<div class="relative flex flex-1 items-center justify-center overflow-hidden bg-muted/30 px-4">
+			<div class="relative w-full max-w-sm">
+				<div class="relative aspect-[9/16] w-full overflow-hidden rounded-2xl bg-white shadow-lg">
+					{#if imagePreviewUrl}
+						<img src={imagePreviewUrl} alt="Story preview" class="h-full w-full object-cover" />
+						<button
+							class="absolute bottom-6 right-6 rounded-full bg-white/90 p-3 shadow-lg hover:bg-white"
+							onclick={() => fileInput?.click()}
+							disabled={isUploading || isSubmitting}
+						>
+							<Icon icon="solar:camera-bold" class="size-6 text-foreground" />
+						</button>
+					{:else}
+						<div class="flex h-full w-full flex-col items-center justify-center">
+							<button
+								class="flex flex-col items-center gap-4"
+								onclick={() => fileInput?.click()}
+								disabled={isUploading || isSubmitting}
+							>
+								<div class="rounded-full bg-muted p-6">
+									<Icon icon="solar:camera-add-bold" class="size-8 text-muted-foreground" />
+								</div>
+								<div class="text-center">
+									<p class="text-lg font-medium">Create a Story</p>
+									<p class="text-sm text-muted-foreground">Share a photo with your followers</p>
+								</div>
+							</button>
+						</div>
+					{/if}
+				</div>
+			</div>
+		</div>
 
 		<input
 			type="file"
@@ -89,22 +133,5 @@
 			bind:this={fileInput}
 			onchange={handleFileSelect}
 		/>
-
-		<div class="flex justify-between">
-			<Button variant="outline" onclick={onClose} disabled={isUploading || isSubmitting}
-				>Cancel</Button
-			>
-			<Button onclick={handleSubmit} disabled={!selectedFile || isUploading || isSubmitting}>
-				{#if isUploading}
-					<Icon icon="eos-icons:loading" class="mr-2 size-4 animate-spin" />
-					Uploading...
-				{:else if isSubmitting}
-					<Icon icon="eos-icons:loading" class="mr-2 size-4 animate-spin" />
-					Creating Story...
-				{:else}
-					Create Story
-				{/if}
-			</Button>
-		</div>
 	</div>
-</Modal>
+</div>

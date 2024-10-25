@@ -138,6 +138,7 @@
 			fetchFollowing();
 		}
 	});
+
 	$effect(() => {
 		const mediaQuery = window.matchMedia('(max-width: 768px)');
 
@@ -163,12 +164,12 @@
 	>
 		<a
 			href="/settings"
-			class={cn(buttonVariants({ size: 'sm', variant: 'outline' }), 'absolute right-4 top-8')}
+			class={cn(buttonVariants({ size: 'sm', variant: 'outline' }), 'absolute right-2 top-2')}
 		>
 			<Icon icon="solar:settings-bold" class="mr-2 size-5" />
 			Settings
 		</a>
-		<div class="flex items-center">
+		<div class="mt-1 flex items-center">
 			<div class="relative">
 				<button
 					aria-label="Upload profile picture"

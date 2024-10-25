@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { cn } from '$lib/cn';
 	import type { UserStoriesResponse } from '$lib/types/story.types';
 	import Icon from '@iconify/svelte';
-	import { Avatar } from '../ui/avatar';
-	import { fade, fly, scale } from 'svelte/transition';
+	import { onDestroy, onMount } from 'svelte';
 	import { cubicOut, elasticOut } from 'svelte/easing';
+	import { fade, fly, scale } from 'svelte/transition';
+	import { Avatar } from '../ui/avatar';
 	import { buttonVariants } from '../ui/button';
-	import { cn } from '$lib/cn';
 
 	type Props = {
 		allStories: UserStoriesResponse[];
@@ -85,6 +85,18 @@
 		if (event.key === 'Escape') onClose();
 	}
 </script>
+
+<svelte:head>
+	{#if currentStory}
+		<style>
+			body {
+				overflow: hidden;
+				position: fixed;
+				width: 100%;
+			}
+		</style>
+	{/if}
+</svelte:head>
 
 <svelte:window on:keydown={handleKeydown} />
 

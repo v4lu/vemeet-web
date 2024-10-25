@@ -138,15 +138,16 @@
 </script>
 
 <CustomHeaderWithTitle title="Edit Profile" />
-<div class="container h-full px-4 py-6 lg:border-x lg:border-border lg:bg-card lg:px-8">
-	<div class="max-w-pc mx-auto">
-		<form class="flex flex-col justify-between space-y-8" onsubmit={handleSubmit}>
-			<div class="flex-1 space-y-8">
-				<div class="space-y-6">
-					<div class="flex items-center gap-4">
-						<Avatar class="size-16" user={$sessionStore} />
+<div class="container h-full px-4 py-4 lg:border-x lg:border-border lg:bg-card lg:px-8">
+	<div class="mx-auto max-w-pc">
+		<form class="flex flex-col justify-between space-y-6 sm:space-y-8" onsubmit={handleSubmit}>
+			<div class="flex-1 space-y-6 sm:space-y-8">
+				<!-- Basic Information Section -->
+				<div class="space-y-4 sm:space-y-6">
+					<div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
+						<Avatar class="size-14 sm:size-16" user={$sessionStore} />
 						<div>
-							<h2 class="text-lg font-semibold">Basic Information</h2>
+							<h2 class="text-base font-semibold sm:text-lg">Basic Information</h2>
 							<p class="text-sm text-muted-foreground">
 								Update your profile details and personal information
 							</p>
@@ -159,7 +160,7 @@
 								<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 									<Icon
 										icon="solar:user-bold"
-										class="h-5 w-5 text-muted-foreground/70 transition-colors group-focus-within:text-primary"
+										class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
 									/>
 								</div>
 								<Input
@@ -178,7 +179,7 @@
 									<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 										<Icon
 											icon="solar:user-id-bold"
-											class="h-5 w-5 text-muted-foreground/70 transition-colors group-focus-within:text-primary"
+											class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
 										/>
 									</div>
 									<Input
@@ -194,7 +195,7 @@
 									<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 										<Icon
 											icon="solar:users-group-two-rounded-bold"
-											class="h-5 w-5 text-muted-foreground/70 transition-colors group-focus-within:text-primary"
+											class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
 										/>
 									</div>
 									<select
@@ -218,15 +219,15 @@
 				</div>
 
 				<!-- Location section -->
-				<div class="space-y-6">
-					<div class="flex items-center gap-4">
+				<div class="space-y-4 sm:space-y-6">
+					<div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
 						<div
-							class="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary"
+							class="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary sm:size-16"
 						>
-							<Icon icon="solar:map-point-bold" class="size-8" />
+							<Icon icon="solar:map-point-bold" class="size-6 sm:size-8" />
 						</div>
 						<div>
-							<h2 class="text-lg font-semibold">Location</h2>
+							<h2 class="text-base font-semibold sm:text-lg">Location</h2>
 							<p class="text-sm text-muted-foreground">Where are you based?</p>
 						</div>
 					</div>
@@ -237,7 +238,7 @@
 								<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 									<Icon
 										icon="material-symbols:globe"
-										class="h-5 w-5 text-muted-foreground/70 transition-colors group-focus-within:text-primary"
+										class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
 									/>
 								</div>
 								<select
@@ -265,7 +266,7 @@
 								<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 									<Icon
 										icon="solar:city-bold"
-										class="h-5 w-5 text-muted-foreground/70 transition-colors group-focus-within:text-primary"
+										class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
 									/>
 								</div>
 								<Input
@@ -280,11 +281,11 @@
 								/>
 								{#if showCityDropdown && locationsResp.cities.length > 0}
 									<ul
-										class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border bg-card py-1 shadow-lg"
+										class="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border bg-card py-1 shadow-lg sm:max-h-60"
 									>
 										{#each locationsResp.cities as cityOption}
 											<li
-												class="cursor-pointer px-4 py-2 text-sm text-foreground transition-colors hover:bg-accent"
+												class="cursor-pointer px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
 												onclick={() => selectCity(cityOption)}
 											>
 												{cityOption.cityName}
@@ -298,15 +299,15 @@
 				</div>
 
 				<!-- Bio section -->
-				<div class="space-y-6">
-					<div class="flex items-center gap-4">
+				<div class="space-y-4 sm:space-y-6">
+					<div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
 						<div
-							class="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary"
+							class="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary sm:size-16"
 						>
-							<Icon icon="solar:pen-bold" class="size-8" />
+							<Icon icon="solar:pen-bold" class="size-6 sm:size-8" />
 						</div>
 						<div>
-							<h2 class="text-lg font-semibold">About You</h2>
+							<h2 class="text-base font-semibold sm:text-lg">About You</h2>
 							<p class="text-sm text-muted-foreground">
 								Share a bit about yourself with the community
 							</p>
@@ -320,7 +321,7 @@
 								rows="4"
 								class={cn(
 									inputVariants(),
-									'min-h-[100px] resize-none bg-muted/50 ring-primary/20 transition-all focus:ring-2'
+									'min-h-[120px] resize-none bg-muted/50 ring-primary/20 transition-all focus:ring-2'
 								)}
 								placeholder="Tell us about yourself, your interests, and what brings you to our community..."
 								bind:value={bio}

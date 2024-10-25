@@ -2,7 +2,7 @@
 	import { api, createAuthHeaders } from '$lib/api.js';
 	import { Button } from '$lib/components/ui/button';
 	import { CustomHeaderWithTitle } from '$lib/components/ui/custom-header';
-
+	import { Drawer } from '$lib/components/ui/drawer/index.js';
 	import { Modal } from '$lib/components/ui/modals';
 	import { Toggle } from '$lib/components/ui/toggle/index.js';
 	import { sessionStore } from '$lib/stores/session.store';
@@ -17,6 +17,7 @@
 	let modalContent = $state('');
 	let toggleType = $state('');
 	let isSubmitting = $state(false);
+	let isMobile = $state(true);
 
 	function openModal(type: string) {
 		toggleType = type;
@@ -95,110 +96,122 @@
 			console.error(error);
 		}
 	}
+
+	$effect(() => {
+		const mediaQuery = window.matchMedia('(max-width: 768px)');
+
+		function handleResize(e: MediaQueryListEvent | MediaQueryList) {
+			isMobile = e.matches;
+		}
+
+		mediaQuery.addEventListener('change', handleResize);
+
+		handleResize(mediaQuery);
+
+		return () => {
+			mediaQuery.removeEventListener('change', handleResize);
+		};
+	});
+
+	const Dialog = $derived(isMobile ? Drawer : Modal);
 </script>
 
 <CustomHeaderWithTitle title="Privacy Settings" />
 
 <div
-	class="container h-full bg-background px-4 py-6 lg:border-x lg:border-border lg:bg-card lg:px-8"
+	class="min-h-full bg-background px-4 py-4 sm:px-6 lg:border-x lg:border-border lg:bg-card lg:px-8"
 >
-	<div class="max-w-pc mx-auto space-y-8">
+	<div class="mx-auto max-w-3xl space-y-6">
 		<div class="space-y-2">
-			<h2 class="text-2xl font-semibold tracking-tight">Privacy & Security</h2>
+			<h2 class="text-xl font-semibold tracking-tight sm:text-2xl">Privacy & Security</h2>
 			<p class="text-sm text-muted-foreground">
 				Manage your privacy settings and control how others interact with you
 			</p>
 		</div>
 
-		<div class="space-y-6 rounded-xl border bg-card p-6 shadow-sm">
-			<div class="space-y-6">
-				<div class="flex items-start space-x-4">
-					<div
-						class="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary"
-					>
-						<Icon icon="solar:shield-user-bold" class="size-6" />
-					</div>
-					<div class="flex flex-1 items-center justify-between">
-						<div class="space-y-1">
-							<div class="flex items-center gap-2">
-								<h3 class="text-lg font-medium text-foreground">Private Profile</h3>
-								{#if isPrivate}
-									<span
-										class="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
-									>
-										<Icon icon="solar:shield-check-bold" class="mr-1 size-3.5" />
-										Enabled
-									</span>
-								{/if}
-							</div>
-							<p class="text-sm text-muted-foreground">
-								Only approved followers can see your profile content and activities
-							</p>
+		<div class="space-y-4 rounded-lg border bg-card shadow-sm sm:p-6">
+			<div class="flex flex-col space-y-4 p-4 sm:flex-row sm:items-start sm:space-x-4 sm:space-y-0">
+				<div
+					class="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary sm:size-12"
+				>
+					<Icon icon="solar:shield-user-bold" class="size-5 sm:size-6" />
+				</div>
+				<div class="flex flex-1 flex-col space-y-2 sm:space-y-1">
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-2">
+							<h3 class="text-base font-medium text-foreground sm:text-lg">Private Profile</h3>
+							{#if isPrivate}
+								<span
+									class="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+								>
+									<Icon icon="solar:shield-check-bold" class="mr-1 size-3.5" />
+									Enabled
+								</span>
+							{/if}
 						</div>
-						<Toggle checked={isPrivate} onchange={() => openModal('isPrivate')} />
+						<Toggle checked={isPrivate} onchange={() => openModal('isPrivate')} size="md" />
 					</div>
+					<p class="text-sm text-muted-foreground">
+						Only approved followers can see your profile content and activities
+					</p>
 				</div>
 			</div>
 
 			<div class="border-t"></div>
 
-			<div class="space-y-6">
-				<div class="flex items-start space-x-4">
-					<div
-						class="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary"
-					>
-						<Icon icon="solar:users-group-rounded-bold" class="size-6" />
-					</div>
-					<div class="flex flex-1 items-center justify-between">
-						<div class="space-y-1">
-							<div class="flex items-center gap-2">
-								<h3 class="text-lg font-medium text-foreground">Swiper Mode</h3>
-								{#if !swiperMode}
-									<span
-										class="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
-									>
-										<Icon icon="solar:shield-cross-bold" class="mr-1 size-3.5" />
-										Disabled
-									</span>
-								{/if}
-							</div>
-							<p class="text-sm text-muted-foreground">
-								Allow your profile to be discovered through Swiper mode
-							</p>
+			<div class="flex flex-col space-y-4 p-4 sm:flex-row sm:items-start sm:space-x-4 sm:space-y-0">
+				<div
+					class="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary sm:size-12"
+				>
+					<Icon icon="solar:users-group-rounded-bold" class="size-5 sm:size-6" />
+				</div>
+				<div class="flex flex-1 flex-col space-y-2 sm:space-y-1">
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-2">
+							<h3 class="text-base font-medium text-foreground sm:text-lg">Swiper Mode</h3>
+							{#if !swiperMode}
+								<span
+									class="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
+								>
+									<Icon icon="solar:shield-cross-bold" class="mr-1 size-3.5" />
+									Disabled
+								</span>
+							{/if}
 						</div>
-						<Toggle checked={swiperMode} onchange={() => openModal('swiperMode')} />
+						<Toggle checked={swiperMode} onchange={() => openModal('swiperMode')} size="md" />
 					</div>
+					<p class="text-sm text-muted-foreground">
+						Allow your profile to be discovered through Swiper mode
+					</p>
 				</div>
 			</div>
 
 			<div class="border-t"></div>
 
-			<div class="space-y-6">
-				<div class="flex items-start space-x-4">
-					<div
-						class="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary"
-					>
-						<Icon icon="solar:lock-keyhole-bold" class="size-6" />
-					</div>
-					<div class="flex flex-1 items-center justify-between">
-						<div class="space-y-1">
-							<div class="flex items-center gap-2">
-								<h3 class="text-lg font-medium text-foreground">Locked Inbox</h3>
-								{#if inboxLocked}
-									<span
-										class="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
-									>
-										<Icon icon="solar:shield-check-bold" class="mr-1 size-3.5" />
-										Enabled
-									</span>
-								{/if}
-							</div>
-							<p class="text-sm text-muted-foreground">
-								Only receive messages from approved connections
-							</p>
+			<div class="flex flex-col space-y-4 p-4 sm:flex-row sm:items-start sm:space-x-4 sm:space-y-0">
+				<div
+					class="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary sm:size-12"
+				>
+					<Icon icon="solar:lock-keyhole-bold" class="size-5 sm:size-6" />
+				</div>
+				<div class="flex flex-1 flex-col space-y-2 sm:space-y-1">
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-2">
+							<h3 class="text-base font-medium text-foreground sm:text-lg">Locked Inbox</h3>
+							{#if inboxLocked}
+								<span
+									class="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+								>
+									<Icon icon="solar:shield-check-bold" class="mr-1 size-3.5" />
+									Enabled
+								</span>
+							{/if}
 						</div>
-						<Toggle checked={inboxLocked} onchange={() => openModal('inboxLocked')} />
+						<Toggle checked={inboxLocked} onchange={() => openModal('inboxLocked')} size="md" />
 					</div>
+					<p class="text-sm text-muted-foreground">
+						Only receive messages from approved connections
+					</p>
 				</div>
 			</div>
 		</div>
@@ -219,8 +232,8 @@
 </div>
 
 {#if showModal}
-	<Modal onClose={() => (showModal = false)}>
-		<div class="space-y-4 p-2">
+	<Dialog onClose={() => (showModal = false)}>
+		<div class="space-y-4 p-4">
 			<div class="flex items-center gap-4">
 				<div class="flex size-12 items-center justify-center rounded-full bg-primary/10">
 					<Icon
@@ -256,5 +269,5 @@
 				</Button>
 			</div>
 		</div>
-	</Modal>
+	</Dialog>
 {/if}

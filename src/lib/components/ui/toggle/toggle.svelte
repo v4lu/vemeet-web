@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { cn } from '$lib/cn';
-	import { cubicOut } from 'svelte/easing';
-	import { spring, tweened } from 'svelte/motion';
+	import { spring } from 'svelte/motion';
 
 	type Props = {
 		checked: boolean;
@@ -15,8 +14,8 @@
 	const toggleSpring = spring(
 		{ x: checked ? 1 : 0 },
 		{
-			stiffness: 0.2,
-			damping: 0.4
+			stiffness: 0.25,
+			damping: 0.7
 		}
 	);
 
@@ -24,25 +23,22 @@
 		toggleSpring.set({ x: checked ? 1 : 0 });
 	});
 
-	const backgroundTween = tweened(checked ? 100 : 0, {
-		duration: 150,
-		easing: cubicOut
-	});
-
-	$effect(() => {
-		backgroundTween.set(checked ? 100 : 0);
-	});
-
 	const sizes = {
-		sm: 'h-5 w-9',
-		md: 'h-6 w-11',
-		lg: 'h-7 w-14'
+		sm: 'h-6 w-11',
+		md: 'h-7 w-14',
+		lg: 'h-8 w-16'
 	};
 
 	const handleSizes = {
-		sm: 'h-4 w-4',
-		md: 'h-5 w-5',
-		lg: 'h-6 w-6'
+		sm: 'size-4',
+		md: 'size-5',
+		lg: 'size-6'
+	};
+
+	const iconSizes = {
+		sm: 'size-2.5',
+		md: 'size-3',
+		lg: 'size-3.5'
 	};
 </script>
 
@@ -52,7 +48,7 @@
 	aria-checked={checked}
 	{disabled}
 	class={cn(
-		'relative inline-flex items-center rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
+		'group relative inline-flex touch-none items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
 		sizes[size],
 		checked ? 'bg-primary' : 'bg-input'
 	)}
@@ -60,14 +56,20 @@
 >
 	<span
 		class={cn(
-			'absolute left-[2px] flex items-center justify-center rounded-full bg-background shadow-lg ring-0 transition-all',
+			'pointer-events-none absolute flex items-center justify-center rounded-full bg-white shadow-lg ring-0 transition-transform',
 			handleSizes[size]
 		)}
-		style="transform: translateX(calc({$toggleSpring.x} * (100%)))"
+		style="transform: translateX(calc({$toggleSpring.x} * (100% - 100% / 20))); left: 8px;"
 	>
 		{#if checked}
-			<svg class="h-3 w-3 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+			<svg
+				class={cn('text-primary', iconSizes[size])}
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+				stroke-width="3"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
 			</svg>
 		{/if}
 	</span>
