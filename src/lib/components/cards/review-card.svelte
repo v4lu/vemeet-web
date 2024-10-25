@@ -1,11 +1,11 @@
 <script lang="ts">
-	import Icon from '@iconify/svelte';
-	import { Button } from '../ui/button';
-	import { Dropdown } from '../ui/dropdown';
-	import { Avatar } from '../ui/avatar';
 	import { formatTimestamp } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { LocationReviewResponse } from '$lib/types/geo.types';
+	import Icon from '@iconify/svelte';
+	import { Avatar } from '../ui/avatar';
+	import { Button } from '../ui/button';
+	import { Dropdown } from '../ui/dropdown';
 	import { ConfirmModal, ImageModal } from '../ui/modals';
 
 	type Props = {
@@ -55,7 +55,7 @@
 	}
 </script>
 
-<div class="rounded-b-xl border-t border-border">
+<div class="border-t border-border">
 	<div class="p-4">
 		<div class="flex items-start space-x-4">
 			<Avatar user={review.user} class="h-12 w-12" />

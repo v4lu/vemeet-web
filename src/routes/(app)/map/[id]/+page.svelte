@@ -8,7 +8,7 @@
 		useVeganLocation(data.accessToken, +data.id);
 </script>
 
-<main class="container mb-12 mt-8">
+<main class="mb-12">
 	{#if resp.location}
 		<LocationCard
 			authToken={data.accessToken}

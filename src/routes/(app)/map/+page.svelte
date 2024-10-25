@@ -64,7 +64,7 @@
 				'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 		}).addTo(map);
 
-		L.control.zoom({ position: 'topright' }).addTo(map);
+		// L.control.zoom({ position: 'topright' }).addTo(map);
 
 		if (Array.isArray(resp.locations)) {
 			resp.locations.forEach((location: VeganLocation) => {
@@ -155,7 +155,7 @@
 						'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 				}).addTo(map);
 
-				L.control.zoom({ position: 'topright' }).addTo(map);
+				// L.control.zoom({ position: 'topright' }).addTo(map);
 
 				if (Array.isArray(resp.locations)) {
 					resp.locations.forEach((location: VeganLocation) => {
@@ -251,51 +251,91 @@
 	}
 </script>
 
-<div class="fixed left-0 top-[64px] h-[calc(100vh-64px-65px)] w-full">
+<div class="fixed left-0 top-[64px] h-[calc(100dvh-64px-65px)] w-full">
+	<!-- Map Container -->
 	<div bind:this={mapElement} class="h-full w-full"></div>
-	<div class="absolute left-4 top-4 z-[1000] w-[340px]">
-		<div class="relative w-full max-w-sm" use:clickOutside={handleClickOutside}>
+
+	<!-- Search Bar - Mobile Optimized -->
+	<div class="absolute inset-x-4 top-4 z-[1000] flex flex-col items-center gap-2">
+		<div
+			class="relative w-full max-w-[calc(100vw-32px)] shadow-lg"
+			use:clickOutside={handleClickOutside}
+		>
 			<Input
 				type="text"
-				placeholder="Search for vegan locations..."
+				placeholder="Search vegan locations..."
 				bind:value={searchInput}
 				oninput={handleSearch}
-				class="pr-10"
+				class="h-11 w-full rounded-full border-none bg-background/95 pr-10 backdrop-blur-sm focus:ring-2 focus:ring-primary sm:pr-12"
 			/>
-			{#if showDropdown}
-				{#if isSearching}
-					<div
-						class="absolute z-50 mt-1 flex max-h-60 w-full items-center justify-center overflow-auto rounded-md bg-popover py-1 text-sm shadow-md"
+			<div class="absolute right-3 top-1/2 -translate-y-1/2">
+				{#if searchInput}
+					<button
+						class="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
+						onclick={() => {
+							searchInput = '';
+							showDropdown = false;
+						}}
 					>
-						<Icon icon="eos-icons:loading" class="size-5 animate-spin text-primary" />
-					</div>
+						<Icon icon="solar:close-circle-bold" class="size-5" />
+					</button>
 				{:else}
-					<ul
-						class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-popover py-1 text-sm shadow-md"
-						role="listbox"
-					>
-						{#each searchResults as result}
-							<!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
-							<li
-								onkeydown={(event) => handleKeyDown(event, result)}
-								class="cursor-pointer px-4 py-2 hover:bg-muted"
-								onclick={() => selectLocation(result)}
-								tabindex="0"
-								role="button"
-							>
-								<strong>{result.name}</strong>
-								<br />
-								<span class="text-xs text-muted-foreground">{result.address}</span>
-							</li>
-						{/each}
-					</ul>
+					<Icon icon="solar:magnifer-bold" class="size-5 text-muted-foreground" />
 				{/if}
+			</div>
+
+			<!-- Search Results Dropdown -->
+			{#if showDropdown}
+				<div
+					class="absolute left-0 right-0 top-full mt-2 overflow-hidden rounded-lg bg-background/95 shadow-lg backdrop-blur-sm"
+				>
+					{#if isSearching}
+						<div class="flex items-center justify-center p-4">
+							<Icon icon="eos-icons:loading" class="size-5 animate-spin text-primary" />
+						</div>
+					{:else}
+						<ul class="max-h-[40vh] overflow-auto overscroll-contain py-1" role="listbox">
+							{#each searchResults as result}
+								<li
+									onkeydown={(event) => handleKeyDown(event, result)}
+									class="cursor-pointer px-4 py-3 hover:bg-muted/50 active:bg-muted"
+									onclick={() => selectLocation(result)}
+									tabindex="0"
+									role="button"
+								>
+									<div class="flex items-start gap-3">
+										<div class="rounded-full bg-primary/10 p-2">
+											<Icon
+												icon={result.type.toLowerCase() === 'restaurant'
+													? 'solar:bowl-chopsticks-bold'
+													: result.type.toLowerCase() === 'cafe'
+														? 'solar:cup-bold'
+														: 'solar:shop-bold'}
+												class="size-4 text-primary"
+											/>
+										</div>
+										<div>
+											<strong class="text-sm font-medium">{result.name}</strong>
+											<p class="mt-0.5 text-xs text-muted-foreground">{result.address}</p>
+										</div>
+									</div>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				</div>
 			{/if}
 		</div>
 	</div>
-	<div class="absolute bottom-4 left-4 z-[1000]">
-		<Button onclick={() => (isOpenCreateModal = true)} size="sm">
-			<Icon icon="lucide:plus" class="ml-2 size-5" />
+
+	<!-- Create Location Button - Mobile Optimized -->
+	<div class="absolute inset-x-0 bottom-6 z-[1000] flex justify-center">
+		<Button
+			onclick={() => (isOpenCreateModal = true)}
+			size="lg"
+			class="h-12 rounded-full px-6 shadow-lg"
+		>
+			<Icon icon="lucide:plus" class="mr-2 size-5" />
 			Create New Location
 		</Button>
 	</div>
@@ -349,5 +389,44 @@
 	:global(.popup-content p) {
 		margin: 0;
 		font-size: 14px;
+	}
+
+	ul {
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+
+	ul::-webkit-scrollbar {
+		display: none;
+	}
+
+	:global(.leaflet-control-zoom a) {
+		width: 44px !important;
+		height: 44px !important;
+		line-height: 44px !important;
+	}
+
+	:global(.leaflet-popup-content-wrapper) {
+		border-radius: 12px;
+		padding: 8px;
+	}
+
+	:global(.leaflet-popup-content) {
+		margin: 10px 14px;
+		font-size: 15px;
+	}
+
+	:global(.popup-content h3) {
+		margin: 0 0 8px 0;
+		font-size: 17px;
+	}
+
+	:global(.popup-content p) {
+		margin: 4px 0;
+		font-size: 15px;
+	}
+
+	:global(.leaflet-control-zoom .leaflet-bar .leaflet-control) {
+		display: hidden !important;
 	}
 </style>

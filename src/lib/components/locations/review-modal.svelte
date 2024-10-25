@@ -1,16 +1,17 @@
 <script lang="ts">
-	import { Button } from '../ui/button';
-	import { Field } from '../ui/field';
-	import { inputVariants } from '../ui/input';
-	import { Modal } from '../ui/modals';
-	import Icon from '@iconify/svelte';
-	import { toast } from '$lib/stores/toast.store';
 	import { uploadImage } from '$lib/api';
+	import { toast } from '$lib/stores/toast.store';
 	import type {
 		LocationReviewRequest,
 		LocationReviewResponse,
 		LocationReviewUpdate
 	} from '$lib/types/geo.types';
+	import Icon from '@iconify/svelte';
+	import { Button } from '../ui/button';
+	import { Drawer } from '../ui/drawer';
+	import { Field } from '../ui/field';
+	import { inputVariants } from '../ui/input';
+	import { Modal } from '../ui/modals';
 
 	type Props = {
 		onClose: () => void;
@@ -26,6 +27,7 @@
 	let reviewFileInput: HTMLInputElement;
 	let reviewImageIdsToRemove: number[] = $state([]);
 	let imageUploadLoading = $state(false);
+	let isMobile = $state(true);
 
 	$effect(() => {
 		if (editingReview) {
@@ -110,9 +112,27 @@
 			toast.error('Failed to submit review');
 		}
 	}
+
+	$effect(() => {
+		const mediaQuery = window.matchMedia('(max-width: 768px)');
+
+		function handleResize(e: MediaQueryListEvent | MediaQueryList) {
+			isMobile = e.matches;
+		}
+
+		mediaQuery.addEventListener('change', handleResize);
+
+		handleResize(mediaQuery);
+
+		return () => {
+			mediaQuery.removeEventListener('change', handleResize);
+		};
+	});
+
+	const Dialog = $derived(isMobile ? Drawer : Modal);
 </script>
 
-<Modal {onClose} class="w-full max-w-lg">
+<Dialog {onClose} class="w-full max-w-lg">
 	<h2 class="mb-6 text-2xl font-semibold">
 		{editingReview ? 'Edit Review' : 'Add Review'}
 	</h2>
@@ -220,4 +240,4 @@
 			</Button>
 		</div>
 	</form>
-</Modal>
+</Dialog>

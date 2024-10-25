@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { formatTimestamp } from '$lib/date';
+	import { sessionStore } from '$lib/stores/session.store';
+	import { toast } from '$lib/stores/toast.store';
 	import type {
 		LocationReviewRequest,
 		LocationReviewResponse,
@@ -10,13 +12,11 @@
 	import Icon from '@iconify/svelte';
 	import { elasticOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
+	import { ReviewCard } from '.';
+	import { EditLocation, ReviewModal } from '../locations';
 	import { Button } from '../ui/button';
 	import { Dropdown } from '../ui/dropdown';
 	import { ConfirmModal, ImageModal } from '../ui/modals';
-	import { toast } from '$lib/stores/toast.store';
-	import { sessionStore } from '$lib/stores/session.store';
-	import { ReviewCard } from '.';
-	import { EditLocation, ReviewModal } from '../locations';
 
 	type VeganLocationCardProps = {
 		location: VeganLocation;
@@ -138,7 +138,7 @@
 </script>
 
 <div
-	class="mb-6 rounded-xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
+	class="container mb-6 border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
 >
 	<div class="relative">
 		{#if $sessionStore.id === location.user.id}
@@ -307,7 +307,7 @@
 		</div>
 	</div>
 
-	<div class="space-y-6 border-t border-border bg-card shadow-lg last:rounded-b-xl">
+	<div class="space-y-6 border-t border-border bg-card">
 		{#each location.reviews as review (review.id)}
 			<ReviewCard {review} {handleEditReview} {handleDeleteReview} />
 		{/each}

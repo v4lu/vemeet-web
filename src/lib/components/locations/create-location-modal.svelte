@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { uploadImage } from '$lib/api';
+	import { sessionStore } from '$lib/stores/session.store';
 	import { toast } from '$lib/stores/toast.store';
 	import type { AddressSuggestion, CreateLocation, NominatimResponse } from '$lib/types/geo.types';
 	import { clickOutside, debounce } from '$lib/utils';
 	import Icon from '@iconify/svelte';
 	import { Button } from '../ui/button';
+	import { Field } from '../ui/field';
 	import { Input, inputVariants } from '../ui/input';
 	import { Modal } from '../ui/modals';
-	import { Field } from '../ui/field';
-	import { sessionStore } from '$lib/stores/session.store';
 
 	type Props = {
 		createLocation: (payload: CreateLocation) => Promise<void>;
