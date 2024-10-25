@@ -1,5 +1,5 @@
 export const CLIENT_BASE_URL = 'https://core.vemeet.me/v1';
-export const SERVER_BASE_URL = 'http://app-core:8070/v1';
+export const SERVER_BASE_URL = 'http://core-app:8070/v1';
 export const WEBSOCKET_URL = 'wss://core.vemeet.me';
 export const ACCESS_TOKEN = 'access_token';
 export const REFRESH_TOKEN = 'refresh_token';

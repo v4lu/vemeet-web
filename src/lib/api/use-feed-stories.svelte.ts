@@ -1,12 +1,12 @@
+import { authAPI } from '$lib/api';
+import type { ServerErrorResponse } from '$lib/types/ky.types';
 import type {
 	CreateStoryRequest,
 	StoryResponse,
 	UserStoriesResponse
 } from '$lib/types/story.types';
 import type { User } from '$lib/types/user.types';
-import type { ServerErrorResponse } from '$lib/types/ky.types';
 import { HTTPError } from 'ky';
-import { authAPI } from '$lib/api';
 
 class Story {
 	error = $state<ServerErrorResponse | null>(null);
