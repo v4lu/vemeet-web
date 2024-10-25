@@ -1,5 +1,4 @@
 import { api } from '$lib/api.js';
-import type { ServerErrorResponse } from '$lib/types/ky.types.js';
 import { type UserRegisterSchemaPayload, userRegisterSchema } from '$lib/validators/auth.validator';
 import { fail, redirect } from '@sveltejs/kit';
 import { HTTPError } from 'ky';
@@ -48,9 +47,11 @@ export const actions = {
 			throw redirect(307, `/welcome?email=${res.email}`);
 		} catch (error) {
 			if (error instanceof HTTPError) {
+				if (error.response.status === 409) {
+					return fail(409, { form });
+				}
 				if (error.response.status === 401) {
-					const res = (await error.response.json()) as ServerErrorResponse;
-					return setError(form, `CREDENTIALS: ${res.message}`);
+					return fail(401, { form });
 				}
 				return setError(form, 'SERVER: There is currently server issues, please try again later.');
 			}

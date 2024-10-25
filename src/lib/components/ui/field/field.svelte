@@ -30,6 +30,8 @@
 	</div>
 	{@render children()}
 	{#if error}
-		<p class="text-xs text-destructive">{error}</p>
+		{#each error as e}
+			<p class="text-xs text-destructive">{e}</p>
+		{/each}
 	{/if}
 </div>

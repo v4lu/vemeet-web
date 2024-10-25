@@ -6,60 +6,37 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Logo } from '$lib/components/ui/logo';
 	import { toast } from '$lib/stores/toast.store.js';
-	import { verificationCodeSchema } from '$lib/validators/auth.validator.js';
 	import Icon from '@iconify/svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
+
+	const schema = z.object({
+		email: z.string().email('Please enter a valid email address')
+	});
 
 	let { data } = $props();
-	let isVerifying = $state(false);
+	let isSubmitting = $state(false);
 	const { form, errors, enhance } = superForm(data.form, {
-		validators: zodClient(verificationCodeSchema),
+		validators: zodClient(schema),
 		onSubmit: async ({ formData, cancel }) => {
 			cancel();
-			isVerifying = true;
+			isSubmitting = true;
 			try {
-				await api.post('auth/confirm', {
-					json: { confirmationCode: formData.get('code'), email: data.email }
+				await api.post('auth/password-reset/initiate', {
+					json: { email: formData.get('email') }
 				});
-				toast.success('Verification successful!');
-				goto('/sign-in');
+				toast.success('Password reset instructions sent to your email!');
+				goto(`/new-password?email=${formData.get('email')}`);
 			} catch (error) {
-				console.error('Verification error:', error);
-				toast.error('Invalid verification code. Please try again.');
+				console.error('Password reset error:', error);
+				toast.error('Failed to send reset instructions. Please try again.');
 			} finally {
-				isVerifying = false;
+				isSubmitting = false;
 			}
 		}
 	});
-
-	let resendDisabled = $state(false);
-	let resendTimer = $state(0);
-
-	function startResendTimer() {
-		resendDisabled = true;
-		resendTimer = 60;
-		const interval = setInterval(() => {
-			resendTimer--;
-			if (resendTimer <= 0) {
-				clearInterval(interval);
-				resendDisabled = false;
-			}
-		}, 1000);
-	}
-
-	async function handleResendCode() {
-		if (resendDisabled) return;
-		try {
-			await api.post('auth/verification-email/resend', { json: { email: data.email } }).json();
-			toast.success('Verification code resent');
-			startResendTimer();
-		} catch (error) {
-			console.error('Resend error:', error);
-			toast.error('Failed to resend code. Please try again later.');
-		}
-	}
 </script>
 
 <div class="grid min-h-screen w-full lg:grid-cols-2">
@@ -74,38 +51,41 @@
 				<h2
 					class="mt-4 text-balance text-center text-2xl font-extrabold sm:mt-6 sm:text-4xl lg:text-left lg:leading-tight"
 				>
-					One Last Step to Join Us
+					Reset Your Password
 				</h2>
 				<p class="mt-3 text-center text-sm text-white/80 sm:text-base lg:text-left">
-					We want to ensure your email is valid. This helps us keep our community safe and secure.
+					Don't worry, it happens to the best of us. We'll help you get back into your account
+					safely.
 				</p>
 
 				<div class="mt-8 flex flex-col gap-6">
 					<div class="flex items-start gap-4">
 						<div class="rounded-full bg-white/10 p-3 backdrop-blur-sm">
+							<Icon icon="mdi:email-check" class="h-6 w-6 text-primary" />
+						</div>
+						<div>
+							<h3 class="font-medium text-white">Check Your Email</h3>
+							<p class="text-sm text-white/80">
+								We'll send you instructions to reset your password
+							</p>
+						</div>
+					</div>
+					<div class="flex items-start gap-4">
+						<div class="rounded-full bg-white/10 p-3 backdrop-blur-sm">
+							<Icon icon="mdi:lock-reset" class="h-6 w-6 text-primary" />
+						</div>
+						<div>
+							<h3 class="font-medium text-white">Create New Password</h3>
+							<p class="text-sm text-white/80">Choose a strong password for your account</p>
+						</div>
+					</div>
+					<div class="flex items-start gap-4">
+						<div class="rounded-full bg-white/10 p-3 backdrop-blur-sm">
 							<Icon icon="mdi:shield-check" class="h-6 w-6 text-primary" />
 						</div>
 						<div>
-							<h3 class="font-medium text-white">Secure Access</h3>
-							<p class="text-sm text-white/80">Verify your email to access all features</p>
-						</div>
-					</div>
-					<div class="flex items-start gap-4">
-						<div class="rounded-full bg-white/10 p-3 backdrop-blur-sm">
-							<Icon icon="mdi:email-fast" class="h-6 w-6 text-primary" />
-						</div>
-						<div>
-							<h3 class="font-medium text-white">Quick Process</h3>
-							<p class="text-sm text-white/80">Simple verification with a 6-digit code</p>
-						</div>
-					</div>
-					<div class="flex items-start gap-4">
-						<div class="rounded-full bg-white/10 p-3 backdrop-blur-sm">
-							<Icon icon="mdi:account-check" class="h-6 w-6 text-primary" />
-						</div>
-						<div>
-							<h3 class="font-medium text-white">Start Exploring</h3>
-							<p class="text-sm text-white/80">Connect with the community after verification</p>
+							<h3 class="font-medium text-white">Secure Process</h3>
+							<p class="text-sm text-white/80">Your account security is our top priority</p>
 						</div>
 					</div>
 				</div>
@@ -128,42 +108,37 @@
 					<h2
 						class="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-4xl font-bold text-transparent"
 					>
-						Verify Your Email
+						Forgot Password?
 					</h2>
-					<p class="text-lg text-muted-foreground">Enter the verification code</p>
+					<p class="text-lg text-muted-foreground">Reset your password</p>
 				</div>
 			</div>
 
 			<div
 				class="w-full space-y-6 p-0 lg:rounded-2xl lg:border lg:border-border lg:bg-card lg:p-12 lg:shadow-xl lg:ring-1 lg:ring-border lg:backdrop-blur-sm"
 			>
-				<div class="space-y-4 text-center">
-					<p class="text-lg text-muted-foreground">
-						We've sent a verification code to <span class="font-medium text-foreground"
-							>{data.email}</span
-						>
+				<div class="space-y-4">
+					<p class="text-center text-sm text-muted-foreground">
+						Enter your email address and we'll send you instructions to reset your password.
 					</p>
 				</div>
 
 				<form use:enhance method="POST" class="space-y-6">
-					<input type="hidden" id="email" name="email" bind:value={data.email} />
-					<Field name="Verification Code" error={$errors.code}>
+					<Field name="Email" error={$errors.email}>
 						<div class="group relative">
 							<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 								<Icon
-									icon="mdi:shield-check"
+									icon="mynaui:envelope"
 									class="h-5 w-5 text-muted-foreground/70 transition-colors group-focus-within:text-primary"
 								/>
 							</div>
 							<Input
-								bind:value={$form.code}
-								id="code"
-								name="code"
-								type="text"
-								autocomplete="one-time-code"
+								bind:value={$form.email}
+								type="email"
+								name="email"
+								placeholder="you@example.com"
 								required
 								class="border-0 bg-muted/50 pl-10 pr-4 ring-primary/20 transition-all focus:ring-2 lg:border lg:bg-background"
-								placeholder="Enter 6-digit code"
 							/>
 						</div>
 					</Field>
@@ -171,11 +146,11 @@
 					<Button
 						type="submit"
 						class="w-full font-semibold transition-all hover:shadow-lg"
-						disabled={isVerifying}
-						isLoading={isVerifying}
+						disabled={isSubmitting}
+						isLoading={isSubmitting}
 						size="lg"
 					>
-						{isVerifying ? 'Verifying...' : 'Verify Email'}
+						{isSubmitting ? 'Sending Instructions...' : 'Send Reset Instructions'}
 					</Button>
 				</form>
 
@@ -186,20 +161,18 @@
 						</div>
 						<div class="relative flex justify-center text-sm">
 							<span class="bg-background px-3 text-muted-foreground lg:bg-card">
-								Didn't receive the code?
+								Remember your password?
 							</span>
 						</div>
 					</div>
 
 					<div class="mt-6 flex justify-center">
-						<button
-							type="button"
-							class="font-medium text-primary transition-colors hover:text-primary/80 hover:underline disabled:opacity-50"
-							onclick={handleResendCode}
-							disabled={resendDisabled}
+						<a
+							href="/sign-in"
+							class="font-medium text-primary transition-colors hover:text-primary/80 hover:underline"
 						>
-							{resendDisabled ? `Resend code in ${resendTimer}s` : 'Resend code'}
-						</button>
+							Back to Sign in
+						</a>
 					</div>
 				</div>
 			</div>

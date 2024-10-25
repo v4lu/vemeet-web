@@ -40,3 +40,25 @@ export const verificationCodeSchema = z.object({
 	code: z.string().min(1, 'Please provide verification code'),
 	email: z.string().email('Please provide valid email address').trim()
 });
+
+export const forgotPasswordSchema = z.object({
+	email: z.string().email('Please provide valid email address').trim()
+});
+
+export const newPasswordSchema = z
+	.object({
+		email: z.string().email('Please provide valid email address').trim(),
+		confirmationCode: z.string().min(1, 'Please provide confirmation code'),
+		newPassword: z
+			.string()
+			.min(8, 'Password must be at least 8 characters')
+			.regex(/[a-z]/, 'Password must contain at least 1 lowercase letter')
+			.regex(/[A-Z]/, 'Password must contain at least 1 uppercase letter')
+			.regex(/\d/, 'Password must contain at least 1 number')
+			.regex(/[@$!%*?&.]/, 'Password must contain at least 1 special character'),
+
+		confirmPassword: z.string().min(1, 'Please confirm your password')
+	})
+	.refine((data) => data.newPassword === data.confirmPassword, {
+		message: "Passwords don't match"
+	});

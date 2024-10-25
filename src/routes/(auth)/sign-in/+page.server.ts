@@ -1,10 +1,9 @@
 import { api } from '$lib/api.js';
 import { ACCESS_TOKEN, COGNITO_ID, REFRESH_TOKEN, isProduction } from '$lib/constants.js';
-import type { ServerErrorResponse } from '$lib/types/ky.types.js';
 import { type UserLoginSchemaPayload, userLoginSchema } from '$lib/validators/auth.validator.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { HTTPError } from 'ky';
-import { setError, superValidate } from 'sveltekit-superforms';
+import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 
 type LoginResponse = {
@@ -73,11 +72,14 @@ export const actions = {
 			redirect(307, '/');
 		} catch (error) {
 			if (error instanceof HTTPError) {
-				if (error.response.status === 401) {
-					const res = (await error.response.json()) as ServerErrorResponse;
-					return setError(form, `CREDENTIALS: ${res.message}`);
+				if (error.response.status === 403) {
+					return fail(403, { form });
 				}
-				return setError(form, 'SERVER: There is currently server issues, please try again later.');
+				if (error.response.status === 401) {
+					return fail(401, { form });
+				} else {
+					return fail(500, { form });
+				}
 			}
 		}
 

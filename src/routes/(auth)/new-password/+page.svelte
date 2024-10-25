@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { api } from '$lib/api';
 	import { Button } from '$lib/components/ui/button';
 	import { Field } from '$lib/components/ui/field';
 	import { Input } from '$lib/components/ui/input';
 	import { Logo } from '$lib/components/ui/logo';
 	import { toast } from '$lib/stores/toast.store.js';
-	import { userLoginSchema } from '$lib/validators/auth.validator.js';
+	import { newPasswordSchema } from '$lib/validators/auth.validator.js';
 	import Icon from '@iconify/svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { superForm } from 'sveltekit-superforms';
@@ -13,13 +14,25 @@
 
 	let { data } = $props();
 	let togglePassword = $state(false);
-	const { enhance, form, errors, submitting } = superForm(data.form, {
-		validators: zodClient(userLoginSchema),
-		onResult: ({ result }) => {
-			if (result.status === 403) toast.error('Invalid email or password');
-			if (result.status === 401) toast.error('Invalid email or password');
-			if (result.status === 500) toast.error('Something went wrong. Please try again');
-			if (result.status === 200 || result.status === 201) goto('/');
+	let toggleConfirmPassword = $state(false);
+	const { form, errors, enhance, submitting } = superForm(data.form, {
+		validators: zodClient(newPasswordSchema),
+		onSubmit: async ({ formData, cancel }) => {
+			cancel();
+			try {
+				await api.post('auth/password-reset/complete', {
+					json: {
+						email: data.email,
+						newPassword: formData.get('newPassword'),
+						confirmationCode: formData.get('confirmationCode')
+					}
+				});
+				toast.success('Password reset successful!');
+				goto('/sign-in');
+			} catch (error) {
+				console.error('Password reset error:', error);
+				toast.error('Failed to reset password. Please try again.');
+			}
 		}
 	});
 
@@ -34,7 +47,7 @@
 		return score;
 	}
 
-	let passwordStrength = $derived(getPasswordStrength($form.password));
+	let passwordStrength = $derived(getPasswordStrength($form.newPassword));
 </script>
 
 <div class="grid min-h-screen w-full lg:grid-cols-2">
@@ -44,45 +57,44 @@
 			class="absolute inset-0 z-10 bg-gradient-to-t from-black via-black/50 to-transparent"
 		></div>
 
-		<!-- Sign-in specific content -->
 		<div class="absolute inset-0 z-20 flex items-center justify-center">
 			<div class="flex max-w-lg flex-col items-center px-8 lg:items-start lg:text-white">
 				<h2
 					class="mt-4 text-balance text-center text-2xl font-extrabold sm:mt-6 sm:text-4xl lg:text-left lg:leading-tight"
 				>
-					Welcome Back to Your Community
+					Create Your New Password
 				</h2>
 				<p class="mt-3 text-center text-sm text-white/80 sm:text-base lg:text-left">
-					Sign in to connect with fellow vegans, discover new recipes, and continue making a
-					positive impact.
+					Choose a strong password to keep your account secure. Make sure it's unique and easy to
+					remember.
 				</p>
 
 				<div class="mt-8 flex flex-col gap-6">
 					<div class="flex items-start gap-4">
 						<div class="rounded-full bg-white/10 p-3 backdrop-blur-sm">
-							<Icon icon="mdi:account-heart" class="h-6 w-6 text-primary" />
+							<Icon icon="mdi:password-check" class="h-6 w-6 text-primary" />
 						</div>
 						<div>
-							<h3 class="font-medium text-white">Your Profile</h3>
-							<p class="text-sm text-white/80">Access your personalized feed and connections</p>
+							<h3 class="font-medium text-white">Strong Password</h3>
+							<p class="text-sm text-white/80">Use a mix of letters, numbers, and symbols</p>
 						</div>
 					</div>
 					<div class="flex items-start gap-4">
 						<div class="rounded-full bg-white/10 p-3 backdrop-blur-sm">
-							<Icon icon="mdi:message-text" class="h-6 w-6 text-primary" />
+							<Icon icon="mdi:shield-lock" class="h-6 w-6 text-primary" />
 						</div>
 						<div>
-							<h3 class="font-medium text-white">Messages</h3>
-							<p class="text-sm text-white/80">Continue conversations with your community</p>
+							<h3 class="font-medium text-white">Enhanced Security</h3>
+							<p class="text-sm text-white/80">Keep your account protected</p>
 						</div>
 					</div>
 					<div class="flex items-start gap-4">
 						<div class="rounded-full bg-white/10 p-3 backdrop-blur-sm">
-							<Icon icon="mdi:bookmark-outline" class="h-6 w-6 text-primary" />
+							<Icon icon="mdi:login-variant" class="h-6 w-6 text-primary" />
 						</div>
 						<div>
-							<h3 class="font-medium text-white">Saved Items</h3>
-							<p class="text-sm text-white/80">Access your favorite recipes and places</p>
+							<h3 class="font-medium text-white">Ready to Go</h3>
+							<p class="text-sm text-white/80">Sign in with your new password after reset</p>
 						</div>
 					</div>
 				</div>
@@ -95,7 +107,6 @@
 		</div>
 	</div>
 
-	<!-- Right side with form -->
 	<div class="flex w-full items-center justify-center p-4 lg:p-8">
 		<div class="w-full max-w-2xl" in:fly={{ y: 20, duration: 600 }} out:fade>
 			<div class="mb-8 space-y-6 text-center lg:hidden">
@@ -106,36 +117,45 @@
 					<h2
 						class="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-4xl font-bold text-transparent"
 					>
-						Welcome to Vemeet
+						Reset Password
 					</h2>
-					<p class="text-lg text-muted-foreground">Sign in to your account</p>
+					<p class="text-lg text-muted-foreground">Create a new password</p>
 				</div>
 			</div>
 
 			<div
 				class="w-full space-y-6 p-0 lg:rounded-2xl lg:border lg:border-border lg:bg-card lg:p-12 lg:shadow-xl lg:ring-1 lg:ring-border lg:backdrop-blur-sm"
 			>
-				<form use:enhance method="POST" action="?/login" class="space-y-6">
-					<Field name="Email" error={$errors.email}>
+				<div class="space-y-4">
+					<p class="text-center text-sm text-muted-foreground">
+						Enter the code sent to <span class="font-medium text-foreground">{data.email}</span> and
+						create your new password.
+					</p>
+				</div>
+
+				<form use:enhance method="POST" class="space-y-6">
+					<input type="hidden" name="email" value={data.email} />
+
+					<Field name="Confirmation Code" error={$errors.confirmationCode}>
 						<div class="group relative">
 							<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 								<Icon
-									icon="mynaui:envelope"
+									icon="mdi:shield-check"
 									class="h-5 w-5 text-muted-foreground/70 transition-colors group-focus-within:text-primary"
 								/>
 							</div>
 							<Input
-								bind:value={$form.email}
-								type="email"
-								name="email"
-								placeholder="you@example.com"
+								bind:value={$form.confirmationCode}
+								name="confirmationCode"
+								type="text"
+								placeholder="Enter 6-digit code"
 								required
 								class="border-0 bg-muted/50 pl-10 pr-4 ring-primary/20 transition-all focus:ring-2 lg:border lg:bg-background"
 							/>
 						</div>
 					</Field>
 
-					<Field name="Password" class="space-y-2">
+					<Field name="New Password" error={$errors.newPassword} class="space-y-2">
 						<div class="group relative">
 							<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 								<Icon
@@ -144,10 +164,10 @@
 								/>
 							</div>
 							<Input
-								bind:value={$form.password}
+								bind:value={$form.newPassword}
+								name="newPassword"
 								type={togglePassword ? 'text' : 'password'}
 								placeholder="••••••••"
-								name="password"
 								required
 								class="border-0 bg-muted/50 pl-10 pr-10 ring-primary/20 transition-all focus:ring-2 lg:border lg:bg-background"
 							/>
@@ -163,7 +183,7 @@
 							</button>
 						</div>
 
-						{#if $form.password}
+						{#if $form.newPassword}
 							<div class="h-1 w-full overflow-hidden rounded-full bg-muted/50" transition:fade>
 								<div
 									class="h-full transition-all duration-500 ease-out {passwordStrength <= 40
@@ -175,25 +195,45 @@
 								></div>
 							</div>
 						{/if}
+					</Field>
 
-						<div class="flex justify-end">
-							<a
-								href="/forgot-password"
-								class="text-sm font-medium text-primary transition-colors hover:text-primary/80 hover:underline"
+					<Field name="Confirm Password" error={$errors.confirmPassword}>
+						<div class="group relative">
+							<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+								<Icon
+									icon="solar:lock-password-outline"
+									class="h-5 w-5 text-muted-foreground/70 transition-colors group-focus-within:text-primary"
+								/>
+							</div>
+							<Input
+								bind:value={$form.confirmPassword}
+								name="confirmPassword"
+								type={toggleConfirmPassword ? 'text' : 'password'}
+								placeholder="••••••••"
+								required
+								class="border-0 bg-muted/50 pl-10 pr-10 ring-primary/20 transition-all focus:ring-2 lg:border lg:bg-background"
+							/>
+							<button
+								type="button"
+								class="absolute inset-y-0 right-0 flex items-center pr-3 transition-colors hover:text-primary focus:outline-none"
+								onclick={() => (toggleConfirmPassword = !toggleConfirmPassword)}
 							>
-								Forgot password?
-							</a>
+								<Icon
+									icon={toggleConfirmPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
+									class="h-5 w-5 text-muted-foreground/70 transition-colors hover:text-primary"
+								/>
+							</button>
 						</div>
 					</Field>
 
 					<Button
-						disabled={$submitting}
-						isLoading={$submitting}
 						type="submit"
 						class="w-full font-semibold transition-all hover:shadow-lg"
+						disabled={$submitting}
+						isLoading={$submitting}
 						size="lg"
 					>
-						Sign in
+						{$submitting ? 'Resetting Password...' : 'Reset Password'}
 					</Button>
 				</form>
 
@@ -203,17 +243,18 @@
 							<div class="w-full border-t border-border/50"></div>
 						</div>
 						<div class="relative flex justify-center text-sm">
-							<span class="bg-background px-3 text-muted-foreground lg:bg-card">New to Vemeet?</span
-							>
+							<span class="bg-background px-3 text-muted-foreground lg:bg-card">
+								Remember your password?
+							</span>
 						</div>
 					</div>
 
 					<div class="mt-6 flex justify-center">
 						<a
-							href="/sign-up"
+							href="/sign-in"
 							class="font-medium text-primary transition-colors hover:text-primary/80 hover:underline"
 						>
-							Create an account
+							Back to Sign in
 						</a>
 					</div>
 				</div>
