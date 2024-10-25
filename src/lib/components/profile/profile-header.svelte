@@ -1,14 +1,15 @@
 <script lang="ts">
+	import { cn } from '$lib/cn';
 	import { formatBday } from '$lib/date';
+	import { sessionStore } from '$lib/stores/session.store';
 	import type { User } from '$lib/types/user.types';
 	import Icon from '@iconify/svelte';
 	import { UserHorizontalCard } from '../cards';
+	import { ConfirmDrawer } from '../drawers';
 	import { Avatar } from '../ui/avatar';
 	import { Button, buttonVariants } from '../ui/button';
-	import { cn } from '$lib/cn';
-	import { sessionStore } from '$lib/stores/session.store';
-	import { ConfirmDrawer } from '../drawers';
 	import { Drawer } from '../ui/drawer';
+	import { ConfirmModal, Modal } from '../ui/modals';
 
 	type ProfileHeaderProps = {
 		user: User;
@@ -18,6 +19,8 @@
 		followUser: () => void;
 		isFollowing: boolean;
 	};
+
+	let isMobile = $state(true);
 
 	let { user, followers, following, followUser, unfollowUser, isFollowing }: ProfileHeaderProps =
 		$props();
@@ -33,6 +36,24 @@
 		isSubmitting = false;
 		isUnfollowModalOpen = false;
 	}
+
+	$effect(() => {
+		const mediaQuery = window.matchMedia('(max-width: 768px)');
+
+		function handleResize(e: MediaQueryListEvent | MediaQueryList) {
+			isMobile = e.matches;
+		}
+
+		mediaQuery.addEventListener('change', handleResize);
+
+		handleResize(mediaQuery);
+
+		return () => {
+			mediaQuery.removeEventListener('change', handleResize);
+		};
+	});
+
+	const Dialog = $derived(isMobile ? Drawer : Modal);
 </script>
 
 <div class="rounded-t-xl">
@@ -139,7 +160,7 @@
 </div>
 
 {#if isFollowersModalOpen}
-	<Drawer onClose={() => (isFollowersModalOpen = false)} class="h-2/3">
+	<Dialog onClose={() => (isFollowersModalOpen = false)} class="h-2/3 md:h-auto md:w-[30rem]">
 		<div class="hide-scrollbar max-h-[25rem] overflow-y-auto">
 			<h2 class="mb-4 text-xl font-semibold">Followers</h2>
 			<div class="grid w-full gap-2">
@@ -148,11 +169,11 @@
 				{/each}
 			</div>
 		</div>
-	</Drawer>
+	</Dialog>
 {/if}
 
 {#if isFollowingModalOpen}
-	<Drawer onClose={() => (isFollowingModalOpen = false)} class="h-2/3">
+	<Dialog onClose={() => (isFollowingModalOpen = false)} class="h-2/3 md:h-auto md:w-[30rem]">
 		<div class="hide-scrollbar max-h-[25rem] overflow-y-auto">
 			<h2 class="mb-4 text-xl font-semibold">Following</h2>
 			<div class="grid w-full gap-2">
@@ -161,7 +182,7 @@
 				{/each}
 			</div>
 		</div>
-	</Drawer>
+	</Dialog>
 {/if}
 
 {#if isUnfollowModalOpen}
@@ -173,6 +194,17 @@
 		confirmText="Unfollow"
 		submitting={isSubmitting}
 		title={`Unfollow ${user.username}`}
+		class="md:hidden"
+	/>
+	<ConfirmModal
+		showIcon={false}
+		desc={`Are you sure you want to unfollow ${user.username}`}
+		onClose={() => (isUnfollowModalOpen = false)}
+		onConfirm={handleUnfollow}
+		confirmText="Unfollow"
+		submitting={isSubmitting}
+		title={`Unfollow ${user.username}`}
+		class="hidden md:block md:w-[30rem]"
 	/>
 {/if}
 

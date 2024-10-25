@@ -19,7 +19,9 @@
 
 <CustomHeaderWithTitle title="Settings" />
 
-<div class="container flex h-full flex-col justify-between bg-card p-6 shadow-lg">
+<div
+	class="container flex h-full flex-col justify-between bg-card p-6 shadow-lg lg:border-x lg:border-border"
+>
 	<div class="flex-1">
 		<ul class="space-y-2">
 			{#each menuItems as item}
@@ -39,9 +41,15 @@
 		</ul>
 	</div>
 	<div class="mt-8">
-		<Button variant="outline" class="w-full hover:bg-destructive hover:text-destructive-foreground">
-			<Icon icon="solar:logout-2-outline" class="mr-2" width="20" height="20" />
-			Log Out
-		</Button>
+		<form action="?/logout" method="POST">
+			<Button
+				type="submit"
+				variant="outline"
+				class="w-full hover:bg-destructive hover:text-destructive-foreground"
+			>
+				<Icon icon="solar:logout-2-outline" class="mr-2" width="20" height="20" />
+				Log Out
+			</Button>
+		</form>
 	</div>
 </div>

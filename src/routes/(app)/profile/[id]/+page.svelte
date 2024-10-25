@@ -36,51 +36,53 @@
 	});
 </script>
 
-<div class="mb-12">
-	<div class="overflow-hidden bg-card shadow-lg">
-		{#if resp.isLoading}
-			<ProfileHeaderSkeleton />
-		{:else if resp.user}
-			<ProfileHeader
-				followers={resp.followers}
-				{followUser}
-				{unfollowUser}
-				following={resp.following}
-				user={resp.user}
-				isFollowing={resp.isFollowing}
-			/>
-		{/if}
-		<nav class="relative flex border-t border-border">
-			{#each tabs as tab}
-				<button
-					class="flex-1 px-6 py-4 text-sm font-medium transition-colors hover:bg-accent"
-					class:text-primary={activeTab === tab}
-					class:text-muted-foreground={activeTab !== tab}
-					onclick={() => setActiveTab(tab)}
-				>
-					{tab}
-				</button>
-			{/each}
-			<div
-				class="absolute bottom-0 h-0.5 bg-primary transition-all duration-300 ease-out"
-				style="left: {$indicatorSpring.x}%; width: {$indicatorSpring.w}%;"
-			></div>
-		</nav>
-	</div>
+<div class="">
+	<div class="mx-auto h-full max-w-[60rem] pb-12 lg:border-x lg:border-border lg:bg-card">
+		<div class="overflow-hidden bg-card shadow-lg">
+			{#if resp.isLoading}
+				<ProfileHeaderSkeleton />
+			{:else if resp.user}
+				<ProfileHeader
+					followers={resp.followers}
+					{followUser}
+					{unfollowUser}
+					following={resp.following}
+					user={resp.user}
+					isFollowing={resp.isFollowing}
+				/>
+			{/if}
+			<nav class="relative flex border-t border-border">
+				{#each tabs as tab}
+					<button
+						class="flex-1 px-6 py-4 text-sm font-medium transition-colors hover:bg-accent"
+						class:text-primary={activeTab === tab}
+						class:text-muted-foreground={activeTab !== tab}
+						onclick={() => setActiveTab(tab)}
+					>
+						{tab}
+					</button>
+				{/each}
+				<div
+					class="absolute bottom-0 h-0.5 bg-primary transition-all duration-300 ease-out"
+					style="left: {$indicatorSpring.x}%; width: {$indicatorSpring.w}%;"
+				></div>
+			</nav>
+		</div>
 
-	<div class="container pt-8">
-		{#if activeTab === 'Posts'}
-			<div in:fade={{ duration: 300, easing: quintOut }}>
-				<ProfileFeed authToken={data.accessToken} userId={data.id} />
-			</div>
-		{:else if activeTab === 'Recipes'}
-			<div in:fade={{ duration: 300, easing: quintOut }}>
-				<h2>Recipes area</h2>
-			</div>
-		{:else if activeTab === 'Media'}
-			<div in:fade={{ duration: 300, easing: quintOut }}>
-				<ProfileMedia authToken={data.accessToken} userId={data.id} />
-			</div>
-		{/if}
+		<div class="container pt-8">
+			{#if activeTab === 'Posts'}
+				<div in:fade={{ duration: 300, easing: quintOut }}>
+					<ProfileFeed authToken={data.accessToken} userId={data.id} />
+				</div>
+			{:else if activeTab === 'Recipes'}
+				<div in:fade={{ duration: 300, easing: quintOut }}>
+					<h2>Recipes area</h2>
+				</div>
+			{:else if activeTab === 'Media'}
+				<div in:fade={{ duration: 300, easing: quintOut }}>
+					<ProfileMedia authToken={data.accessToken} userId={data.id} />
+				</div>
+			{/if}
+		</div>
 	</div>
 </div>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { api, createAuthHeaders, uploadImage } from '$lib/api';
+	import { cn } from '$lib/cn';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { formatBday } from '$lib/date';
 	import { sessionStore } from '$lib/stores/session.store';
@@ -9,9 +10,9 @@
 	import { onMount } from 'svelte';
 	import { UserHorizontalCard } from '../cards';
 	import { Avatar } from '../ui/avatar';
-	import { Skeleton } from '../ui/skeleton';
-	import { cn } from '$lib/cn';
 	import { Drawer } from '../ui/drawer';
+	import { Modal } from '../ui/modals';
+	import { Skeleton } from '../ui/skeleton';
 
 	type HeaderProps = {
 		authToken: string;
@@ -33,6 +34,7 @@
 	let followers: User[] = $state([]);
 	let following: User[] = $state([]);
 	let isLoading = $state(false);
+	let isMobile = $state(true);
 
 	function handleInputFileClick(): void {
 		if (!fileInput) return;
@@ -136,6 +138,23 @@
 			fetchFollowing();
 		}
 	});
+	$effect(() => {
+		const mediaQuery = window.matchMedia('(max-width: 768px)');
+
+		function handleResize(e: MediaQueryListEvent | MediaQueryList) {
+			isMobile = e.matches;
+		}
+
+		mediaQuery.addEventListener('change', handleResize);
+
+		handleResize(mediaQuery);
+
+		return () => {
+			mediaQuery.removeEventListener('change', handleResize);
+		};
+	});
+
+	const Dialog = $derived(isMobile ? Drawer : Modal);
 </script>
 
 <div class="rounded-t-xl">
@@ -278,10 +297,10 @@
 </div>
 
 {#if isFollowersModalOpen}
-	<Drawer class="h-2/3" onClose={() => (isFollowersModalOpen = false)}>
-		<div class="hide-scrollbar max-h-[25rem] w-[18rem] overflow-y-auto">
+	<Dialog class="h-2/3 md:h-auto md:w-[30rem]" onClose={() => (isFollowersModalOpen = false)}>
+		<div class="hide-scrollbar max-h-[25rem] overflow-y-auto">
 			<h2 class="mb-4 text-xl font-semibold">Followers</h2>
-			<div class="grid gap-2">
+			<div class="grid w-full gap-2">
 				{#if isLoading}
 					<p>Loading followers...</p>
 				{:else}
@@ -291,12 +310,12 @@
 				{/if}
 			</div>
 		</div>
-	</Drawer>
+	</Dialog>
 {/if}
 
 {#if isFollowingModalOpen}
-	<Drawer class="h-2/3" onClose={() => (isFollowingModalOpen = false)}>
-		<div class="hide-scrollbar max-h-[25rem] w-[18rem] overflow-y-auto">
+	<Dialog class="h-2/3 md:h-auto md:w-[30rem]" onClose={() => (isFollowingModalOpen = false)}>
+		<div class="hide-scrollbar max-h-[25rem] w-full overflow-y-auto">
 			<h2 class="mb-4 text-xl font-semibold">Following</h2>
 			<div class="grid w-full gap-2">
 				{#if isLoading}
@@ -308,7 +327,7 @@
 				{/if}
 			</div>
 		</div>
-	</Drawer>
+	</Dialog>
 {/if}
 
 <style lang="postcss">

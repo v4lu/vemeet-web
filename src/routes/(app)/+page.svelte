@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { useFeed } from '$lib/api/use-feed.svelte.js';
 	import { useFeedStories } from '$lib/api/use-feed-stories.svelte.js';
+	import { useFeed } from '$lib/api/use-feed.svelte.js';
 	import { PostCard, RecipeCard } from '$lib/components/cards';
 	import { CreatePost } from '$lib/components/profile/index.js';
-	import { SkeletonCard } from '$lib/components/ui/skeleton';
-	import { FeedStories } from '$lib/components/story/index.js';
 	import CircleStorySkeleton from '$lib/components/skeleton/circle-story-skeleton.svelte';
+	import { FeedStories } from '$lib/components/story/index.js';
+	import { SkeletonCard } from '$lib/components/ui/skeleton';
 
 	let { data } = $props();
 	const { loadFeed, resp, createPost, deletePost, postLikeToggle, deleteRecipe, recipeLikeToggle } =
@@ -36,7 +36,7 @@
 	});
 </script>
 
-<main class="container my-8">
+<main class="container border-border py-8 lg:border-x lg:bg-card">
 	<div class="hide-scrollbar overflow-x-auto">
 		<div class="flex gap-x-4">
 			{#if storiesResp.isLoading}

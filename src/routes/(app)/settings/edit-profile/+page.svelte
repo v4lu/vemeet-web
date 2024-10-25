@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { useLocations } from '$lib/api/use-locations.svelte.js';
 	import { useUpdateUser } from '$lib/api/use-update-user.svelte.js';
 	import { cn } from '$lib/cn';
+	import { Avatar } from '$lib/components/ui/avatar';
 	import { Button } from '$lib/components/ui/button';
 	import { CustomHeaderWithTitle } from '$lib/components/ui/custom-header';
 	import { Field } from '$lib/components/ui/field';
@@ -9,7 +11,7 @@
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { City, Country } from '$lib/types/geo.types.js';
 	import type { UserUpdateFormData } from '$lib/types/user.types.js';
-	import { browser } from '$app/environment';
+	import Icon from '@iconify/svelte';
 	let { data } = $props();
 
 	let username = $state($sessionStore.username);
@@ -136,84 +138,207 @@
 </script>
 
 <CustomHeaderWithTitle title="Edit Profile" />
-<div class="container grid bg-card">
-	<form class="flex flex-col justify-between space-y-6 p-6" onsubmit={handleSubmit}>
-		<div class="flex-1">
-			<Field name="Username">
-				<Input
-					id="username"
-					placeholder="Username"
-					bind:value={username}
-					required
-					class="bg-background"
-				/>
-			</Field>
-
-			<div class="grid gap-6 sm:grid-cols-2">
-				<Field name="Name" optional>
-					<Input id="name" placeholder="Name" bind:value={name} class="bg-background" />
-				</Field>
-				<Field name="Gender" optional>
-					<Input id="gender" placeholder="Gender" bind:value={gender} class="bg-background" />
-				</Field>
-			</div>
-
-			<div class="grid gap-6 sm:grid-cols-2">
-				<Field name="Country" optional>
-					<select
-						id="country"
-						class={cn(inputVariants(), 'bg-background')}
-						bind:value={country.countryIsoCode}
-						onchange={handleCountryChange}
-					>
-						<option value="">Select a country</option>
-						{#each data.countries as countryOption}
-							<option value={countryOption.countryIsoCode}>
-								{countryOption.countryName}
-							</option>
-						{/each}
-					</select>
-				</Field>
-				<Field name="City" optional>
-					<div class="relative">
-						<Input
-							id="city"
-							placeholder="Search for a city"
-							bind:value={citySearch}
-							oninput={handleCitySearch}
-							disabled={!country.countryIsoCode}
-							class="bg-background"
-						/>
-						{#if showCityDropdown && locationsResp.cities.length > 0}
-							<ul
-								class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
-							>
-								{#each locationsResp.cities as cityOption}
-									<li
-										class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 hover:bg-indigo-600 hover:text-white"
-										onclick={() => selectCity(cityOption)}
-									>
-										{cityOption.cityName}
-									</li>
-								{/each}
-							</ul>
-						{/if}
+<div class="container h-full px-4 py-6 lg:border-x lg:border-border lg:bg-card lg:px-8">
+	<div class="max-w-pc mx-auto">
+		<form class="flex flex-col justify-between space-y-8" onsubmit={handleSubmit}>
+			<div class="flex-1 space-y-8">
+				<div class="space-y-6">
+					<div class="flex items-center gap-4">
+						<Avatar class="size-16" user={$sessionStore} />
+						<div>
+							<h2 class="text-lg font-semibold">Basic Information</h2>
+							<p class="text-sm text-muted-foreground">
+								Update your profile details and personal information
+							</p>
+						</div>
 					</div>
-				</Field>
+
+					<div class="space-y-4">
+						<Field name="Username">
+							<div class="group relative">
+								<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+									<Icon
+										icon="solar:user-bold"
+										class="h-5 w-5 text-muted-foreground/70 transition-colors group-focus-within:text-primary"
+									/>
+								</div>
+								<Input
+									id="username"
+									placeholder="Enter your username"
+									bind:value={username}
+									required
+									class="bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2"
+								/>
+							</div>
+						</Field>
+
+						<div class="grid gap-4 sm:grid-cols-2">
+							<Field name="Name" optional>
+								<div class="group relative">
+									<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+										<Icon
+											icon="solar:user-id-bold"
+											class="h-5 w-5 text-muted-foreground/70 transition-colors group-focus-within:text-primary"
+										/>
+									</div>
+									<Input
+										id="name"
+										placeholder="Enter your full name"
+										bind:value={name}
+										class="bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2"
+									/>
+								</div>
+							</Field>
+							<Field name="Gender" optional>
+								<div class="group relative">
+									<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+										<Icon
+											icon="solar:users-group-two-rounded-bold"
+											class="h-5 w-5 text-muted-foreground/70 transition-colors group-focus-within:text-primary"
+										/>
+									</div>
+									<select
+										id="gender"
+										bind:value={gender}
+										class={cn(
+											inputVariants(),
+											'bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2'
+										)}
+									>
+										<option value="">Select gender</option>
+										<option value="male">Male</option>
+										<option value="female">Female</option>
+										<option value="other">Other</option>
+										<option value="prefer_not_to_say">Prefer not to say</option>
+									</select>
+								</div>
+							</Field>
+						</div>
+					</div>
+				</div>
+
+				<!-- Location section -->
+				<div class="space-y-6">
+					<div class="flex items-center gap-4">
+						<div
+							class="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary"
+						>
+							<Icon icon="solar:map-point-bold" class="size-8" />
+						</div>
+						<div>
+							<h2 class="text-lg font-semibold">Location</h2>
+							<p class="text-sm text-muted-foreground">Where are you based?</p>
+						</div>
+					</div>
+
+					<div class="grid gap-4 sm:grid-cols-2">
+						<Field name="Country" optional>
+							<div class="group relative">
+								<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+									<Icon
+										icon="material-symbols:globe"
+										class="h-5 w-5 text-muted-foreground/70 transition-colors group-focus-within:text-primary"
+									/>
+								</div>
+								<select
+									id="country"
+									class={cn(
+										inputVariants(),
+										'bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2'
+									)}
+									bind:value={country.countryIsoCode}
+									onchange={handleCountryChange}
+								>
+									<option value="">Select a country</option>
+									{#each data.countries as countryOption}
+										<option value={countryOption.countryIsoCode}>
+											{countryOption.countryFlag}
+											{countryOption.countryName}
+										</option>
+									{/each}
+								</select>
+							</div>
+						</Field>
+
+						<Field name="City" optional>
+							<div class="group relative">
+								<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+									<Icon
+										icon="solar:city-bold"
+										class="h-5 w-5 text-muted-foreground/70 transition-colors group-focus-within:text-primary"
+									/>
+								</div>
+								<Input
+									id="city"
+									placeholder={country.countryIsoCode
+										? 'Search for a city'
+										: 'Select a country first'}
+									bind:value={citySearch}
+									oninput={handleCitySearch}
+									disabled={!country.countryIsoCode}
+									class="bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2"
+								/>
+								{#if showCityDropdown && locationsResp.cities.length > 0}
+									<ul
+										class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border bg-card py-1 shadow-lg"
+									>
+										{#each locationsResp.cities as cityOption}
+											<li
+												class="cursor-pointer px-4 py-2 text-sm text-foreground transition-colors hover:bg-accent"
+												onclick={() => selectCity(cityOption)}
+											>
+												{cityOption.cityName}
+											</li>
+										{/each}
+									</ul>
+								{/if}
+							</div>
+						</Field>
+					</div>
+				</div>
+
+				<!-- Bio section -->
+				<div class="space-y-6">
+					<div class="flex items-center gap-4">
+						<div
+							class="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary"
+						>
+							<Icon icon="solar:pen-bold" class="size-8" />
+						</div>
+						<div>
+							<h2 class="text-lg font-semibold">About You</h2>
+							<p class="text-sm text-muted-foreground">
+								Share a bit about yourself with the community
+							</p>
+						</div>
+					</div>
+
+					<Field name="Bio" optional>
+						<div class="group relative">
+							<textarea
+								id="bio"
+								rows="4"
+								class={cn(
+									inputVariants(),
+									'min-h-[100px] resize-none bg-muted/50 ring-primary/20 transition-all focus:ring-2'
+								)}
+								placeholder="Tell us about yourself, your interests, and what brings you to our community..."
+								bind:value={bio}
+							></textarea>
+						</div>
+					</Field>
+				</div>
 			</div>
 
-			<Field name="Bio" optional>
-				<textarea
-					id="bio"
-					rows="4"
-					class={cn(inputVariants(), 'resize-none bg-background')}
-					placeholder="Tell us about yourself..."
-					bind:value={bio}
-				></textarea>
-			</Field>
-		</div>
-		<Button type="submit" class="w-full" isLoading={isSubmitting} disabled={isSubmitting}>
-			{isSubmitting ? 'Saving...' : 'Save Changes'}
-		</Button>
-	</form>
+			<Button
+				type="submit"
+				class="w-full font-medium"
+				size="lg"
+				isLoading={isSubmitting}
+				disabled={isSubmitting}
+			>
+				{isSubmitting ? 'Saving Changes...' : 'Save Changes'}
+			</Button>
+		</form>
+	</div>
 </div>

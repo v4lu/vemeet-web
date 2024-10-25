@@ -15,7 +15,7 @@
 <a
 	href={`/profile/${user.id}`}
 	class={cn(
-		'flex w-full items-center gap-3 p-3 hover:bg-muted/50',
+		'flex w-full items-center gap-3 p-3 hover:bg-accent',
 		!notRounded && 'rounded-lg',
 		className
 	)}

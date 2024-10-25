@@ -1,45 +1,29 @@
 <script lang="ts">
-	import Icon from '@iconify/svelte';
-	import { cn } from '$lib/cn';
-	import { Button, buttonVariants } from '../ui/button';
 	import { useNotification } from '$lib/api/use-notification.svelte';
-	import { Avatar } from '../ui/avatar';
-	import { sessionStore } from '$lib/stores/session.store';
-	import { clickOutside } from '$lib/utils';
-	import { slide } from 'svelte/transition';
+	import { cn } from '$lib/cn';
+	import Icon from '@iconify/svelte';
+	import { buttonVariants } from '../ui/button';
 	import { Logo } from '../ui/logo';
 	type Props = {
 		authToken: string;
 	};
-	type NavigationType = {
-		path: string;
-		icon: string;
-		name: string;
-	};
+
 	let { authToken }: Props = $props();
 	let { resp } = useNotification(authToken);
-	let isNotificationDropdownOpen = $state(false);
-	let navigation = $state<NavigationType[]>([
-		{
-			path: '/swiper',
-			icon: 'solar:flame-bold-duotone',
-			name: 'Meet New People'
-		},
-		{
-			path: '/settings',
-			icon: 'solar:settings-bold',
-			name: 'Settings'
-		}
-	]);
 </script>
 
-<div class="fixed inset-x-0 top-0 z-[90] h-16 w-full border-b border-border bg-background">
+<div
+	class="container fixed inset-x-0 top-0 z-[90] h-16 w-full border-b border-border bg-card shadow-lg lg:border-x"
+>
 	<header class="container flex items-center justify-between py-3">
 		<a href="/" class=" flex items-center justify-center gap-2 text-xl font-bold text-primary">
 			<Logo class="size-10" />
-			<span class="-mt-1"> vemeet </span>
+			<span class="-mt-1"> Vemeet </span>
 		</a>
 		<div class="flex items-center justify-center gap-2">
+			<a class={cn(buttonVariants({ size: 'icon', variant: 'ghost' }), 'relative')} href="/swiper">
+				<Icon icon="solar:flame-bold-duotone" class="size-6" />
+			</a>
 			<a
 				class={cn(buttonVariants({ size: 'icon', variant: 'ghost' }), 'relative')}
 				href="/messages"
@@ -53,44 +37,12 @@
 					</div>
 				{/if}
 			</a>
-			<div use:clickOutside={() => (isNotificationDropdownOpen = false)} class="relative">
-				<button
-					onclick={() => (isNotificationDropdownOpen = !isNotificationDropdownOpen)}
-					class="focus:outline-none"
-				>
-					<Avatar user={$sessionStore} class="size-9" />
-				</button>
-				{#if isNotificationDropdownOpen}
-					<div
-						transition:slide={{ duration: 300 }}
-						class="absolute right-0 top-12 z-[120] w-48 overflow-hidden rounded-xl border border-border bg-card shadow-lg"
-					>
-						<div class="flex flex-col">
-							{#each navigation as { name, path, icon }}
-								<a
-									onclick={() => (isNotificationDropdownOpen = false)}
-									href={path}
-									class={cn(
-										buttonVariants({ variant: 'ghost' }),
-										'justify-start rounded-none py-2 text-sm first:rounded-t-md hover:bg-muted'
-									)}
-								>
-									<Icon {icon} class="mr-2 size-4" />
-									{name}
-								</a>
-							{/each}
-							<hr class="border-border" />
-							<Button
-								variant="ghost"
-								class="justify-start rounded-none rounded-b-md py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
-							>
-								<Icon icon="solar:logout-2-bold" class="mr-2 size-4" />
-								Logout
-							</Button>
-						</div>
-					</div>
-				{/if}
-			</div>
+			<a
+				class={cn(buttonVariants({ size: 'icon', variant: 'ghost' }), 'relative')}
+				href="/notifications"
+			>
+				<Icon icon="solar:bell-bold" class="size-6" />
+			</a>
 		</div>
 	</header>
 </div>
