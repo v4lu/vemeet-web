@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { fade, fly } from 'svelte/transition';
+	import { uploadFile, uploadImage } from '$lib/api';
+	import { cn } from '$lib/cn';
+	import type { ChatAssetReq, CreateMessage } from '$lib/types/chat.types';
 	import Icon from '@iconify/svelte';
+	import { fade, fly } from 'svelte/transition';
 	import { Button } from '../ui/button';
 	import { inputVariants } from '../ui/input';
-	import { cn } from '$lib/cn';
-	import { uploadFile, uploadImage } from '$lib/api';
-	import type { ChatAssetReq, CreateMessage } from '$lib/types/chat.types';
 
 	type Props = {
 		handleSubmit: (message: Omit<CreateMessage, 'firstTime'>) => Promise<void>;
@@ -27,7 +27,7 @@
 	let errorMessage = $state('');
 	let recordingDuration = $state(0);
 	let recordingInterval = $state<number | null>(null);
-	let isMobile = $derived(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+	let isMobile = $state(false);
 	let isInputFocused = $state(false);
 
 	function handleInputFocus() {
@@ -211,9 +211,25 @@
 		const remainingSeconds = seconds % 60;
 		return `${minutes > 0 ? `${minutes}m ` : ''}${remainingSeconds}s`;
 	}
+
+	$effect(() => {
+		const mediaQuery = window.matchMedia('(max-width: 768px)');
+
+		function handleResize(e: MediaQueryListEvent | MediaQueryList) {
+			isMobile = e.matches;
+		}
+
+		mediaQuery.addEventListener('change', handleResize);
+
+		handleResize(mediaQuery);
+
+		return () => {
+			mediaQuery.removeEventListener('change', handleResize);
+		};
+	});
 </script>
 
-<div class="container fixed bottom-0 left-0 right-0 border-t border-border bg-background shadow-lg">
+<div class="container fixed bottom-0 left-0 right-0 border-t border-border bg-card shadow-lg">
 	<div class="container mx-auto py-4">
 		<form onsubmit={onSubmit} class="flex flex-col items-center justify-center gap-4">
 			{#if imageUrls.length > 0}

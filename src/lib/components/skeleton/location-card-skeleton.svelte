@@ -3,7 +3,7 @@
 </script>
 
 <div
-	class="mb-6 rounded-xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
+	class="container mb-6 border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
 >
 	<div class="relative">
 		<div class="relative mb-4 flex items-center justify-between p-4">

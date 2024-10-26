@@ -251,7 +251,7 @@
 	}
 </script>
 
-<div class="fixed left-0 top-[64px] h-[calc(100dvh-64px-65px)] w-full">
+<div class="fixed inset-x-0 top-[64px] mx-auto h-[calc(100dvh-64px-65px)] w-full max-w-pc">
 	<!-- Map Container -->
 	<div bind:this={mapElement} class="h-full w-full"></div>
 

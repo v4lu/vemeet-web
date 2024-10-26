@@ -1,23 +1,25 @@
 <script lang="ts">
 	import { useFetchChats } from '$lib/api/use-fetch-chats.svelte';
+	import { CustomHeaderWithTitle } from '$lib/components/ui/custom-header';
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 	import { formatTimestamp } from '$lib/date.js';
-	import type { Chat } from '$lib/types/chat.types';
 	import { sessionStore } from '$lib/stores/session.store';
-	import { CustomHeaderWithTitle } from '$lib/components/ui/custom-header';
+	import type { Chat } from '$lib/types/chat.types';
 
 	let { data } = $props();
 	const { resp } = useFetchChats(data.accessToken);
 
 	function getLastMessagePreview(chat: Chat): string {
 		if (!chat.lastMessage) return 'No messages yet';
+		if (chat.lastMessage.messageType === 'AUDIO') return 'Voice message';
+		if (chat.lastMessage.messageType === 'IMAGE') return 'Image';
 		return chat.lastMessage.content || `[${chat.lastMessage.messageType}]`;
 	}
 </script>
 
 <CustomHeaderWithTitle title="Mesages" />
 
-<main class="container mb-8 mt-4 min-h-max border-x border-border">
+<main class="container min-h-max lg:border-x lg:border-border lg:bg-card">
 	{#if resp.isLoading}
 		<div class="space-y-2">
 			{#each Array(5) as _}

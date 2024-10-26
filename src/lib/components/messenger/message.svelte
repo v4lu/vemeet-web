@@ -67,29 +67,13 @@
 						{#if asset.fileType === 'IMAGE' && asset.fileUrl}
 							<div
 								class="group/image relative overflow-hidden rounded-xl border bg-muted/30"
-								class:col-span-2={message.chatAssets.length === 3 &&
-									asset.fileUrl === message.chatAssets[0].fileUrl}
 								onclick={() => openImageModal(asset.fileUrl!)}
 							>
-								<div class="relative pt-[100%]">
-									<img
-										src={asset.fileUrl}
-										alt="Chat asset"
-										class="absolute inset-0 h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-									/>
-									<div
-										class="absolute inset-0 bg-black/0 transition-colors group-hover/image:bg-black/10"
-									/>
-									<div
-										class="absolute inset-0 opacity-0 transition-opacity group-hover/image:opacity-100"
-									>
-										<div class="flex h-full items-center justify-center">
-											<div class="rounded-full bg-black/50 p-2 backdrop-blur-sm">
-												<Icon icon="solar:maximize-square-bold" class="size-5 text-white" />
-											</div>
-										</div>
-									</div>
-								</div>
+								<img
+									src={asset.fileUrl}
+									alt="Chat asset"
+									class="object-cover transition-transform duration-300 hover:scale-105"
+								/>
 							</div>
 						{:else if asset.fileType === 'VIDEO'}
 							<div class="relative overflow-hidden rounded-xl border bg-muted/30">
