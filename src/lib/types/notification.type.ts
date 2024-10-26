@@ -1,6 +1,6 @@
 import type { User } from './user.types';
 
-enum NotificationType {
+export enum NotificationType {
 	NEW_FOLLOWER = 'new_follower',
 	NEW_REACTION = 'new_reaction',
 	NEW_COMMENT = 'new_comment',

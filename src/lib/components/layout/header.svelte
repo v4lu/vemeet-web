@@ -42,6 +42,13 @@
 				href="/notifications"
 			>
 				<Icon icon="solar:bell-bold" class="size-6" />
+				{#if resp.nonMessageNotification.length > 0}
+					<div
+						class="absolute bottom-0 right-0 flex size-3.5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-background"
+					>
+						{resp.nonMessageNotification.length > 9 ? '9+' : resp.nonMessageNotification.length}
+					</div>
+				{/if}
 			</a>
 		</div>
 	</header>
