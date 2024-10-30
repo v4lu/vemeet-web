@@ -54,6 +54,7 @@
 	});
 
 	const Dialog = $derived(isMobile ? Drawer : Modal);
+	const ConfirmDialog = $derived(isMobile ? ConfirmDrawer : ConfirmModal);
 </script>
 
 <div class="rounded-t-xl">
@@ -186,7 +187,7 @@
 {/if}
 
 {#if isUnfollowModalOpen}
-	<ConfirmDrawer
+	<ConfirmDialog
 		showIcon={false}
 		desc={`Are you sure you want to unfollow ${user.username}`}
 		onClose={() => (isUnfollowModalOpen = false)}
@@ -194,17 +195,7 @@
 		confirmText="Unfollow"
 		submitting={isSubmitting}
 		title={`Unfollow ${user.username}`}
-		class="md:hidden"
-	/>
-	<ConfirmModal
-		showIcon={false}
-		desc={`Are you sure you want to unfollow ${user.username}`}
-		onClose={() => (isUnfollowModalOpen = false)}
-		onConfirm={handleUnfollow}
-		confirmText="Unfollow"
-		submitting={isSubmitting}
-		title={`Unfollow ${user.username}`}
-		class="hidden md:block md:w-[30rem]"
+		class="md:w-[30rem]"
 	/>
 {/if}
 

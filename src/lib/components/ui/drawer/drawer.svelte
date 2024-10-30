@@ -5,9 +5,6 @@
 	import { quintOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 
-
-
-
 	type Props = {
 		onClose: () => void;
 		class?: string;
@@ -57,7 +54,7 @@
 		transition:slide={{ duration: 300, easing: quintOut, axis: 'y' }}
 	>
 		<div
-			class="absolute left-0 right-0 top-0 flex h-10 cursor-grab items-center justify-center"
+			class="m absolute left-0 right-0 top-0 flex h-10 cursor-grab items-center justify-center"
 			ontouchstart={handleDragStart}
 			ontouchmove={handleDrag}
 			ontouchend={handleDragEnd}

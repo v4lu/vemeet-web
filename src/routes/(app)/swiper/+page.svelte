@@ -2,6 +2,7 @@
 	import { useSwiperModeSetup } from '$lib/api/use-swipper-setup.svelte.js';
 	import { SwiperHome } from '$lib/components/swiper/index.js';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { Drawer } from '$lib/components/ui/drawer/index.js';
 	import { Input } from '$lib/components/ui/input';
 	import { Modal } from '$lib/components/ui/modals';
 	import { Select } from '$lib/components/ui/select';
@@ -23,6 +24,7 @@
 	let maxAge = $state(50);
 	let preferredGender = $state('Female');
 	let maxDistance = $state(50);
+	let isMobile = $state(true);
 
 	const genderOptions = [
 		{ value: 'Female', label: 'Female' },
@@ -55,10 +57,28 @@
 	}
 
 	checkConfiguration();
+
+	$effect(() => {
+		const mediaQuery = window.matchMedia('(max-width: 768px)');
+
+		function handleResize(e: MediaQueryListEvent | MediaQueryList) {
+			isMobile = e.matches;
+		}
+
+		mediaQuery.addEventListener('change', handleResize);
+
+		handleResize(mediaQuery);
+
+		return () => {
+			mediaQuery.removeEventListener('change', handleResize);
+		};
+	});
+
+	const Dialog = $derived(isMobile ? Drawer : Modal);
 </script>
 
 {#if showSwiperModeModal}
-	<Modal onClose={() => (showSwiperModeModal = false)}>
+	<Dialog onClose={() => (showSwiperModeModal = false)}>
 		<h2 class="mb-4 text-xl font-bold">Swiper Mode is Disabled</h2>
 		<p>You need to enable Swiper Mode in your privacy settings to continue.</p>
 		<div class="mt-4 flex justify-end">
@@ -66,11 +86,11 @@
 				Go to Privacy Settings
 			</a>
 		</div>
-	</Modal>
+	</Dialog>
 {/if}
 
 {#if showProfileModal}
-	<Modal onClose={() => (showProfileModal = false)}>
+	<Dialog onClose={() => (showProfileModal = false)}>
 		<h2 class="mb-4 text-xl font-bold">Profile Information Incomplete</h2>
 		<p>
 			Please complete your profile information to use Swiper Mode. We need to know your location
@@ -80,26 +100,30 @@
 				Edit Profile
 			</a>
 		</div>
-	</Modal>
+	</Dialog>
 {/if}
 
 {#if showConfigModal}
-	<Modal onClose={() => (showConfigModal = false)}>
+	<Dialog onClose={() => (showConfigModal = false)}>
 		<h2 class="mb-4 text-xl font-bold">Swiper Mode Configuration</h2>
 		<p class="mb-4">Please configure your Swiper preferences to continue.</p>
 		<form onsubmit={handleSubmit} class="space-y-4">
 			<div class="flex space-x-4">
 				<div class="flex-1">
-					<label for="minAge" class="block text-sm font-medium text-gray-700">Minimum Age</label>
+					<label for="minAge" class="block text-sm font-medium text-muted-foreground"
+						>Minimum Age</label
+					>
 					<Input type="number" id="minAge" bind:value={minAge} min="18" max="100" required />
 				</div>
 				<div class="flex-1">
-					<label for="maxAge" class="block text-sm font-medium text-gray-700">Maximum Age</label>
+					<label for="maxAge" class="block text-sm font-medium text-muted-foreground"
+						>Maximum Age</label
+					>
 					<Input type="number" id="maxAge" bind:value={maxAge} min="18" max="100" required />
 				</div>
 			</div>
 			<div>
-				<label for="preferredGender" class="block text-sm font-medium text-gray-700"
+				<label for="preferredGender" class="block text-sm font-medium text-muted-foreground"
 					>Preferred Gender</label
 				>
 				<Select
@@ -110,7 +134,7 @@
 				/>
 			</div>
 			<div>
-				<label for="maxDistance" class="block text-sm font-medium text-gray-700"
+				<label for="maxDistance" class="block text-sm font-medium text-muted-foreground"
 					>Maximum Distance (km)</label
 				>
 				<Input
@@ -128,8 +152,10 @@
 				</Button>
 			</div>
 		</form>
-	</Modal>
+	</Dialog>
 {/if}
+
+<div class="mt-24 grid">Some content about swiper</div>
 
 {#if resp.isUserReady}
 	<SwiperHome authToken={data.accessToken} />
