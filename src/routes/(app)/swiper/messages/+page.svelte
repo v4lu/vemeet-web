@@ -1,16 +1,15 @@
 <script lang="ts">
 	import { useSwiperMessages } from '$lib/api/use-swiper-messages.svelte';
+	import { CustomHeaderWithTitle } from '$lib/components/ui/custom-header/index.js';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 
 	let { data } = $props();
 	const { resp } = useSwiperMessages(data.accessToken);
 </script>
 
-<div class="container mb-12 mt-8">
-	<div class="mb-6 flex items-center justify-between">
-		<h1 class="text-2xl font-bold">Matches</h1>
-	</div>
+<CustomHeaderWithTitle title="Matches" />
 
+<div class="container my-6">
 	{#if resp.isLoading}
 		<div class="space-y-2">
 			{#each Array(5) as _}

@@ -1,12 +1,21 @@
 <script lang="ts">
 	import { useSwiperModeSetup } from '$lib/api/use-swipper-setup.svelte.js';
+	import { cn } from '$lib/cn.js';
 	import { SwiperHome } from '$lib/components/swiper/index.js';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import CustomHeaderWithTitle from '$lib/components/ui/custom-header/custom-header-with-title.svelte';
+	import CustomHeader from '$lib/components/ui/custom-header/custom-header.svelte';
 	import { Drawer } from '$lib/components/ui/drawer/index.js';
 	import { Input } from '$lib/components/ui/input';
 	import { Modal } from '$lib/components/ui/modals';
 	import { Select } from '$lib/components/ui/select';
 	import { sessionStore } from '$lib/stores/session.store';
+	import Icon from '@iconify/svelte';
+
+	type NavigationType = {
+		path: string;
+		icon: string;
+	};
 
 	let { data } = $props();
 	const { resp, configureSwiperPreferences } = useSwiperModeSetup(
@@ -75,6 +84,21 @@
 	});
 
 	const Dialog = $derived(isMobile ? Drawer : Modal);
+
+	let navigation = $state<NavigationType[]>([
+		{
+			path: '/swiper/messages',
+			icon: 'solar:heart-angle-bold'
+		},
+		{
+			path: '/swiper/profile',
+			icon: 'solar:user-bold'
+		},
+		{
+			path: '/swiper/preferences',
+			icon: 'solar:settings-bold'
+		}
+	]);
 </script>
 
 {#if showSwiperModeModal}
@@ -155,8 +179,23 @@
 	</Dialog>
 {/if}
 
-<div class="mt-24 grid">Some content about swiper</div>
-
 {#if resp.isUserReady}
+	<CustomHeader>
+		<div class="container mx-auto flex items-center justify-end">
+			{#each navigation as { path, icon }}
+				<a
+					class={cn(
+						data.pathname === path && 'text-primary',
+						buttonVariants({ size: 'icon', variant: 'ghost' })
+					)}
+					href={path}
+				>
+					<Icon {icon} class="size-6" />
+				</a>
+			{/each}
+		</div>
+	</CustomHeader>
 	<SwiperHome authToken={data.accessToken} />
+{:else}
+	<CustomHeaderWithTitle title="Swiper Mode" />
 {/if}

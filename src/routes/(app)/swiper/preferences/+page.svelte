@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { useSwiperModeSetup } from '$lib/api/use-swipper-setup.svelte.js';
 	import { Button } from '$lib/components/ui/button';
-	import { Field } from '$lib/components/ui/field';
+	import CustomHeaderWithTitle from '$lib/components/ui/custom-header/custom-header-with-title.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { Select } from '$lib/components/ui/select';
 	import { sessionStore } from '$lib/stores/session.store';
@@ -56,74 +56,128 @@
 	});
 </script>
 
-<div class="container mx-auto max-w-2xl px-4 py-8">
-	<h1 class="mb-8 text-3xl font-bold text-primary">Edit Swiper Preferences</h1>
-	<form class="space-y-8" onsubmit={handleSubmit}>
-		<div class="rounded-lg bg-card p-6 shadow-lg">
-			<h2 class="mb-4 text-xl font-semibold">Age Range</h2>
-			<div class="mb-4 flex items-center justify-between">
-				<span class="text-sm font-medium text-muted-foreground">Min: {minAge}</span>
-				<span class="text-sm font-medium text-muted-foreground">Max: {maxAge}</span>
-			</div>
-			<div class="flex space-x-4">
-				<Field name="Minimum Age" class="flex-1">
-					<Input
-						type="number"
-						id="minAge"
-						bind:value={minAge}
-						min={18}
-						max={100}
-						required
-						class="mt-1"
-					/>
-				</Field>
-				<Field name="Maximum Age" class="flex-1">
-					<Input
-						type="number"
-						id="maxAge"
-						bind:value={maxAge}
-						min={18}
-						max={100}
-						required
-						class="mt-1"
-					/>
-				</Field>
-			</div>
+<CustomHeaderWithTitle title="Swiper Preferences" />
+
+<div
+	class="my-6 min-h-full bg-background px-4 py-4 sm:px-6 lg:border-x lg:border-border lg:bg-card lg:px-8"
+>
+	<div class="mx-auto max-w-3xl space-y-6">
+		<div class="space-y-2">
+			<p class="text-sm text-muted-foreground">
+				Customize your swiper preferences to find better matches
+			</p>
 		</div>
 
-		<div class="rounded-lg bg-card p-6 shadow-lg">
-			<h2 class="mb-4 text-xl font-semibold">Preferred Gender</h2>
-			<Select id="preferredGender" bind:value={preferredGender} options={genderOptions} required />
-		</div>
+		<form onsubmit={handleSubmit} class="space-y-4">
+			<div class="space-y-4 rounded-lg border bg-card shadow-sm sm:p-6">
+				<div
+					class="flex flex-col space-y-4 p-4 sm:flex-row sm:items-start sm:space-x-4 sm:space-y-0"
+				>
+					<div
+						class="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary sm:size-12"
+					>
+						<Icon icon="solar:users-group-rounded-bold" class="size-5 sm:size-6" />
+					</div>
+					<div class="flex flex-1 flex-col space-y-4">
+						<div>
+							<h3 class="text-base font-medium text-foreground sm:text-lg">Age Range</h3>
+							<div class="mt-2 flex space-x-4">
+								<div class="flex-1">
+									<label class="text-sm text-muted-foreground">Minimum Age</label>
+									<Input
+										type="number"
+										id="minAge"
+										bind:value={minAge}
+										min={18}
+										max={100}
+										required
+										class="mt-1"
+									/>
+								</div>
+								<div class="flex-1">
+									<label class="text-sm text-muted-foreground">Maximum Age</label>
+									<Input
+										type="number"
+										id="maxAge"
+										bind:value={maxAge}
+										min={18}
+										max={100}
+										required
+										class="mt-1"
+									/>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 
-		<div class="rounded-lg bg-card p-6 shadow-lg">
-			<h2 class="mb-4 text-xl font-semibold">Maximum Distance</h2>
-			<div class="mb-4 flex items-center justify-between">
-				<span class="text-sm font-medium text-muted-foreground">{maxDistance} km</span>
-				<Icon icon="solar:map-point-bold" class="size-6 text-primary" />
+				<div class="border-t"></div>
+
+				<div
+					class="flex flex-col space-y-4 p-4 sm:flex-row sm:items-start sm:space-x-4 sm:space-y-0"
+				>
+					<div
+						class="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary sm:size-12"
+					>
+						<Icon icon="solar:users-bold" class="size-5 sm:size-6" />
+					</div>
+					<div class="flex flex-1 flex-col space-y-2">
+						<h3 class="text-base font-medium text-foreground sm:text-lg">Preferred Gender</h3>
+						<Select
+							id="preferredGender"
+							bind:value={preferredGender}
+							options={genderOptions}
+							required
+						/>
+					</div>
+				</div>
+
+				<div class="border-t"></div>
+
+				<div
+					class="flex flex-col space-y-4 p-4 sm:flex-row sm:items-start sm:space-x-4 sm:space-y-0"
+				>
+					<div
+						class="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary sm:size-12"
+					>
+						<Icon icon="solar:map-point-bold" class="size-5 sm:size-6" />
+					</div>
+					<div class="flex flex-1 flex-col space-y-2">
+						<h3 class="text-base font-medium text-foreground sm:text-lg">Maximum Distance</h3>
+						<div class="space-y-2">
+							<div class="flex items-center justify-between">
+								<span class="text-sm text-muted-foreground">{maxDistance} km</span>
+							</div>
+							<Input
+								type="number"
+								id="maxDistance"
+								bind:value={maxDistance}
+								min={1}
+								max={100000}
+								required
+							/>
+						</div>
+					</div>
+				</div>
 			</div>
-			<Input
-				type="number"
-				id="maxDistance"
-				bind:value={maxDistance}
-				min={1}
-				max={100000}
-				required
-				class="mt-1"
-			/>
-		</div>
 
-		<Button
-			type="submit"
-			class="w-full transition-all duration-300 hover:shadow-lg"
-			disabled={resp.isLoadingUpdateSwiperPreferences}
-		>
-			{#if resp.isLoadingUpdateSwiperPreferences}
-				Saving...
-			{:else}
-				<Icon icon="solar:check-circle-bold" class="mr-2 size-5" />
-				Save Preferences
-			{/if}
-		</Button>
-	</form>
+			<div class="rounded-lg border bg-card/50 p-4">
+				<div class="flex items-start space-x-2">
+					<Icon icon="solar:info-circle-bold" class="mt-1 size-5 text-muted-foreground" />
+					<div class="flex-1 text-sm text-muted-foreground">
+						<p>Your swiper preferences help us show you more relevant matches.</p>
+						<p class="mt-2">Changes to these settings take effect immediately.</p>
+					</div>
+				</div>
+			</div>
+
+			<Button type="submit" class="w-full" disabled={resp.isLoadingUpdateSwiperPreferences}>
+				{#if resp.isLoadingUpdateSwiperPreferences}
+					Saving...
+				{:else}
+					Save Preferences
+				{/if}
+			</Button>
+		</form>
+	</div>
 </div>

@@ -71,14 +71,14 @@
 </script>
 
 <div
-	class="relative mx-auto h-[550px] w-full max-w-md overflow-hidden rounded-xl bg-card shadow-lg"
+	class="border-1 relative mx-auto h-[550px] w-full max-w-md overflow-hidden rounded-3xl border-border bg-card shadow-sm"
 >
 	<div
 		tabindex="0"
 		role="button"
 		aria-roledescription="draggable card"
 		class={cn(
-			'h-full w-full overflow-hidden rounded-xl bg-card transition-all duration-300',
+			'h-full w-full overflow-hidden rounded-3xl bg-card transition-all duration-300',
 			index === 0 && swipeDirection === 'left' && 'border-l-4 border-red-500',
 			index === 0 && swipeDirection === 'right' && 'border-r-4 border-green-500'
 		)}

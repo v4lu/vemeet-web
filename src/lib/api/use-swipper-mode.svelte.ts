@@ -1,5 +1,4 @@
 import { authAPI } from '$lib/api';
-import { toast } from '$lib/stores/toast.store';
 import type { ServerErrorResponse } from '$lib/types/ky.types';
 import type { PotentialSwipePagableResponse, SwipeProfile } from '$lib/types/user.types';
 
@@ -31,7 +30,6 @@ export function useSwiperMode(authToken: string) {
 			resp.error = null;
 		} catch (e) {
 			resp.error = e as ServerErrorResponse;
-			toast.error('Failed to load potential matches. Please try again later.');
 			console.error(e);
 		} finally {
 			resp.isLoading = false;

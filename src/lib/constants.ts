@@ -6,7 +6,7 @@ export const REFRESH_TOKEN = 'refresh_token';
 export const COGNITO_ID = 'cognito_id';
 export const isProduction = false;
 
-export const endpointsWithoutHeader = ['/messages', '/settings', '/settings/privacy'];
+export const endpointsWithoutHeader = ['/messages', '/settings', '/settings/privacy', '/swiper'];
 
 export function showHeader(pathname: string): boolean {
 	for (const endpoint of endpointsWithoutHeader) {
@@ -19,7 +19,6 @@ export const endpointsWithoutIsland = ['/messages/+'];
 
 export function showIsland(pathname: string): boolean {
 	if (pathname === '/messages' || pathname === '/messages/') return true;
-	if (pathname.startsWith('/swiper')) return false;
 
 	const messagesRegex = /^\/messages(?:\/\d+)*$/;
 	if (messagesRegex.test(pathname)) {
