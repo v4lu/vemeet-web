@@ -17,17 +17,17 @@
 	}
 </script>
 
-<CustomHeaderWithTitle title="Mesages" />
+<CustomHeaderWithTitle title="Mesasges" />
 
 <main class="container min-h-max lg:border-x lg:border-border lg:bg-card">
 	{#if resp.isLoading}
-		<div class="space-y-2">
+		<div class="mt-4 space-y-2">
 			{#each Array(5) as _}
 				<Skeleton class="h-14 w-full" />
 			{/each}
 		</div>
 	{:else if resp.chats}
-		<div class="space-y-2">
+		<div class="mt-4 space-y-2">
 			{#each resp.chats as chat (chat.id)}
 				<a
 					href={`/messages/${$sessionStore.id}/${chat.otherUser.id}`}

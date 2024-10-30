@@ -122,13 +122,13 @@
 </CustomHeader>
 
 <div class="grid flex-1 bg-background">
-	<div class="h-[calc(100dvh-81px)] overflow-hidden">
+	<div class="mt-20 h-[calc(100dvh-81px-80px)] overflow-hidden">
 		<div
 			bind:this={scrollContainer}
 			class="hide-scrollbar container h-full overflow-y-auto lg:border-x lg:border-border lg:bg-card"
 		>
-			<div bind:this={messageList} class="flex min-h-full flex-col justify-end">
-				<div class="mt-auto pt-4">
+			<div bind:this={messageList} class="flex min-h-full flex-col justify-start">
+				<div class="mt-auto">
 					{#if isLoadingMore}
 						<MessageSkeleton />
 					{/if}
