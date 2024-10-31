@@ -90,7 +90,7 @@
 <CustomHeaderWithTitle title="Profile Settings" />
 
 <div
-	class="my-6 min-h-full bg-background px-4 py-4 sm:px-6 lg:border-x lg:border-border lg:bg-card lg:px-8"
+	class="container bg-background px-4 py-4 sm:px-6 lg:border-x lg:border-border lg:bg-card lg:px-8"
 >
 	<div class="mx-auto max-w-3xl space-y-6">
 		<div class="space-y-2">

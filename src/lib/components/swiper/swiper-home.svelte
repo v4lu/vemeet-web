@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { useSwiperMode } from '$lib/api/use-swipper-mode.svelte';
 	import Icon from '@iconify/svelte';
 	import { flip } from 'svelte/animate';
@@ -75,9 +76,25 @@
 				</div>
 			</div>
 		{/each}
-	{:else if showNoMoreMatches}
-		<div class="mt-4 flex min-h-[600px] items-center justify-center text-center" in:fade>
-			<p class="text-muted-foreground">No more matches available at the moment.</p>
+	{:else if showNoMoreMatches || resp.potentialMatches.length === 0}
+		<div
+			class="mt-4 flex min-h-[28rem] flex-col items-center justify-center gap-6 text-center"
+			in:fade
+		>
+			<div class="flex size-20 items-center justify-center rounded-full bg-primary/10">
+				<Icon icon="lucide:search-x" class="size-10 text-primary" />
+			</div>
+			<div class="space-y-2 px-4">
+				<h3 class="text-xl font-semibold">No More Matches Found</h3>
+				<p class="text-sm text-muted-foreground">
+					We couldn't find any more matches with your current preferences. Try adjusting your
+					preferences to see more people.
+				</p>
+			</div>
+			<Button onclick={() => goto('/swiper/preferences')} class="mt-4">
+				<Icon icon="solar:settings-bold" class="mr-2 size-4" />
+				Adjust Preferences
+			</Button>
 		</div>
 	{/if}
 </div>
