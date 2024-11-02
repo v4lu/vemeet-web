@@ -10,7 +10,7 @@
 </script>
 
 <div
-	class="relative mx-auto h-[28rem] w-full max-w-md overflow-hidden rounded-xl bg-card shadow-lg"
+	class="relative mx-auto h-[27rem] w-full max-w-md overflow-hidden rounded-xl bg-card shadow-lg"
 >
 	<div class={cn('h-full w-full overflow-hidden rounded-xl bg-card', className)}>
 		<div class="relative h-3/4 w-full">

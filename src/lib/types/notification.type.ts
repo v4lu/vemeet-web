@@ -11,7 +11,10 @@ export enum NotificationType {
 export type Notification = {
 	id: number;
 	user: User;
-	notificationType: NotificationType;
+	notificationType: {
+		id: number;
+		name: NotificationType;
+	};
 	content: string;
 	isRead: boolean;
 	createdAt: string;

@@ -1,3 +1,4 @@
+import type { Pageable, Sort } from './page.types';
 import type { User } from './user.types';
 
 export type Country = {
@@ -133,4 +134,18 @@ export type LocationReviewUpdate = {
 	comment?: string;
 	imagesToAdd?: string[];
 	imageIdsToRemove?: number[];
+};
+
+export type LocationPagableResponse = {
+	content: VeganLocation[];
+	pageable: Pageable;
+	totalPages: number;
+	totalElements: number;
+	last: boolean;
+	first: boolean;
+	size: number;
+	number: number;
+	sort: Sort;
+	numberOfElements: number;
+	empty: boolean;
 };

@@ -99,7 +99,7 @@
 	});
 </script>
 
-<CustomHeader class="flex items-center justify-between border-b p-4  shadow-sm lg:bg-card">
+<CustomHeader class="flex items-center justify-between border-b bg-transparent p-4 shadow-sm">
 	<div class="flex items-center pl-6">
 		<a href={`/profile/${data.otherUser.id}`}>
 			<Avatar user={data.otherUser} class="mr-3 size-10" />
@@ -122,7 +122,7 @@
 </CustomHeader>
 
 <div class="grid flex-1 bg-background">
-	<div class="mt-20 h-[calc(100dvh-81px-80px)] overflow-hidden">
+	<div class="h-[calc(100dvh-81px)] overflow-hidden">
 		<div
 			bind:this={scrollContainer}
 			class="hide-scrollbar container h-full overflow-y-auto lg:border-x lg:border-border lg:bg-card"

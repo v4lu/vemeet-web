@@ -95,3 +95,17 @@ export type UserUpdateFormData = {
 	cityLat?: number | null;
 	cityLng?: number | null;
 };
+
+export type UserPagableResponse = {
+	content: User[];
+	pageable: Pageable;
+	totalPages: number;
+	totalElements: number;
+	last: boolean;
+	first: boolean;
+	size: number;
+	number: number;
+	sort: Sort;
+	numberOfElements: number;
+	empty: boolean;
+};

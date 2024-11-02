@@ -71,7 +71,7 @@
 </script>
 
 <div
-	class="border-1 relative mx-auto h-[28rem] w-full max-w-md overflow-hidden rounded-3xl border-border bg-card shadow-sm"
+	class="border-1 relative mx-auto h-[27rem] w-full max-w-md overflow-hidden rounded-3xl border-border bg-card shadow-sm"
 >
 	<div
 		tabindex="0"

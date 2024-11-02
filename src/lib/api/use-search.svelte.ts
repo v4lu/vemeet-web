@@ -1,4 +1,3 @@
-// use-search.svelte.ts
 import { authAPI } from '$lib/api';
 import type { VeganLocation } from '$lib/types/geo.types';
 import type { ServerErrorResponse } from '$lib/types/ky.types';

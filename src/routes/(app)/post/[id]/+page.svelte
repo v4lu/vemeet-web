@@ -48,7 +48,9 @@
 	{#if res.isLoading}
 		<PostSkeleton />
 	{:else if res.post}
-		<div class="overflow-hidden bg-card shadow-lg transition-all duration-300 hover:shadow-xl">
+		<div
+			class="mx-auto min-h-[88.8dvh] max-w-pc overflow-hidden bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
+		>
 			<div class="relative mt-4">
 				{#if res.post.user.id === $sessionStore.id}
 					<div class="absolute right-3 top-3 z-10">

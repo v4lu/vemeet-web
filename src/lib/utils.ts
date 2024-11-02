@@ -1,3 +1,5 @@
+import { onMount } from 'svelte';
+
 export function capitalize(s: string): string {
 	return s.charAt(0).toUpperCase() + s.slice(1);
 }
@@ -52,4 +54,34 @@ export function scrollToSection(event: Event, id: string, offset: number) {
 			behavior: 'smooth'
 		});
 	}
+}
+
+export function useIntersection(
+	node: HTMLElement,
+	options: {
+		once?: boolean;
+		onIntersect?: (entry: IntersectionObserverEntry) => void;
+	}
+) {
+	let observer: IntersectionObserver;
+
+	const handleIntersect = (entries: IntersectionObserverEntry[]) => {
+		entries.forEach((entry) => {
+			if (entry.isIntersecting) {
+				options.onIntersect?.(entry);
+				if (options.once) {
+					observer.unobserve(node);
+				}
+			}
+		});
+	};
+
+	observer = new IntersectionObserver(handleIntersect);
+	observer.observe(node);
+
+	return {
+		destroy() {
+			observer.disconnect();
+		}
+	};
 }
