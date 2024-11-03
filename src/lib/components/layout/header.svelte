@@ -15,7 +15,7 @@
 <div
 	class="container fixed inset-x-0 top-0 z-[90] h-16 w-full border-b border-border bg-card shadow lg:border-x"
 >
-	<header class="container flex items-center justify-between py-3">
+	<header class="flex items-center justify-between py-3">
 		<a href="/" class=" flex items-center justify-center gap-2 text-xl font-bold text-primary">
 			<Logo class="size-10" />
 			<span class="-mt-1"> Vemeet </span>

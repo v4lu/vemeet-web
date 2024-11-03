@@ -4,7 +4,7 @@
 	let { count = 24 }: { count?: number } = $props();
 </script>
 
-<div class="flex flex-1 flex-col-reverse overflow-y-auto p-4">
+<div class="my-12 flex flex-1 flex-col-reverse overflow-y-auto p-4">
 	{#each Array(count) as _, i}
 		<div class={`mb-4 flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
 			<div class={`max-w-[70%] ${i % 2 === 0 ? 'ml-auto' : 'mr-auto'}`}>

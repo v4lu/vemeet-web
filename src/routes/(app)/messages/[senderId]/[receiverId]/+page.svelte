@@ -6,7 +6,6 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import CustomHeader from '$lib/components/ui/custom-header/custom-header.svelte';
 	import type { Message as TMessage } from '$lib/types/chat.types.js';
-	import { debounce } from '$lib/utils.js';
 	import Icon from '@iconify/svelte';
 	import { onDestroy } from 'svelte';
 
@@ -23,19 +22,18 @@
 	let messageList: HTMLDivElement;
 	let isLoadingMore = $state(false);
 	let isInitialLoad = $state(true);
-	let prevScrollHeight = $state(0);
 	let isNearBottom = $state(true);
+	let shouldPreserveScroll = $state(false);
+	let lastScrollTop = $state(0);
 
 	function updateMessages(newMessages: TMessage[]) {
 		const uniqueMessages = newMessages.filter(
 			(newMsg) => !resp.messages.some((existingMsg) => existingMsg.id === newMsg.id)
 		);
 		if (uniqueMessages.length > 0) {
-			resp.messages = [...resp.messages, ...uniqueMessages].sort(
-				(a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-			);
+			resp.messages = [...resp.messages, ...uniqueMessages];
 			if (isNearBottom) {
-				setTimeout(scrollToBottom, 0);
+				requestAnimationFrame(scrollToBottom);
 			}
 		}
 	}
@@ -48,45 +46,69 @@
 
 	async function loadMoreMessages() {
 		if (!resp.hasMore || isLoadingMore) return;
+
 		isLoadingMore = true;
-		prevScrollHeight = scrollContainer.scrollHeight;
-		await fetchData(resp.currentPage + 1);
-		isLoadingMore = false;
-		scrollContainer.scrollTop = scrollContainer.scrollHeight - prevScrollHeight;
+		shouldPreserveScroll = true;
+
+		try {
+			const oldFirstMessage = messageList?.firstElementChild;
+			const oldHeight = scrollContainer?.scrollHeight || 0;
+
+			await fetchData(resp.currentPage + 1);
+
+			// Wait for DOM update
+			await new Promise((resolve) => setTimeout(resolve, 0));
+
+			if (scrollContainer && oldFirstMessage) {
+				const newHeight = scrollContainer.scrollHeight;
+				const heightDiff = newHeight - oldHeight;
+				scrollContainer.scrollTop = heightDiff;
+			}
+		} catch (error) {
+			console.error('Error loading more messages:', error);
+		} finally {
+			isLoadingMore = false;
+			shouldPreserveScroll = false;
+		}
 	}
 
-	const debouncedLoadMoreMessages = debounce(() => {
-		loadMoreMessages();
-	}, 200);
-
 	function handleScroll() {
-		if (scrollContainer) {
-			const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-			isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+		if (!scrollContainer || shouldPreserveScroll || isLoadingMore) return;
 
-			if (scrollTop === 0 && !isLoadingMore && resp.hasMore) {
-				debouncedLoadMoreMessages();
-			}
+		const { scrollTop } = scrollContainer;
+		const scrollingUp = scrollTop < lastScrollTop;
+		lastScrollTop = scrollTop;
+
+		// Check if we're at or very close to the top and scrolling up
+		if (scrollTop <= 10 && scrollingUp && resp.hasMore) {
+			loadMoreMessages();
 		}
+
+		// Update near bottom state
+		const { scrollHeight, clientHeight } = scrollContainer;
+		isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
 	}
 
 	$effect(() => {
 		if (!resp.firstTime) {
 			fetchData(0).then(() => {
 				isInitialLoad = false;
-				setTimeout(scrollToBottom, 0);
+				requestAnimationFrame(scrollToBottom);
 			});
 		}
+
 		if (scrollContainer) {
-			scrollContainer.addEventListener('scroll', handleScroll);
+			// Store initial scroll position
+			lastScrollTop = scrollContainer.scrollTop;
+			scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
 		}
 	});
 
 	$effect(() => {
-		if (resp.messages.length > 0 && !isLoadingMore) {
+		if (resp.messages.length > 0 && !isLoadingMore && !shouldPreserveScroll) {
 			const lastMessage = resp.messages[resp.messages.length - 1];
 			if (lastMessage.sender.id !== data.user.id && isNearBottom) {
-				setTimeout(scrollToBottom, 0);
+				requestAnimationFrame(scrollToBottom);
 			}
 		}
 	});
@@ -127,7 +149,7 @@
 			bind:this={scrollContainer}
 			class="hide-scrollbar container h-full overflow-y-auto lg:border-x lg:border-border lg:bg-card"
 		>
-			<div bind:this={messageList} class="flex min-h-full flex-col justify-start">
+			<div bind:this={messageList} class="mt-20 flex min-h-full flex-col justify-start">
 				<div class="mt-auto">
 					{#if isLoadingMore}
 						<MessageSkeleton />
@@ -149,8 +171,7 @@
 			const res = await postMessage(message);
 			if (res) {
 				updateMessages([res]);
-
-				setTimeout(scrollToBottom, 0);
+				requestAnimationFrame(scrollToBottom);
 			}
 			isSubmittingMessage = false;
 		}}

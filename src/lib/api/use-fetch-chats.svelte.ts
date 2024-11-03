@@ -28,13 +28,20 @@ class UsersResponse {
 
 export function useFetchChats(authToken: string) {
 	const resp = new UsersResponse();
-
+	const api = authAPI(authToken);
 	async function fetchData() {
 		resp.isLoading = true;
 		try {
-			const api = authAPI(authToken);
-			resp.chats = await api.get('chats').json();
-			resp.error = undefined;
+			const response = await api<Chat[]>('chats').json();
+			resp.chats = response.sort((a, b) => {
+				if (a.lastMessage && b.lastMessage) {
+					return (
+						new Date(b.lastMessage.createdAt).getTime() -
+						new Date(a.lastMessage.createdAt).getTime()
+					);
+				}
+				return 0;
+			});
 		} catch (err) {
 			if (err instanceof HTTPError) {
 				resp.error = (await err.response.json()) as ServerErrorResponse;

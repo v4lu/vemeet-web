@@ -36,7 +36,7 @@
 <div
 	class="container fixed bottom-0 left-0 right-0 z-[30] border-t bg-card py-3 shadow-md lg:border-x lg:border-border"
 >
-	<div class="container flex items-center justify-between">
+	<div class="flex items-center justify-between">
 		{#each navigation as { path, icon }}
 			<a
 				class={cn(
