@@ -7,7 +7,7 @@
 	import CustomHeader from '$lib/components/ui/custom-header/custom-header.svelte';
 	import type { Message as TMessage } from '$lib/types/chat.types.js';
 	import Icon from '@iconify/svelte';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	let { data } = $props();
 	const { resp, fetchData, postMessage, cleanup } = useChat({
@@ -23,8 +23,23 @@
 	let isLoadingMore = $state(false);
 	let isInitialLoad = $state(true);
 	let isNearBottom = $state(true);
-	let shouldPreserveScroll = $state(false);
 	let lastScrollTop = $state(0);
+
+	// Initial data load
+	onMount(async () => {
+		try {
+			if (!resp.messages.length) {
+				await fetchData(1);
+			}
+		} finally {
+			isInitialLoad = false;
+		}
+
+		if (scrollContainer) {
+			scrollContainer.addEventListener('scroll', handleScroll);
+			scrollToBottom();
+		}
+	});
 
 	function updateMessages(newMessages: TMessage[]) {
 		const uniqueMessages = newMessages.filter(
@@ -40,7 +55,8 @@
 
 	function scrollToBottom() {
 		if (scrollContainer) {
-			scrollContainer.scrollTop = scrollContainer.scrollHeight;
+			const { scrollHeight, clientHeight } = scrollContainer;
+			scrollContainer.scrollTop = scrollHeight - clientHeight;
 		}
 	}
 
@@ -48,64 +64,44 @@
 		if (!resp.hasMore || isLoadingMore) return;
 
 		isLoadingMore = true;
-		shouldPreserveScroll = true;
+		const previousScrollHeight = scrollContainer?.scrollHeight || 0;
+		const previousScrollTop = scrollContainer?.scrollTop || 0;
 
 		try {
-			const oldFirstMessage = messageList?.firstElementChild;
-			const oldHeight = scrollContainer?.scrollHeight || 0;
-
 			await fetchData(resp.currentPage + 1);
 
 			// Wait for DOM update
-			await new Promise((resolve) => setTimeout(resolve, 0));
+			await new Promise((resolve) => setTimeout(resolve, 50));
 
-			if (scrollContainer && oldFirstMessage) {
-				const newHeight = scrollContainer.scrollHeight;
-				const heightDiff = newHeight - oldHeight;
-				scrollContainer.scrollTop = heightDiff;
+			if (scrollContainer) {
+				const newScrollHeight = scrollContainer.scrollHeight;
+				const heightDifference = newScrollHeight - previousScrollHeight;
+				scrollContainer.scrollTop = previousScrollTop + heightDifference;
 			}
 		} catch (error) {
 			console.error('Error loading more messages:', error);
 		} finally {
 			isLoadingMore = false;
-			shouldPreserveScroll = false;
 		}
 	}
 
 	function handleScroll() {
-		if (!scrollContainer || shouldPreserveScroll || isLoadingMore) return;
+		if (!scrollContainer || isLoadingMore) return;
 
-		const { scrollTop } = scrollContainer;
-		const scrollingUp = scrollTop < lastScrollTop;
-		lastScrollTop = scrollTop;
+		const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
 
-		// Check if we're at or very close to the top and scrolling up
-		if (scrollTop <= 10 && scrollingUp && resp.hasMore) {
+		// Check if scrolling up and near top
+		if (scrollTop < lastScrollTop && scrollTop < 100 && resp.hasMore) {
 			loadMoreMessages();
 		}
 
-		// Update near bottom state
-		const { scrollHeight, clientHeight } = scrollContainer;
+		// Update bottom proximity state
 		isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+		lastScrollTop = scrollTop;
 	}
 
 	$effect(() => {
-		if (!resp.firstTime) {
-			fetchData(0).then(() => {
-				isInitialLoad = false;
-				requestAnimationFrame(scrollToBottom);
-			});
-		}
-
-		if (scrollContainer) {
-			// Store initial scroll position
-			lastScrollTop = scrollContainer.scrollTop;
-			scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
-		}
-	});
-
-	$effect(() => {
-		if (resp.messages.length > 0 && !isLoadingMore && !shouldPreserveScroll) {
+		if (resp.messages.length > 0 && !isLoadingMore) {
 			const lastMessage = resp.messages[resp.messages.length - 1];
 			if (lastMessage.sender.id !== data.user.id && isNearBottom) {
 				requestAnimationFrame(scrollToBottom);
@@ -154,8 +150,13 @@
 					{#if isLoadingMore}
 						<MessageSkeleton />
 					{/if}
-					{#if !resp.firstTime && (isInitialLoad || resp.isLoading) && resp.messages.length === 0}
+
+					{#if isInitialLoad}
 						<MessageSkeleton />
+					{:else if resp.messages.length === 0}
+						<div class="flex h-full items-center justify-center">
+							<p class="text-muted-foreground">No messages yet. Start a conversation!</p>
+						</div>
 					{:else}
 						{#each resp.messages as message}
 							<Message {message} />

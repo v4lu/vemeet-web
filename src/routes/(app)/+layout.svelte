@@ -12,7 +12,7 @@
 	{#if showHeader(data.path)}
 		<Header authToken={data.accessToken} />
 	{/if}
-	<main class={cn('flex-1', showIsland(data.path) && 'mb-12 mt-[64px] grid pb-4')}>
+	<main class={cn('flex-1 bg-card', showIsland(data.path) && 'mb-12 mt-[64px] grid pb-4')}>
 		{@render children()}
 	</main>
 
