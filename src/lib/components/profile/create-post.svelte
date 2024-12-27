@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { uploadImage } from '$lib/api';
-	import { cn } from '$lib/cn';
-	import { toast } from '$lib/stores/toast.store';
 	import Icon from '@iconify/svelte';
 	import { Button } from '../ui/button';
 	import { inputVariants } from '../ui/input';
+	import { uploadImage } from '$lib/api';
+	import { cn } from '$lib/cn';
+	import { toast } from '$lib/stores/toast.store';
 
 	type CreatePostProps = {
 		createPost: (content: string, imageUrls: string[]) => Promise<void>;

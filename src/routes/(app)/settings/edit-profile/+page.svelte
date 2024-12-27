@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Icon from '@iconify/svelte';
 	import { browser } from '$app/environment';
 	import { useLocations } from '$lib/api/use-locations.svelte.js';
 	import { useUpdateUser } from '$lib/api/use-update-user.svelte.js';
@@ -11,7 +12,6 @@
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { City, Country } from '$lib/types/geo.types.js';
 	import type { UserUpdateFormData } from '$lib/types/user.types.js';
-	import Icon from '@iconify/svelte';
 	let { data } = $props();
 
 	let username = $state($sessionStore.username);
@@ -142,7 +142,6 @@
 	<div class="mx-auto max-w-pc">
 		<form class="flex flex-col justify-between space-y-6 sm:space-y-8" onsubmit={handleSubmit}>
 			<div class="flex-1 space-y-6 sm:space-y-8">
-				<!-- Basic Information Section -->
 				<div class="space-y-4 sm:space-y-6">
 					<div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
 						<Avatar class="size-14 sm:size-16" user={$sessionStore} />
@@ -191,7 +190,7 @@
 								</div>
 							</Field>
 							<Field name="Gender" optional>
-								<div class="group relative">
+								<div class="relative flex items-center">
 									<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 										<Icon
 											icon="solar:users-group-two-rounded-bold"
@@ -218,7 +217,6 @@
 					</div>
 				</div>
 
-				<!-- Location section -->
 				<div class="space-y-4 sm:space-y-6">
 					<div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
 						<div
@@ -234,7 +232,7 @@
 
 					<div class="grid gap-4 sm:grid-cols-2">
 						<Field name="Country" optional>
-							<div class="group relative">
+							<div class="relative flex items-center">
 								<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 									<Icon
 										icon="material-symbols:globe"
@@ -284,12 +282,13 @@
 										class="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border bg-card py-1 shadow-lg sm:max-h-60"
 									>
 										{#each locationsResp.cities as cityOption}
-											<li
-												class="cursor-pointer px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
+											<button
+												type="button"
+												class="w-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-accent"
 												onclick={() => selectCity(cityOption)}
 											>
 												{cityOption.cityName}
-											</li>
+											</button>
 										{/each}
 									</ul>
 								{/if}
@@ -298,7 +297,6 @@
 					</div>
 				</div>
 
-				<!-- Bio section -->
 				<div class="space-y-4 sm:space-y-6">
 					<div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
 						<div

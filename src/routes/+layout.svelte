@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { Toast } from '$lib/components/ui/toast';
-
 	import '@fontsource-variable/exo-2';
 	import { ModeWatcher } from 'mode-watcher';
 	import { fade } from 'svelte/transition';
 	import '../app.css';
 	import { toast } from '../lib/stores/toast.store';
+	import { Toast } from '$lib/components/ui/toast';
 
 	let { children } = $props();
 </script>

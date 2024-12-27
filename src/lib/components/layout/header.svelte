@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { useNotification } from '$lib/api/use-notification.svelte';
-	import { cn } from '$lib/cn';
 	import Icon from '@iconify/svelte';
 	import { buttonVariants } from '../ui/button';
 	import { Logo } from '../ui/logo';
+	import { cn } from '$lib/cn';
+	import { useNotification } from '$lib/api/use-notification.svelte';
 	type Props = {
 		authToken: string;
 	};

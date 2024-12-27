@@ -1,8 +1,4 @@
 <script lang="ts">
-	import { cn } from '$lib/cn';
-	import { formatTimestamp } from '$lib/date';
-	import { sessionStore } from '$lib/stores/session.store';
-	import type { Post } from '$lib/types/post.types';
 	import Icon from '@iconify/svelte';
 	import { elasticOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
@@ -11,6 +7,10 @@
 	import { Dropdown } from '../ui/dropdown';
 	import { ConfirmModal, ImageModal, Modal } from '../ui/modals';
 	import UserHorizontalCard from './user-horizontal-card.svelte';
+	import type { Post } from '$lib/types/post.types';
+	import { sessionStore } from '$lib/stores/session.store';
+	import { formatTimestamp } from '$lib/date';
+	import { cn } from '$lib/cn';
 
 	type PostCardProps = {
 		post: Post;
@@ -71,7 +71,7 @@
 </script>
 
 <div
-	class="mb-6 overflow-hidden rounded-xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
+	class="mb-6 rounded-xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
 >
 	<div class="relative">
 		{#if post.user.id === $sessionStore.id}
