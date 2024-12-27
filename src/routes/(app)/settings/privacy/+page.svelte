@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Icon from '@iconify/svelte';
 	import { api, createAuthHeaders } from '$lib/api.js';
 	import { Button } from '$lib/components/ui/button';
 	import { CustomHeaderWithTitle } from '$lib/components/ui/custom-header';
@@ -7,7 +8,6 @@
 	import { Toggle } from '$lib/components/ui/toggle/index.js';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { User } from '$lib/types/user.types.js';
-	import Icon from '@iconify/svelte';
 
 	let { data } = $props();
 	let isPrivate = $state($sessionStore.isPrivate);
@@ -116,10 +116,10 @@
 	const Dialog = $derived(isMobile ? Drawer : Modal);
 </script>
 
-<CustomHeaderWithTitle title="Privacy Settings" />
+<CustomHeaderWithTitle title="Privacy" />
 
 <div
-	class="min-h-full bg-background px-4 py-4 sm:px-6 lg:border-x lg:border-border lg:bg-card lg:px-8"
+	class="container min-h-full bg-background px-4 py-4 sm:px-6 lg:border-x lg:border-border lg:bg-card lg:px-8"
 >
 	<div class="mx-auto max-w-3xl space-y-6">
 		<div class="space-y-2">

@@ -12,7 +12,16 @@
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { City, Country } from '$lib/types/geo.types.js';
 	import type { UserUpdateFormData } from '$lib/types/user.types.js';
+	import { clickOutside } from '$lib/utils';
+
 	let { data } = $props();
+	let genderOptions = $state([
+		{ value: '', label: 'Select gender' },
+		{ value: 'male', label: 'Male' },
+		{ value: 'female', label: 'Female' },
+		{ value: 'other', label: 'Other' },
+		{ value: 'prefer_not_to_say', label: 'Prefer not to say' }
+	]);
 
 	let username = $state($sessionStore.username);
 	let name = $state($sessionStore.name ?? '');
@@ -33,11 +42,15 @@
 	let bio = $state($sessionStore.bio || '');
 
 	let citySearch = $state($sessionStore.cityName || '');
+	let countrySearch = $state($sessionStore.countryName || '');
+	let filteredCountries = $state(data.countries);
 
 	const { isSubmitting, updateUser } = useUpdateUser(data.accessToken);
 	const { fetchCities, resp: locationsResp } = useLocations(data.accessToken);
 
 	let showCityDropdown = $state(false);
+	let showCountryDropdown = $state(false);
+	let showGenderDropdown = $state(false);
 
 	function debounce<F extends (...args: any[]) => any>(
 		func: F,
@@ -55,29 +68,32 @@
 		showCityDropdown = true;
 	}, 300);
 
-	function handleCountryChange(event: Event) {
-		const select = event.target as HTMLSelectElement;
-		const selectedCountry = data.countries.find((c) => c.countryIsoCode === select.value);
-		if (selectedCountry) {
-			country = {
-				countryFlag: selectedCountry.countryFlag,
-				countryIsoCode: selectedCountry.countryIsoCode,
-				countryLat: selectedCountry.countryLat,
-				countryLng: selectedCountry.countryLng,
-				countryName: selectedCountry.countryName
-			};
-			city = {} as City;
-			citySearch = '';
-			showCityDropdown = false;
-			locationsResp.cities = [];
-			fetchCities(selectedCountry.countryIsoCode!);
-		} else {
-			country = {} as Country;
-			city = {} as City;
-			citySearch = '';
-			showCityDropdown = false;
-			locationsResp.cities = [];
-		}
+	function handleCountrySearch(event: Event) {
+		const input = event.target as HTMLInputElement;
+		countrySearch = input.value;
+
+		filteredCountries = data.countries.filter((country) =>
+			country?.countryName?.toLowerCase().includes(countrySearch.toLowerCase())
+		);
+
+		showCountryDropdown = filteredCountries.length > 0;
+	}
+
+	function selectCountry(selectedCountry: Country) {
+		country = {
+			countryFlag: selectedCountry.countryFlag,
+			countryIsoCode: selectedCountry.countryIsoCode,
+			countryLat: selectedCountry.countryLat,
+			countryLng: selectedCountry.countryLng,
+			countryName: selectedCountry.countryName
+		};
+		city = {} as City;
+		citySearch = '';
+		showCityDropdown = false;
+		locationsResp.cities = [];
+		fetchCities(selectedCountry.countryIsoCode!);
+		countrySearch = selectedCountry.countryName ?? '';
+		showCountryDropdown = false;
 	}
 
 	function handleCitySearch(event: Event) {
@@ -112,6 +128,11 @@
 		};
 
 		await updateUser(payload);
+	}
+
+	function selectGender(selectedGender: string) {
+		gender = selectedGender;
+		showGenderDropdown = false;
 	}
 
 	$effect(() => {
@@ -190,27 +211,45 @@
 								</div>
 							</Field>
 							<Field name="Gender" optional>
-								<div class="relative flex items-center">
-									<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-										<Icon
-											icon="solar:users-group-two-rounded-bold"
-											class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
-										/>
-									</div>
-									<select
-										id="gender"
-										bind:value={gender}
-										class={cn(
-											inputVariants(),
-											'bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2'
-										)}
+								<div class="relative">
+									<button
+										type="button"
+										class="flex w-full items-center justify-between rounded-lg bg-muted/50 px-4 py-2 ring-primary/20 transition-all focus:ring-2"
+										onclick={() => (showGenderDropdown = !showGenderDropdown)}
 									>
-										<option value="">Select gender</option>
-										<option value="male">Male</option>
-										<option value="female">Female</option>
-										<option value="other">Other</option>
-										<option value="prefer_not_to_say">Prefer not to say</option>
-									</select>
+										<div class="flex items-center space-x-2">
+											<Icon
+												icon="solar:users-group-two-rounded-bold"
+												class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
+											/>
+											<span class="text-sm">
+												{genderOptions.find((option) => option.value === gender)?.label ||
+													'Select gender'}
+											</span>
+										</div>
+										<Icon
+											icon={showGenderDropdown
+												? 'solar:chevron-up-bold'
+												: 'solar:chevron-down-bold'}
+											class="size-4 text-muted-foreground/70"
+										/>
+									</button>
+
+									{#if showGenderDropdown}
+										<ul
+											use:clickOutside={() => (showGenderDropdown = false)}
+											class="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border bg-card py-1 shadow-lg sm:max-h-60"
+										>
+											{#each genderOptions as option}
+												<button
+													class="cursor-pointer px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
+													onclick={() => selectGender(option.value)}
+												>
+													{option.label}
+												</button>
+											{/each}
+										</ul>
+									{/if}
 								</div>
 							</Field>
 						</div>
@@ -232,30 +271,37 @@
 
 					<div class="grid gap-4 sm:grid-cols-2">
 						<Field name="Country" optional>
-							<div class="relative flex items-center">
+							<div class="group relative flex items-center">
 								<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 									<Icon
 										icon="material-symbols:globe"
 										class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
 									/>
 								</div>
-								<select
+								<Input
 									id="country"
-									class={cn(
-										inputVariants(),
-										'bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2'
-									)}
-									bind:value={country.countryIsoCode}
-									onchange={handleCountryChange}
-								>
-									<option value="">Select a country</option>
-									{#each data.countries as countryOption}
-										<option value={countryOption.countryIsoCode}>
-											{countryOption.countryFlag}
-											{countryOption.countryName}
-										</option>
-									{/each}
-								</select>
+									placeholder="Search for a country"
+									bind:value={countrySearch}
+									oninput={handleCountrySearch}
+									class="bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2"
+								/>
+								{#if showCountryDropdown && filteredCountries.length > 0}
+									<ul
+										use:clickOutside={() => (showCountryDropdown = false)}
+										class="absolute top-full z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border bg-card py-1 shadow-lg sm:max-h-60"
+									>
+										{#each filteredCountries as countryOption}
+											<button
+												type="button"
+												class="w-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-accent"
+												onclick={() => selectCountry(countryOption)}
+											>
+												<span class="mr-2">{countryOption.countryFlag}</span>
+												<span>{countryOption.countryName}</span>
+											</button>
+										{/each}
+									</ul>
+								{/if}
 							</div>
 						</Field>
 
@@ -279,6 +325,7 @@
 								/>
 								{#if showCityDropdown && locationsResp.cities.length > 0}
 									<ul
+										use:clickOutside={() => (showCityDropdown = false)}
 										class="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border bg-card py-1 shadow-lg sm:max-h-60"
 									>
 										{#each locationsResp.cities as cityOption}

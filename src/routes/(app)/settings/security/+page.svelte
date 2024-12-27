@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Icon from '@iconify/svelte';
+	import { HTTPError } from 'ky';
 	import { goto } from '$app/navigation';
 	import { authAPI } from '$lib/api';
 	import { Button } from '$lib/components/ui/button';
@@ -8,8 +10,6 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Modal } from '$lib/components/ui/modals';
 	import { toast } from '$lib/stores/toast.store';
-	import Icon from '@iconify/svelte';
-	import { HTTPError } from 'ky';
 
 	let { data } = $props();
 	const api = authAPI(data.accessToken);
