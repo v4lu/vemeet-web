@@ -21,6 +21,8 @@
 	import { capitalize } from '$lib/utils.js';
 	import { formatTimestamp } from '$lib/date.js';
 	import { Avatar } from '$lib/components/ui/avatar/index.js';
+	import { uploadImage } from '$lib/api.js';
+	import { toast } from '$lib/stores/toast.store.js';
 
 	let { data } = $props();
 	const { res, deleteRecipe, recipeLikeToggle, updateRecipe } = useRecipe(
@@ -52,6 +54,11 @@
 		difficulty: '',
 		imageUrls: [] as string[]
 	});
+
+	let fileInput = $state<HTMLInputElement | null>(null);
+	let imageUploadLoading = $state(false);
+	let imagesToAdd = $state<string[]>([]);
+	let imageUrlsToRemove = $state<string[]>([]);
 
 	$effect(() => {
 		if (res.recipe) {
@@ -146,11 +153,22 @@
 	}
 
 	async function handleSubmitEdit() {
-		if (res.recipe) {
-			await updateRecipe(editedRecipe);
-			isEditing = false;
-			editor?.setEditable(false);
+		if (!editedRecipe.title || !editedRecipe.content) {
+			toast.error('Please fill in all required fields');
+			return;
 		}
+
+		const finalPayload: CreateRecipe = {
+			...editedRecipe,
+			imageUrls: [...editedRecipe.imageUrls, ...imagesToAdd].filter(
+				(img) => !imageUrlsToRemove.includes(img)
+			)
+		};
+
+		await updateRecipe(finalPayload);
+		isEditing = false;
+		imagesToAdd = [];
+		imageUrlsToRemove = [];
 	}
 
 	function addIngredient() {
@@ -159,6 +177,56 @@
 
 	function removeIngredient(index: number) {
 		editedRecipe.ingredients = editedRecipe.ingredients.filter((_, i) => i !== index);
+	}
+
+	function handleInputFileClick(): void {
+		if (!fileInput) return;
+		fileInput.click();
+	}
+
+	async function handleImageUpload(event: Event): Promise<void> {
+		const input = event.target as HTMLInputElement;
+		if (input.files?.length) {
+			const totalImages =
+				editedRecipe.imageUrls.length +
+				imagesToAdd.length -
+				imageUrlsToRemove.length +
+				input.files.length;
+			if (totalImages <= 5) {
+				imageUploadLoading = true;
+				try {
+					await Promise.all(
+						Array.from(input.files).map((file) =>
+							uploadImage({
+								authToken: data.accessToken,
+								file,
+								setImageUploadLoading: () => (imageUploadLoading = true),
+								setImageUrl: (img) => (imagesToAdd = [...imagesToAdd, img])
+							})
+						)
+					);
+				} catch (error) {
+					console.error('Error uploading images:', error);
+					toast.error('Failed to upload images');
+				} finally {
+					imageUploadLoading = false;
+				}
+			} else {
+				toast.error(`You can upload a maximum of 5 images.`);
+			}
+		}
+	}
+
+	function toggleImageRemoval(imageUrl: string): void {
+		if (imageUrlsToRemove.includes(imageUrl)) {
+			imageUrlsToRemove = imageUrlsToRemove.filter((url) => url !== imageUrl);
+		} else {
+			imageUrlsToRemove = [...imageUrlsToRemove, imageUrl];
+		}
+	}
+
+	function removeNewImage(index: number): void {
+		imagesToAdd = imagesToAdd.filter((_, i) => i !== index);
 	}
 </script>
 
@@ -219,9 +287,79 @@
 			{#if isEditing}
 				<div class="mb-8">
 					<Field name="Recipe Images">
-						<p class="text-sm text-muted-foreground">
-							Image upload functionality to be implemented
-						</p>
+						<div class="space-y-2">
+							<div class="mb-4 flex flex-wrap gap-2">
+								{#each editedRecipe.imageUrls as imageUrl}
+									<div class="relative h-24 w-24 overflow-hidden rounded-lg">
+										<img
+											src={imageUrl}
+											alt="Recipe"
+											class="h-full w-full object-cover object-center transition-transform duration-300 hover:scale-110"
+											class:opacity-50={imageUrlsToRemove.includes(imageUrl)}
+										/>
+										<button
+											type="button"
+											onclick={() => toggleImageRemoval(imageUrl)}
+											class="absolute right-1 top-1 rounded-full bg-black bg-opacity-50 p-1 text-white transition-colors hover:bg-opacity-75"
+											aria-label={imageUrlsToRemove.includes(imageUrl)
+												? 'Undo remove image'
+												: 'Remove image'}
+										>
+											<Icon
+												icon={imageUrlsToRemove.includes(imageUrl)
+													? 'solar:refresh-circle-bold'
+													: 'solar:close-circle-bold'}
+												class="size-4"
+											/>
+										</button>
+									</div>
+								{/each}
+
+								{#each imagesToAdd as imageUrl, i}
+									<div class="relative h-24 w-24 overflow-hidden rounded-lg">
+										<img
+											src={imageUrl}
+											alt="New Recipe"
+											class="h-full w-full object-cover object-center transition-transform duration-300 hover:scale-110"
+										/>
+										<button
+											type="button"
+											onclick={() => removeNewImage(i)}
+											class="absolute right-1 top-1 rounded-full bg-black bg-opacity-50 p-1 text-white transition-colors hover:bg-opacity-75"
+											aria-label="Remove new image"
+										>
+											<Icon icon="solar:close-circle-bold" class="size-4" />
+										</button>
+									</div>
+								{/each}
+							</div>
+
+							<div class="flex items-center gap-2">
+								<Button
+									type="button"
+									disabled={imageUploadLoading ||
+										editedRecipe.imageUrls.length + imagesToAdd.length - imageUrlsToRemove.length >=
+											5}
+									onclick={handleInputFileClick}
+									variant="outline"
+									size="icon-sm"
+									class="rounded-full transition-all duration-300 hover:bg-primary hover:text-white"
+								>
+									<Icon icon="solar:gallery-add-bold" class="size-5" />
+								</Button>
+								<input
+									bind:this={fileInput}
+									type="file"
+									multiple={true}
+									class="hidden"
+									onchange={handleImageUpload}
+									accept="image/*"
+								/>
+								{#if imageUploadLoading}
+									<Icon icon="eos-icons:loading" class="ml-2 size-5 animate-spin text-primary" />
+								{/if}
+							</div>
+						</div>
 					</Field>
 				</div>
 			{:else if res.recipe.images && res.recipe.images.length > 0}

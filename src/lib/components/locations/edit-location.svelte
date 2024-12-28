@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Icon from '@iconify/svelte';
 	import { Button } from '../ui/button';
 	import { Modal } from '../ui/modals';
 	import { Input, inputVariants } from '../ui/input';
@@ -12,7 +13,6 @@
 		NominatimResponse,
 		VeganLocationUpdateRequest
 	} from '$lib/types/geo.types';
-	import Icon from '@iconify/svelte';
 
 	type Props = {
 		onClose: () => void;
