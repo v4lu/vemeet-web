@@ -1,8 +1,4 @@
 <script lang="ts">
-	import { cn } from '$lib/cn';
-	import { formatBday } from '$lib/date';
-	import { sessionStore } from '$lib/stores/session.store';
-	import type { User } from '$lib/types/user.types';
 	import Icon from '@iconify/svelte';
 	import { UserHorizontalCard } from '../cards';
 	import { ConfirmDrawer } from '../drawers';
@@ -10,6 +6,10 @@
 	import { Button, buttonVariants } from '../ui/button';
 	import { Drawer } from '../ui/drawer';
 	import { ConfirmModal, Modal } from '../ui/modals';
+	import type { User } from '$lib/types/user.types';
+	import { sessionStore } from '$lib/stores/session.store';
+	import { formatBday } from '$lib/date';
+	import { cn } from '$lib/cn';
 
 	type ProfileHeaderProps = {
 		user: User;

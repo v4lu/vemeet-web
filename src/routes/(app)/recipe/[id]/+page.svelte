@@ -15,7 +15,7 @@
 	import { Editor } from '$lib/components/ui/editor/index.js';
 	import { Field } from '$lib/components/ui/field/index.js';
 	import { Input, inputVariants } from '$lib/components/ui/input/index.js';
-	import { ConfirmModal, ImageModal } from '$lib/components/ui/modals/index.js';
+	import { ConfirmModal, CropModal, ImageModal } from '$lib/components/ui/modals/index.js';
 	import { sessionStore } from '$lib/stores/session.store.js';
 	import type { CreateRecipe } from '$lib/types/recipe.types.js';
 	import { capitalize } from '$lib/utils.js';
@@ -23,6 +23,7 @@
 	import { Avatar } from '$lib/components/ui/avatar/index.js';
 	import { uploadImage } from '$lib/api.js';
 	import { toast } from '$lib/stores/toast.store.js';
+	import { CropDrawer } from '$lib/components/drawers/index.js';
 
 	let { data } = $props();
 	const { res, deleteRecipe, recipeLikeToggle, updateRecipe } = useRecipe(
@@ -59,6 +60,12 @@
 	let imageUploadLoading = $state(false);
 	let imagesToAdd = $state<string[]>([]);
 	let imageUrlsToRemove = $state<string[]>([]);
+
+	let showCropModal = $state(false);
+	let currentCropImage = $state<{ file: File; url: string } | null>(null);
+	let isMobile = $state(true);
+
+	const CropDialog = $derived(isMobile ? CropDrawer : CropModal);
 
 	$effect(() => {
 		if (res.recipe) {
@@ -192,28 +199,43 @@
 				imagesToAdd.length -
 				imageUrlsToRemove.length +
 				input.files.length;
+
 			if (totalImages <= 5) {
-				imageUploadLoading = true;
-				try {
-					await Promise.all(
-						Array.from(input.files).map((file) =>
-							uploadImage({
-								authToken: data.accessToken,
-								file,
-								setImageUploadLoading: () => (imageUploadLoading = true),
-								setImageUrl: (img) => (imagesToAdd = [...imagesToAdd, img])
-							})
-						)
-					);
-				} catch (error) {
-					console.error('Error uploading images:', error);
-					toast.error('Failed to upload images');
-				} finally {
-					imageUploadLoading = false;
-				}
+				const file = input.files[0];
+				currentCropImage = {
+					file,
+					url: URL.createObjectURL(file)
+				};
+				showCropModal = true;
+				input.value = '';
 			} else {
 				toast.error(`You can upload a maximum of 5 images.`);
 			}
+		}
+	}
+
+	async function handleCroppedImage(croppedBlob: Blob): Promise<void> {
+		if (!currentCropImage) return;
+
+		imageUploadLoading = true;
+		try {
+			// Convert blob to File
+			const croppedFile = new File([croppedBlob], currentCropImage.file.name, {
+				type: 'image/jpeg'
+			});
+
+			await uploadImage({
+				authToken: data.accessToken,
+				file: croppedFile,
+				setImageUploadLoading: () => (imageUploadLoading = true),
+				setImageUrl: (img) => (imagesToAdd = [...imagesToAdd, img])
+			});
+		} catch (error) {
+			console.error('Error uploading cropped image:', error);
+			toast.error('Failed to upload image');
+		} finally {
+			imageUploadLoading = false;
+			currentCropImage = null;
 		}
 	}
 
@@ -228,6 +250,22 @@
 	function removeNewImage(index: number): void {
 		imagesToAdd = imagesToAdd.filter((_, i) => i !== index);
 	}
+
+	$effect(() => {
+		const mediaQuery = window.matchMedia('(max-width: 768px)');
+
+		function handleResize(e: MediaQueryListEvent | MediaQueryList) {
+			isMobile = e.matches;
+		}
+
+		mediaQuery.addEventListener('change', handleResize);
+
+		handleResize(mediaQuery);
+
+		return () => {
+			mediaQuery.removeEventListener('change', handleResize);
+		};
+	});
 </script>
 
 <svelte:head>
@@ -350,7 +388,7 @@
 								<input
 									bind:this={fileInput}
 									type="file"
-									multiple={true}
+									multiple={false}
 									class="hidden"
 									onchange={handleImageUpload}
 									accept="image/*"
@@ -363,7 +401,7 @@
 					</Field>
 				</div>
 			{:else if res.recipe.images && res.recipe.images.length > 0}
-				<div class="relative mb-8">
+				<div class="relative mb-4">
 					<div
 						role="button"
 						tabindex="0"
@@ -371,13 +409,13 @@
 						aria-describedby="image-description"
 						onkeydown={(e) => e.key === 'Enter' && (isImageModalOpen = true)}
 						onclick={() => (isImageModalOpen = true)}
-						class="h-[20rem] w-full overflow-hidden rounded-lg"
+						class="h-[12rem] w-full overflow-hidden rounded-lg md:h-[25rem]"
 					>
 						{#key currentImageIndex}
 							<img
 								src={res.recipe.images[currentImageIndex].imageUrl}
 								alt={`Recipe image ${currentImageIndex + 1}`}
-								class="aspect-video h-full w-full object-cover object-center transition-transform duration-300 hover:scale-105"
+								class="h-full w-full transition-transform duration-300 hover:scale-105"
 								in:slide={{
 									duration: 300,
 									axis: 'x'
@@ -406,7 +444,7 @@
 					{/if}
 				</div>
 				{#if res.recipe.images.length > 1}
-					<div class="mb-6 flex justify-center space-x-1.5 py-8">
+					<div class="mb-8 flex justify-center space-x-1.5">
 						{#each res.recipe.images as _, index}
 							<button
 								aria-label="Change image"
@@ -595,7 +633,7 @@
 
 				<div class="-mx-6 border-t border-border px-8 py-6 md:px-4">
 					<h2 class="mb-4 text-2xl font-semibold">Comments</h2>
-					<p class="italic text-gray-600">Comments section coming soon...</p>
+					<p class="italic text-muted-foreground">Comments section coming soon...</p>
 				</div>
 			{/if}
 		</div>
@@ -621,6 +659,18 @@
 	/>
 {/if}
 
+{#if showCropModal && currentCropImage}
+	<CropDialog
+		imageUrl={currentCropImage.url}
+		aspectRatio={912 / 400}
+		onClose={() => {
+			showCropModal = false;
+			currentCropImage = null;
+		}}
+		onCrop={handleCroppedImage}
+	/>
+{/if}
+
 <style lang="postcss">
 	:global(.prose) {
 		@apply text-gray-800;
@@ -635,7 +685,7 @@
 		@apply mb-2 text-xl font-medium;
 	}
 	:global(.prose p) {
-		@apply mb-4;
+		@apply mb-4 text-base;
 	}
 	:global(.prose ul) {
 		@apply mb-4 list-disc pl-5;
