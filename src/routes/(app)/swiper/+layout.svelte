@@ -1,8 +1,5 @@
 <script lang="ts">
-	import { SwiperIsland } from '$lib/components/swiper';
-
-	let { children, data } = $props();
+	let { children } = $props();
 </script>
 
 {@render children()}
-<SwiperIsland pathname={data.path} />

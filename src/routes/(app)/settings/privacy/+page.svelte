@@ -8,6 +8,7 @@
 	import { Toggle } from '$lib/components/ui/toggle/index.js';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { User } from '$lib/types/user.types.js';
+	import { MainWrapper } from '$lib/components/layout';
 
 	let { data } = $props();
 	let isPrivate = $state($sessionStore.isPrivate);
@@ -122,9 +123,7 @@
 
 <CustomHeaderWithTitle title="Privacy" />
 
-<div
-	class="container min-h-full bg-background px-4 py-4 sm:px-6 lg:border-x lg:border-border lg:bg-card lg:px-8"
->
+<MainWrapper class="bg-card">
 	<div class="mx-auto max-w-3xl space-y-6">
 		<div class="space-y-2">
 			<h2 class="text-xl font-semibold tracking-tight sm:text-2xl">Privacy & Security</h2>
@@ -233,7 +232,7 @@
 			</div>
 		</div>
 	</div>
-</div>
+</MainWrapper>
 
 {#if showModal}
 	<Dialog onClose={() => (showModal = false)}>

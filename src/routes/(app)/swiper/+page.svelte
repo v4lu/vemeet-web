@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Icon from '@iconify/svelte';
 	import { useSwiperModeSetup } from '$lib/api/use-swipper-setup.svelte.js';
 	import { cn } from '$lib/cn.js';
 	import { SwiperHome } from '$lib/components/swiper/index.js';
@@ -10,7 +11,6 @@
 	import { Modal } from '$lib/components/ui/modals';
 	import { Select } from '$lib/components/ui/select';
 	import { sessionStore } from '$lib/stores/session.store';
-	import Icon from '@iconify/svelte';
 
 	type NavigationType = {
 		path: string;

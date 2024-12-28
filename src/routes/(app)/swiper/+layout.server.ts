@@ -1,8 +1,8 @@
+import { redirect } from '@sveltejs/kit';
+import type { HTTPError } from 'ky';
 import { authAPI } from '$lib/api';
 import { ACCESS_TOKEN } from '$lib/constants';
 import type { UserSwiperPreferences } from '$lib/types/user.types';
-import { redirect } from '@sveltejs/kit';
-import type { HTTPError } from 'ky';
 
 export async function load({ cookies, url }) {
 	const accessToken = cookies.get(ACCESS_TOKEN);

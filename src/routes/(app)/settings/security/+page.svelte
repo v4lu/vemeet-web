@@ -10,6 +10,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Modal } from '$lib/components/ui/modals';
 	import { toast } from '$lib/stores/toast.store';
+	import { MainWrapper } from '$lib/components/layout';
 
 	let { data } = $props();
 	const api = authAPI(data.accessToken);
@@ -197,7 +198,7 @@
 
 <CustomHeaderWithTitle title="Security" />
 
-<div class="container h-full px-4 py-4 lg:border-x lg:border-border lg:bg-card lg:px-8">
+<MainWrapper class="bg-card">
 	<div class="mx-auto max-w-pc space-y-6">
 		<div class="space-y-2">
 			<h2 class="text-xl font-semibold tracking-tight sm:text-2xl">Account Security</h2>
@@ -312,7 +313,7 @@
 			</div>
 		</div>
 	</div>
-</div>
+</MainWrapper>
 
 {#if showEmailModal}
 	<Dialog class="lg:min-w-[35rem]" onClose={() => (showEmailModal = false)}>

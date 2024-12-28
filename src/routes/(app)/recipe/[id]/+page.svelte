@@ -25,6 +25,7 @@
 	import { toast } from '$lib/stores/toast.store.js';
 	import { CropDrawer } from '$lib/components/drawers/index.js';
 	import { Comment, CreateComment } from '$lib/components/comments/index.js';
+	import { MainWrapper } from '$lib/components/layout';
 
 	let { data } = $props();
 	const {
@@ -230,7 +231,6 @@
 
 		imageUploadLoading = true;
 		try {
-			// Convert blob to File
 			const croppedFile = new File([croppedBlob], currentCropImage.file.name, {
 				type: 'image/jpeg'
 			});
@@ -319,7 +319,7 @@
 	<title>Vemeet - {res.recipe?.title}</title>
 </svelte:head>
 
-<div class="container bg-card pb-12">
+<MainWrapper>
 	{#if res.isLoading}
 		<RecipeSingleCardSkeleton />
 	{:else if res.recipe}
@@ -705,7 +705,7 @@
 			{/if}
 		</div>
 	{/if}
-</div>
+</MainWrapper>
 
 {#if isImageModalOpen && res.recipe}
 	<ImageModal

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { cn } from '$lib/cn';
 	import Icon from '@iconify/svelte';
 	import type { Snippet } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { cn } from '$lib/cn';
 
 	type Props = {
 		children: Snippet;
@@ -21,7 +21,7 @@
 </script>
 
 <div
-	class="fixed inset-x-0 top-0 z-[90] mx-auto h-16 w-full max-w-[60rem] bg-card lg:border-x lg:border-border"
+	class="fixed inset-x-0 top-0 z-[90] mx-auto h-16 w-full max-w-[60rem] bg-card md:border-x lg:border-x lg:border-border"
 >
 	<header
 		class={cn(

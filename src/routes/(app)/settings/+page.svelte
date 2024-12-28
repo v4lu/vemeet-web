@@ -2,6 +2,7 @@
 	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { CustomHeaderWithTitle } from '$lib/components/ui/custom-header';
+	import { MainWrapper } from '$lib/components/layout';
 
 	interface MenuItem {
 		href: string;
@@ -22,9 +23,7 @@
 
 <CustomHeaderWithTitle title="Settings" />
 
-<div
-	class="container flex h-full flex-col justify-between bg-card p-6 shadow-lg lg:border-x lg:border-border"
->
+<MainWrapper class="flex flex-col justify-between bg-card">
 	<div class="flex-1">
 		<ul class="space-y-2">
 			{#each menuItems as item}
@@ -55,4 +54,4 @@
 			</Button>
 		</form>
 	</div>
-</div>
+</MainWrapper>

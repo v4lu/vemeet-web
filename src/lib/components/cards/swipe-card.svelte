@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { cn } from '$lib/cn';
-	import { calculateAge } from '$lib/date';
-	import type { SwipeProfile } from '$lib/types/user.types';
 	import Icon from '@iconify/svelte';
 	import { spring } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
+	import { cn } from '$lib/cn';
+	import { calculateAge } from '$lib/date';
+	import type { SwipeProfile } from '$lib/types/user.types';
 
 	type Props = {
 		index: number;

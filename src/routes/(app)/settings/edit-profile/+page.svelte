@@ -13,6 +13,7 @@
 	import type { City, Country } from '$lib/types/geo.types.js';
 	import type { UserUpdateFormData } from '$lib/types/user.types.js';
 	import { clickOutside } from '$lib/utils';
+	import { MainWrapper, SettingsTitle } from '$lib/components/layout';
 
 	let { data } = $props();
 	let genderOptions = $state([
@@ -163,182 +164,90 @@
 </svelte:head>
 
 <CustomHeaderWithTitle title="Edit Profile" />
-<div class="container h-full px-4 py-4 lg:border-x lg:border-border lg:bg-card lg:px-8">
-	<div class="mx-auto max-w-pc">
-		<form class="flex flex-col justify-between space-y-6 sm:space-y-8" onsubmit={handleSubmit}>
-			<div class="flex-1 space-y-6 sm:space-y-8">
-				<div class="space-y-4 sm:space-y-6">
-					<div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
-						<Avatar class="size-14 sm:size-16" user={$sessionStore} />
-						<div>
-							<h2 class="text-base font-semibold sm:text-lg">Basic Information</h2>
-							<p class="text-sm text-muted-foreground">
-								Update your profile details and personal information
-							</p>
-						</div>
-					</div>
-
-					<div class="space-y-4">
-						<Field name="Username">
-							<div class="group relative">
-								<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-									<Icon
-										icon="solar:user-bold"
-										class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
-									/>
-								</div>
-								<Input
-									id="username"
-									placeholder="Enter your username"
-									bind:value={username}
-									required
-									class="bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2"
-								/>
-							</div>
-						</Field>
-
-						<div class="grid gap-4 sm:grid-cols-2">
-							<Field name="Name" optional>
-								<div class="group relative">
-									<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-										<Icon
-											icon="solar:user-id-bold"
-											class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
-										/>
-									</div>
-									<Input
-										id="name"
-										placeholder="Enter your full name"
-										bind:value={name}
-										class="bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2"
-									/>
-								</div>
-							</Field>
-							<Field name="Gender" optional>
-								<div class="relative">
-									<button
-										type="button"
-										class="flex w-full items-center justify-between rounded-lg bg-muted/50 px-4 py-2 ring-primary/20 transition-all focus:ring-2"
-										onclick={() => (showGenderDropdown = !showGenderDropdown)}
-									>
-										<div class="flex items-center space-x-2">
-											<Icon
-												icon="solar:users-group-two-rounded-bold"
-												class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
-											/>
-											<span class="text-sm">
-												{genderOptions.find((option) => option.value === gender)?.label ||
-													'Select gender'}
-											</span>
-										</div>
-										<Icon
-											icon={showGenderDropdown
-												? 'solar:chevron-up-bold'
-												: 'solar:chevron-down-bold'}
-											class="size-4 text-muted-foreground/70"
-										/>
-									</button>
-
-									{#if showGenderDropdown}
-										<ul
-											use:clickOutside={() => (showGenderDropdown = false)}
-											class="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border bg-card py-1 shadow-lg sm:max-h-60"
-										>
-											{#each genderOptions as option}
-												<button
-													class="cursor-pointer px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
-													onclick={() => selectGender(option.value)}
-												>
-													{option.label}
-												</button>
-											{/each}
-										</ul>
-									{/if}
-								</div>
-							</Field>
-						</div>
+<MainWrapper class="bg-card">
+	<form class="mt-4 flex flex-col justify-between space-y-6 sm:space-y-8" onsubmit={handleSubmit}>
+		<div class="flex-1 space-y-6 sm:space-y-8">
+			<div class="space-y-4 sm:space-y-6">
+				<div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
+					<Avatar class="size-14 sm:size-16" user={$sessionStore} />
+					<div>
+						<h2 class="text-base font-semibold sm:text-lg">Basic Information</h2>
+						<p class="text-sm text-muted-foreground">
+							Update your profile details and personal information
+						</p>
 					</div>
 				</div>
 
-				<div class="space-y-4 sm:space-y-6">
-					<div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
-						<div
-							class="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary sm:size-16"
-						>
-							<Icon icon="solar:map-point-bold" class="size-6 sm:size-8" />
+				<div class="space-y-4">
+					<Field name="Username">
+						<div class="group relative">
+							<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+								<Icon
+									icon="solar:user-bold"
+									class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
+								/>
+							</div>
+							<Input
+								id="username"
+								placeholder="Enter your username"
+								bind:value={username}
+								required
+								class="bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2"
+							/>
 						</div>
-						<div>
-							<h2 class="text-base font-semibold sm:text-lg">Location</h2>
-							<p class="text-sm text-muted-foreground">Where are you based?</p>
-						</div>
-					</div>
+					</Field>
 
 					<div class="grid gap-4 sm:grid-cols-2">
-						<Field name="Country" optional>
-							<div class="group relative flex items-center">
-								<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-									<Icon
-										icon="material-symbols:globe"
-										class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
-									/>
-								</div>
-								<Input
-									id="country"
-									placeholder="Search for a country"
-									bind:value={countrySearch}
-									oninput={handleCountrySearch}
-									class="bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2"
-								/>
-								{#if showCountryDropdown && filteredCountries.length > 0}
-									<ul
-										use:clickOutside={() => (showCountryDropdown = false)}
-										class="absolute top-full z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border bg-card py-1 shadow-lg sm:max-h-60"
-									>
-										{#each filteredCountries as countryOption}
-											<button
-												type="button"
-												class="w-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-accent"
-												onclick={() => selectCountry(countryOption)}
-											>
-												<span class="mr-2">{countryOption.countryFlag}</span>
-												<span>{countryOption.countryName}</span>
-											</button>
-										{/each}
-									</ul>
-								{/if}
-							</div>
-						</Field>
-
-						<Field name="City" optional>
+						<Field name="Name" optional>
 							<div class="group relative">
 								<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 									<Icon
-										icon="solar:city-bold"
+										icon="solar:user-id-bold"
 										class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
 									/>
 								</div>
 								<Input
-									id="city"
-									placeholder={country.countryIsoCode
-										? 'Search for a city'
-										: 'Select a country first'}
-									bind:value={citySearch}
-									oninput={handleCitySearch}
-									disabled={!country.countryIsoCode}
+									id="name"
+									placeholder="Enter your full name"
+									bind:value={name}
 									class="bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2"
 								/>
-								{#if showCityDropdown && locationsResp.cities.length > 0}
+							</div>
+						</Field>
+						<Field name="Gender" optional>
+							<div class="relative">
+								<button
+									type="button"
+									class="flex w-full items-center justify-between rounded-lg bg-muted/50 px-4 py-2 ring-primary/20 transition-all focus:ring-2"
+									onclick={() => (showGenderDropdown = !showGenderDropdown)}
+								>
+									<div class="flex items-center space-x-2">
+										<Icon
+											icon="solar:users-group-two-rounded-bold"
+											class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
+										/>
+										<span class="text-sm">
+											{genderOptions.find((option) => option.value === gender)?.label ||
+												'Select gender'}
+										</span>
+									</div>
+									<Icon
+										icon={showGenderDropdown ? 'solar:chevron-up-bold' : 'solar:chevron-down-bold'}
+										class="size-4 text-muted-foreground/70"
+									/>
+								</button>
+
+								{#if showGenderDropdown}
 									<ul
-										use:clickOutside={() => (showCityDropdown = false)}
+										use:clickOutside={() => (showGenderDropdown = false)}
 										class="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border bg-card py-1 shadow-lg sm:max-h-60"
 									>
-										{#each locationsResp.cities as cityOption}
+										{#each genderOptions as option}
 											<button
-												type="button"
-												class="w-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-accent"
-												onclick={() => selectCity(cityOption)}
+												class="cursor-pointer px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
+												onclick={() => selectGender(option.value)}
 											>
-												{cityOption.cityName}
+												{option.label}
 											</button>
 										{/each}
 									</ul>
@@ -347,48 +256,116 @@
 						</Field>
 					</div>
 				</div>
+			</div>
 
-				<div class="space-y-4 sm:space-y-6">
-					<div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
-						<div
-							class="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary sm:size-16"
-						>
-							<Icon icon="solar:pen-bold" class="size-6 sm:size-8" />
-						</div>
-						<div>
-							<h2 class="text-base font-semibold sm:text-lg">About You</h2>
-							<p class="text-sm text-muted-foreground">
-								Share a bit about yourself with the community
-							</p>
-						</div>
-					</div>
+			<div class="space-y-4 sm:space-y-6">
+				<SettingsTitle
+					title="Location"
+					subtitle="Where are you based?"
+					icon="solar:map-point-bold"
+				/>
 
-					<Field name="Bio" optional>
+				<div class="grid gap-4 sm:grid-cols-2">
+					<Field name="Country" optional>
+						<div class="group relative flex items-center">
+							<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+								<Icon
+									icon="material-symbols:globe"
+									class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
+								/>
+							</div>
+							<Input
+								id="country"
+								placeholder="Search for a country"
+								bind:value={countrySearch}
+								oninput={handleCountrySearch}
+								class="bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2"
+							/>
+							{#if showCountryDropdown && filteredCountries.length > 0}
+								<ul
+									use:clickOutside={() => (showCountryDropdown = false)}
+									class="absolute top-full z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border bg-card py-1 shadow-lg sm:max-h-60"
+								>
+									{#each filteredCountries as countryOption}
+										<button
+											type="button"
+											class="w-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-accent"
+											onclick={() => selectCountry(countryOption)}
+										>
+											<span class="mr-2">{countryOption.countryFlag}</span>
+											<span>{countryOption.countryName}</span>
+										</button>
+									{/each}
+								</ul>
+							{/if}
+						</div>
+					</Field>
+
+					<Field name="City" optional>
 						<div class="group relative">
-							<textarea
-								id="bio"
-								rows="4"
-								class={cn(
-									inputVariants(),
-									'min-h-[120px] resize-none bg-muted/50 ring-primary/20 transition-all focus:ring-2'
-								)}
-								placeholder="Tell us about yourself, your interests, and what brings you to our community..."
-								bind:value={bio}
-							></textarea>
+							<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+								<Icon
+									icon="solar:city-bold"
+									class="size-4 text-muted-foreground/70 transition-colors group-focus-within:text-primary sm:size-5"
+								/>
+							</div>
+							<Input
+								id="city"
+								placeholder={country.countryIsoCode
+									? 'Search for a city'
+									: 'Select a country first'}
+								bind:value={citySearch}
+								oninput={handleCitySearch}
+								disabled={!country.countryIsoCode}
+								class="bg-muted/50 pl-10 ring-primary/20 transition-all focus:ring-2"
+							/>
+							{#if showCityDropdown && locationsResp.cities.length > 0}
+								<ul
+									use:clickOutside={() => (showCityDropdown = false)}
+									class="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border bg-card py-1 shadow-lg sm:max-h-60"
+								>
+									{#each locationsResp.cities as cityOption}
+										<button
+											type="button"
+											class="w-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-accent"
+											onclick={() => selectCity(cityOption)}
+										>
+											{cityOption.cityName}
+										</button>
+									{/each}
+								</ul>
+							{/if}
 						</div>
 					</Field>
 				</div>
 			</div>
 
-			<Button
-				type="submit"
-				class="w-full font-medium"
-				size="lg"
-				isLoading={isSubmitting}
-				disabled={isSubmitting}
-			>
-				{isSubmitting ? 'Saving Changes...' : 'Save Changes'}
-			</Button>
-		</form>
-	</div>
-</div>
+			<div class="space-y-4 sm:space-y-6">
+				<SettingsTitle
+					title="About You"
+					subtitle="Share a bit about yourself with the community"
+					icon="solar:pen-bold"
+				/>
+
+				<Field name="Bio" optional>
+					<div class="group relative">
+						<textarea
+							id="bio"
+							rows="4"
+							class={cn(
+								inputVariants(),
+								'min-h-[120px] resize-none bg-muted/50 ring-primary/20 transition-all focus:ring-2'
+							)}
+							placeholder="Tell us about yourself, your interests, and what brings you to our community..."
+							bind:value={bio}
+						></textarea>
+					</div>
+				</Field>
+			</div>
+		</div>
+
+		<Button type="submit" class="w-full" size="lg" isLoading={isSubmitting} disabled={isSubmitting}>
+			{isSubmitting ? 'Saving Changes...' : 'Save Changes'}
+		</Button>
+	</form>
+</MainWrapper>

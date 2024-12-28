@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { useSwiperMode } from '$lib/api/use-swipper-mode.svelte';
 	import Icon from '@iconify/svelte';
 	import { flip } from 'svelte/animate';
 	import { fade, fly } from 'svelte/transition';
 	import { SwipeCard } from '../cards';
 	import SwipeCardSkeleton from '../skeleton/swipe-card-skeleton.svelte';
 	import { Button } from '../ui/button';
+	import { useSwiperMode } from '$lib/api/use-swipper-mode.svelte';
+	import { goto } from '$app/navigation';
 
 	type Props = {
 		authToken: string;
