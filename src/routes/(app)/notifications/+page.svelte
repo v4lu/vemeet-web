@@ -1,11 +1,11 @@
 <script lang="ts">
+	import Icon from '@iconify/svelte';
+	import { formatDistanceToNow } from 'date-fns';
 	import { useNotification } from '$lib/api/use-notification.svelte.js';
 	import { cn } from '$lib/cn';
 	import { Button } from '$lib/components/ui/button';
 	import { CustomHeaderWithTitle } from '$lib/components/ui/custom-header';
 	import type { NotificationType } from '$lib/types/notification.type.js';
-	import Icon from '@iconify/svelte';
-	import { formatDistanceToNow } from 'date-fns';
 
 	let { data } = $props();
 	const { resp, markAsRead, markAllAsRead } = useNotification(data.accessToken);

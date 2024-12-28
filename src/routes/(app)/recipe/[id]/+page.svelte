@@ -24,12 +24,19 @@
 	import { uploadImage } from '$lib/api.js';
 	import { toast } from '$lib/stores/toast.store.js';
 	import { CropDrawer } from '$lib/components/drawers/index.js';
+	import { Comment, CreateComment } from '$lib/components/comments/index.js';
 
 	let { data } = $props();
-	const { res, deleteRecipe, recipeLikeToggle, updateRecipe } = useRecipe(
-		data.accessToken,
-		+data.recipeId
-	);
+	const {
+		res,
+		deleteRecipe,
+		recipeLikeToggle,
+		updateRecipe,
+		editComment,
+		deleteComment,
+		commentLikeToggle,
+		createComment
+	} = useRecipe(data.accessToken, +data.recipeId);
 
 	let editor = $state<TipTapEditor>();
 	let currentImageIndex = $state(0);
@@ -66,6 +73,10 @@
 	let isMobile = $state(true);
 
 	const CropDialog = $derived(isMobile ? CropDrawer : CropModal);
+
+	let isSubmittingComment = $state(false);
+	let isSubmittingDeleteComment = $state(false);
+	let isSubmittingEditComment = $state(false);
 
 	$effect(() => {
 		if (res.recipe) {
@@ -266,6 +277,42 @@
 			mediaQuery.removeEventListener('change', handleResize);
 		};
 	});
+
+	async function handlePostComment(content: string) {
+		isSubmittingComment = true;
+		try {
+			await createComment({ content });
+		} finally {
+			isSubmittingComment = false;
+		}
+	}
+
+	async function handleDeleteComment(commentId: number) {
+		isSubmittingDeleteComment = true;
+		try {
+			await deleteComment(commentId);
+		} finally {
+			isSubmittingDeleteComment = false;
+		}
+	}
+
+	async function handleEditComment(commentId: number, content: string) {
+		isSubmittingEditComment = true;
+		try {
+			await editComment(commentId, content);
+		} finally {
+			isSubmittingEditComment = false;
+		}
+	}
+
+	async function handleCommentLike(isLiked: boolean, commentId: number) {
+		try {
+			await commentLikeToggle(isLiked, commentId);
+		} catch (error) {
+			console.error('Error toggling comment like:', error);
+			toast.error('Failed to update like status');
+		}
+	}
 </script>
 
 <svelte:head>
@@ -633,7 +680,27 @@
 
 				<div class="-mx-6 border-t border-border px-8 py-6 md:px-4">
 					<h2 class="mb-4 text-2xl font-semibold">Comments</h2>
-					<p class="italic text-muted-foreground">Comments section coming soon...</p>
+
+					<CreateComment postComment={handlePostComment} isSubmitting={isSubmittingComment} />
+
+					{#if res.recipe?.comments?.length > 0}
+						<div class="mt-6 space-y-4">
+							{#each res.recipe.comments as comment}
+								<Comment
+									{comment}
+									deleteComment={handleDeleteComment}
+									editComment={handleEditComment}
+									{handleCommentLike}
+									{isSubmittingDeleteComment}
+									{isSubmittingEditComment}
+								/>
+							{/each}
+						</div>
+					{:else}
+						<p class="mt-4 text-center italic text-muted-foreground">
+							Be the first to comment on this recipe!
+						</p>
+					{/if}
 				</div>
 			{/if}
 		</div>

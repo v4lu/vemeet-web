@@ -1,8 +1,11 @@
+import { HTTPError } from 'ky';
 import { authAPI } from '$lib/api';
 import { toast } from '$lib/stores/toast.store';
 import type { ServerErrorResponse } from '$lib/types/ky.types';
 import type { CreateRecipe, RecipeCategory, Recipe as RecipeType } from '$lib/types/recipe.types';
-import { HTTPError } from 'ky';
+import type { Comment } from '$lib/types/comment.types';
+import type { Reaction } from '$lib/types/reaction.types';
+
 class Recipe {
 	error = $state<ServerErrorResponse | null>(null);
 	recipe = $state<RecipeType>();
@@ -10,6 +13,7 @@ class Recipe {
 	isLoading = $state(false);
 	isSubmittingUpdate = $state(false);
 	isLoadingCategories = $state(false);
+	isSubmittingComment = $state(false);
 }
 
 export function useRecipe(authToken: string, recipeId: number) {
@@ -21,6 +25,11 @@ export function useRecipe(authToken: string, recipeId: number) {
 		try {
 			const response = await api.get<RecipeType>(`recipes/${recipeId}`).json();
 			res.recipe = response;
+			if (res.recipe) {
+				res.recipe.comments = res.recipe.comments.sort((a: Comment, b: Comment) => {
+					return new Date(a.createdAt) > new Date(b.createdAt) ? -1 : 1;
+				});
+			}
 		} catch (e) {
 			if (e instanceof HTTPError) {
 				const eRes = (await e.response.json()) as ServerErrorResponse;
@@ -97,6 +106,90 @@ export function useRecipe(authToken: string, recipeId: number) {
 		res.isSubmittingUpdate = false;
 	}
 
+	async function createComment(payload: { content: string }) {
+		res.isSubmittingComment = true;
+		try {
+			const response = await api
+				.post<Comment>(`comments/recipes/${recipeId}/comments`, { json: payload })
+				.json();
+			if (res.recipe) {
+				res.recipe.comments.unshift(response);
+			}
+
+			toast.success('Comment added successfully!');
+		} catch (e) {
+			if (e instanceof HTTPError) {
+				const eRes = (await e.response.json()) as ServerErrorResponse;
+				res.error = eRes;
+				console.error(eRes);
+			} else {
+				toast.error('An error occurred while adding your comment');
+			}
+		}
+	}
+
+	async function deleteComment(commentId: number) {
+		try {
+			await api.delete(`comments/${commentId}`).json();
+			if (res.recipe) {
+				res.recipe.comments = res.recipe.comments.filter((c) => c.id !== commentId);
+			}
+			toast.success('Comment deleted successfully');
+		} catch (e) {
+			if (e instanceof HTTPError) {
+				const eRes = (await e.response.json()) as ServerErrorResponse;
+				res.error = eRes;
+				console.error(eRes);
+			}
+			toast.error('Failed to delete comment');
+		}
+	}
+
+	async function editComment(commentId: number, content: string) {
+		try {
+			const response = await api
+				.patch<Comment>(`comments/${commentId}`, {
+					json: { content }
+				})
+				.json();
+			if (res.recipe) {
+				const commentIndex = res.recipe.comments.findIndex((c) => c.id === commentId);
+				res.recipe.comments[commentIndex] = response;
+			}
+			toast.success('Comment updated successfully');
+		} catch (e) {
+			if (e instanceof HTTPError) {
+				const eRes = (await e.response.json()) as ServerErrorResponse;
+				res.error = eRes;
+				console.error(eRes);
+			}
+			toast.error('Failed to update comment');
+		}
+	}
+
+	async function commentLikeToggle(isLiked: boolean, commentId: number) {
+		try {
+			if (isLiked) {
+				await api.delete(`comments/${commentId}/reactions`).json();
+				res.recipe?.comments.find((c) => c.id === commentId)?.reactions.pop();
+			} else {
+				const response = await api
+					.post<Reaction>(`comments/${commentId}/reactions`, {
+						json: { reactionType: 'LIKE' }
+					})
+					.json();
+				res.recipe?.comments.find((c) => c.id === commentId)?.reactions.push(response);
+			}
+		} catch (e) {
+			if (e instanceof HTTPError) {
+				const eRes = (await e.response.json()) as ServerErrorResponse;
+				res.error = eRes;
+				console.error(eRes);
+			}
+			toast.error('Failed to update reaction');
+		}
+	}
+
 	getRecipe();
 	getCategories();
 
@@ -104,6 +197,10 @@ export function useRecipe(authToken: string, recipeId: number) {
 		res,
 		deleteRecipe,
 		updateRecipe,
-		recipeLikeToggle
+		recipeLikeToggle,
+		createComment,
+		deleteComment,
+		editComment,
+		commentLikeToggle
 	};
 }

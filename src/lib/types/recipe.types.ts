@@ -1,3 +1,4 @@
+import type { Comment } from './comment.types';
 import type { Pageable, Sort } from './page.types';
 import type { Reaction } from './reaction.types';
 import type { User } from './user.types';
@@ -39,7 +40,7 @@ export type Recipe = {
 	reactions: Reaction[];
 	images: Image[];
 	user: User;
-	//comments
+	comments: Comment[];
 };
 
 export type RecipePagableResponse = {

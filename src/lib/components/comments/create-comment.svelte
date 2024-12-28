@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { cn } from '$lib/cn';
 	import { fade, scale } from 'svelte/transition';
 
 	import { buttonVariants } from '../ui/button';
 	import { inputVariants } from '../ui/input';
+	import { cn } from '$lib/cn';
 
 	type CreateCommentProp = {
 		isSubmitting: boolean;

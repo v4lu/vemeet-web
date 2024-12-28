@@ -1,26 +1,26 @@
 <script lang="ts">
-	import { cn } from '$lib/cn';
-	import { formatTimestampShort } from '$lib/date';
-	import { sessionStore } from '$lib/stores/session.store';
-	import type { Comment as CommentType } from '$lib/types/comment.types';
 	import Icon from '@iconify/svelte';
+	import { spring } from 'svelte/motion';
 	import { Avatar } from '../ui/avatar';
 	import { Button } from '../ui/button';
 	import { Dropdown } from '../ui/dropdown';
 	import { ConfirmModal } from '../ui/modals';
 	import { Comment } from '.';
-	import { spring } from 'svelte/motion';
+	import { cn } from '$lib/cn';
+	import { formatTimestampShort } from '$lib/date';
+	import { sessionStore } from '$lib/stores/session.store';
+	import type { Comment as CommentType } from '$lib/types/comment.types';
 
 	type CommentProps = {
 		comment: CommentType;
 		depth?: number;
-		postReply: (parentId: number, content: string) => void;
+		postReply?: (parentId: number, content: string) => void;
 		deleteComment: (commentId: number) => void;
 		editComment: (commentId: number, content: string) => void;
 		handleCommentLike: (isLike: boolean, commentId: number) => void;
 		isSubmittingDeleteComment: boolean;
 		isSubmittingEditComment: boolean;
-		isSubmittingReply: boolean;
+		isSubmittingReply?: boolean;
 	};
 
 	let {
@@ -58,7 +58,7 @@
 	});
 
 	function handleReply() {
-		if (!replyContent) return;
+		if (!replyContent || !postReply) return;
 		postReply(comment.id, replyContent);
 		replyContent = '';
 		isReplying = false;
@@ -174,7 +174,7 @@
 					</button>
 				</div>
 			</div>
-			{#if depth === 0}
+			{#if depth === 0 && postReply}
 				<button
 					class="mt-2 text-sm text-primary transition-colors hover:text-primary/80"
 					onclick={() => (isReplying = !isReplying)}
