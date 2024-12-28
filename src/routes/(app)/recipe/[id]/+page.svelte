@@ -1,19 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { useRecipe } from '$lib/api/use-recipe.svelte.js';
-	import { cn } from '$lib/cn.js';
-	import RecipeSingleCardSkeleton from '$lib/components/skeleton/recipe-single-card-skeleton.svelte';
-	import { Avatar } from '$lib/components/ui/avatar';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { Dropdown } from '$lib/components/ui/dropdown/index.js';
-	import { Editor } from '$lib/components/ui/editor/index.js';
-	import { Field } from '$lib/components/ui/field/index.js';
-	import { Input, inputVariants } from '$lib/components/ui/input/index.js';
-	import { ConfirmModal, ImageModal } from '$lib/components/ui/modals/index.js';
-	import { formatTimestamp } from '$lib/date';
-	import { sessionStore } from '$lib/stores/session.store.js';
-	import type { CreateRecipe } from '$lib/types/recipe.types.js';
-	import { capitalize } from '$lib/utils';
 	import Icon from '@iconify/svelte';
 	import { Editor as TipTapEditor } from '@tiptap/core';
 	import Image from '@tiptap/extension-image';
@@ -21,6 +6,21 @@
 	import StarterKit from '@tiptap/starter-kit';
 	import { elasticOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
+	import { goto } from '$app/navigation';
+	import { useRecipe } from '$lib/api/use-recipe.svelte.js';
+	import { cn } from '$lib/cn.js';
+	import RecipeSingleCardSkeleton from '$lib/components/skeleton/recipe-single-card-skeleton.svelte';
+	import { Button } from '$lib/components/ui/button/index.js';
+	import { Dropdown } from '$lib/components/ui/dropdown/index.js';
+	import { Editor } from '$lib/components/ui/editor/index.js';
+	import { Field } from '$lib/components/ui/field/index.js';
+	import { Input, inputVariants } from '$lib/components/ui/input/index.js';
+	import { ConfirmModal, ImageModal } from '$lib/components/ui/modals/index.js';
+	import { sessionStore } from '$lib/stores/session.store.js';
+	import type { CreateRecipe } from '$lib/types/recipe.types.js';
+	import { capitalize } from '$lib/utils.js';
+	import { formatTimestamp } from '$lib/date.js';
+	import { Avatar } from '$lib/components/ui/avatar/index.js';
 
 	let { data } = $props();
 	const { res, deleteRecipe, recipeLikeToggle, updateRecipe } = useRecipe(
@@ -37,10 +37,7 @@
 	let isSettingsOpen = $state(false);
 	let isSubmittingDelete = $state(false);
 	let isLiked = $state(
-		res.recipe &&
-			res.recipe.reactions.some(
-				(reaction) => reaction.user.id === $sessionStore.id && reaction.reactionType === 'LIKE'
-			)
+		res.recipe && res.recipe.reactions.some((reaction) => reaction.user.id === $sessionStore.id)
 	);
 	let submittingLike = $state(false);
 	let isEditing = $state(false);
@@ -75,6 +72,10 @@
 				difficulty: res.recipe.difficulty,
 				imageUrls: res.recipe.images.map((img) => img.imageUrl)
 			};
+
+			isLiked =
+				res.recipe &&
+				res.recipe.reactions.some((reaction) => reaction.user.id === $sessionStore.id);
 
 			return () => {
 				if (editor) {
@@ -161,18 +162,22 @@
 	}
 </script>
 
-<div class="container mb-12 bg-card">
+<svelte:head>
+	<title>Vemeet - {res.recipe?.title}</title>
+</svelte:head>
+
+<div class="container bg-card pb-12">
 	{#if res.isLoading}
 		<RecipeSingleCardSkeleton />
 	{:else if res.recipe}
 		<div class="relative">
 			{#if res.recipe.user.id === $sessionStore.id}
-				<div class="absolute right-3 top-3 z-10">
+				<div class="absolute right-0 top-8 z-10">
 					<Dropdown
 						triggerIcon="solar:menu-dots-bold"
 						bind:isOpen={isSettingsOpen}
 						triggerClass="size-8 flex min-w-0 p-0 shadow-none justify-center bg-none rounded-full hover:bg-none transition-colors border-none"
-						triggerIconClass="m-0 p-0 size-5 hover:text-primary"
+						triggerIconClass="m-0 p-0 size-7 hover:text-primary"
 						class="right-0 top-10"
 					>
 						<div class="flex w-full flex-col gap-1 p-1">
@@ -201,7 +206,7 @@
 					</Dropdown>
 				</div>
 			{/if}
-			<header class="mb-8 px-5 pt-6">
+			<header class={cn('mb-8 pt-8', isEditing && 'pt-20')}>
 				{#if isEditing}
 					<Field name="Title">
 						<Input id="title" bind:value={editedRecipe.title} required />
@@ -209,102 +214,18 @@
 				{:else}
 					<h1 class="mb-4 text-4xl font-bold">{res.recipe.title}</h1>
 				{/if}
-				<div class="flex flex-col items-start justify-start gap-4">
-					{#if !isEditing}
-						<div class="flex items-center">
-							<Avatar user={res.recipe.user} class="mr-4 size-12" />
-							<div>
-								<p class="text-lg font-semibold text-gray-800">{res.recipe.user.username}</p>
-								<p class="text-sm text-gray-600">{formatTimestamp(res.recipe.createdAt)}</p>
-							</div>
-						</div>
-					{/if}
-					<div class="mt-2 grid w-full space-y-2">
-						{#if isEditing}
-							<Field name="Category">
-								<select
-									id="category"
-									bind:value={editedRecipe.categoryId}
-									class={cn(inputVariants({ variant: 'default' }))}
-									required
-								>
-									{#each res.categories as category}
-										<option value={category.id}>{category.name}</option>
-									{/each}
-								</select>
-							</Field>
-							<Field name="Preparation Time" description="in minutes">
-								<Input
-									id="preparationTime"
-									type="number"
-									bind:value={editedRecipe.preparationTime}
-									required
-								/>
-							</Field>
-							<Field name="Cooking Time" description="in minutes">
-								<Input
-									id="cookingTime"
-									type="number"
-									bind:value={editedRecipe.cookingTime}
-									required
-								/>
-							</Field>
-							<Field name="Servings">
-								<Input id="servings" type="number" bind:value={editedRecipe.servings} required />
-							</Field>
-							<Field name="Difficulty">
-								<select
-									id="difficulty"
-									bind:value={editedRecipe.difficulty}
-									class={cn(inputVariants({ variant: 'default' }))}
-									required
-								>
-									<option value="easy">Easy</option>
-									<option value="medium">Medium</option>
-									<option value="hard">Hard</option>
-								</select>
-							</Field>
-						{:else}
-							<div class="flex items-center justify-start gap-4">
-								<span class="flex items-center">
-									<Icon icon="mdi:clock-outline" class="mr-1 size-7" />
-									<span class="text-muted-foreground">Prep: {res.recipe.preparationTime} mins</span>
-								</span>
-								<span class="flex items-center">
-									<Icon icon="mdi:pot-steam-outline" class="mr-1 size-7" />
-									<span class="text-muted-foreground">Cook: {res.recipe.cookingTime} mins</span>
-								</span>
-							</div>
-							<div class="grid space-y-2">
-								<span class="flex items-center">
-									<Icon icon="mdi:account-group-outline" class="mr-1 size-7" />
-									<span class="text-muted-foreground">Serves: {res.recipe.servings}</span>
-								</span>
-								<span class="flex items-center">
-									<Icon
-										icon="mdi:chef-hat"
-										class={cn('mr-1 size-7', getDifficultyColor(res.recipe.difficulty))}
-									/>
-									<span
-										class={cn('text-sm font-medium', getDifficultyColor(res.recipe.difficulty))}
-									>
-										{capitalize(res.recipe.difficulty)}
-									</span>
-								</span>
-							</div>
-						{/if}
-					</div>
-				</div>
 			</header>
 
 			{#if isEditing}
-				<div class="mb-8 px-5">
+				<div class="mb-8">
 					<Field name="Recipe Images">
-						<p class="text-sm text-gray-500">Image upload functionality to be implemented</p>
+						<p class="text-sm text-muted-foreground">
+							Image upload functionality to be implemented
+						</p>
 					</Field>
 				</div>
 			{:else if res.recipe.images && res.recipe.images.length > 0}
-				<div class="relative mb-8 px-5">
+				<div class="relative mb-8">
 					<div
 						role="button"
 						tabindex="0"
@@ -318,7 +239,7 @@
 							<img
 								src={res.recipe.images[currentImageIndex].imageUrl}
 								alt={`Recipe image ${currentImageIndex + 1}`}
-								class="h-full w-full object-cover object-center transition-transform duration-300 hover:scale-105"
+								class="aspect-video h-full w-full object-cover object-center transition-transform duration-300 hover:scale-105"
 								in:slide={{
 									duration: 300,
 									axis: 'x'
@@ -347,9 +268,10 @@
 					{/if}
 				</div>
 				{#if res.recipe.images.length > 1}
-					<div class="mb-6 flex justify-center space-x-1.5 px-5 py-8">
+					<div class="mb-6 flex justify-center space-x-1.5 py-8">
 						{#each res.recipe.images as _, index}
 							<button
+								aria-label="Change image"
 								class="h-2.5 w-2.5 rounded-full transition-colors"
 								class:bg-primary={index === currentImageIndex}
 								class:bg-gray-300={index !== currentImageIndex}
@@ -360,8 +282,107 @@
 				{/if}
 			{/if}
 
-			<div class="px-5">
-				<h2 class="mb-4 text-3xl font-semibold">Ingredients</h2>
+			<div
+				class={cn(
+					'flex w-full flex-col items-start justify-start gap-4 ',
+					isEditing
+						? 'md:flex md:grid-cols-1 '
+						: ' md:grid md:grid-cols-[35%,1fr] md:items-center md:justify-between md:gap-4'
+				)}
+			>
+				{#if !isEditing}
+					<div class="flex items-center">
+						<Avatar user={res.recipe.user} class="mr-4 size-12" />
+						<div>
+							<p class="text-lg font-semibold text-gray-800">{res.recipe.user.username}</p>
+							<p class="text-sm text-gray-600">{formatTimestamp(res.recipe.createdAt)}</p>
+						</div>
+					</div>
+				{/if}
+				<div
+					class={cn(
+						'mt-2 grid w-full space-y-2 ',
+						!isEditing && 'md:flex md:items-center md:justify-end md:gap-4 md:space-y-0'
+					)}
+				>
+					{#if isEditing}
+						<Field name="Category">
+							<select
+								id="category"
+								bind:value={editedRecipe.categoryId}
+								class={cn(inputVariants({ variant: 'default' }))}
+								required
+							>
+								{#each res.categories as category}
+									<option value={category.id}>{category.name}</option>
+								{/each}
+							</select>
+						</Field>
+						<Field name="Preparation Time" description="in minutes">
+							<Input
+								id="preparationTime"
+								type="number"
+								bind:value={editedRecipe.preparationTime}
+								required
+							/>
+						</Field>
+						<Field name="Cooking Time" description="in minutes">
+							<Input
+								id="cookingTime"
+								type="number"
+								bind:value={editedRecipe.cookingTime}
+								required
+							/>
+						</Field>
+						<Field name="Servings">
+							<Input id="servings" type="number" bind:value={editedRecipe.servings} required />
+						</Field>
+						<Field name="Difficulty">
+							<select
+								id="difficulty"
+								bind:value={editedRecipe.difficulty}
+								class={cn(inputVariants({ variant: 'default' }))}
+								required
+							>
+								<option value="easy">Easy</option>
+								<option value="medium">Medium</option>
+								<option value="hard">Hard</option>
+							</select>
+						</Field>
+					{:else}
+						<div class="flex items-center justify-start gap-4">
+							<span class="flex items-center">
+								<Icon icon="mdi:clock-outline" class="mr-1 size-7" />
+								<span class="text-muted-foreground">Prep: {res.recipe.preparationTime} mins</span>
+							</span>
+							<span class="flex items-center">
+								<Icon icon="mdi:pot-steam-outline" class="mr-1 size-7" />
+								<span class="text-muted-foreground">Cook: {res.recipe.cookingTime} mins</span>
+							</span>
+						</div>
+						<div
+							class="grid space-y-2 md:flex md:items-center md:justify-center md:gap-4 md:space-y-0"
+						>
+							<span class="flex items-center">
+								<Icon icon="mdi:account-group-outline" class="mr-1 size-7" />
+								<span class="text-muted-foreground">Serves: {res.recipe.servings}</span>
+							</span>
+							<span class="flex items-center">
+								<Icon
+									icon="mdi:chef-hat"
+									class={cn('mr-1 size-7', getDifficultyColor(res.recipe.difficulty))}
+								/>
+								<span class={cn('text-sm font-medium', getDifficultyColor(res.recipe.difficulty))}>
+									{capitalize(res.recipe.difficulty)}
+								</span>
+							</span>
+						</div>
+					{/if}
+				</div>
+			</div>
+
+			<div>
+				<h2 class="mb-4 mt-8 text-3xl font-semibold">Ingredients</h2>
 				{#if isEditing}
 					<div class="space-y-2">
 						{#each editedRecipe.ingredients as _, index}
@@ -394,7 +415,7 @@
 				{/if}
 			</div>
 
-			<div class="mb-8 mt-6 grid grid-cols-1 gap-8 px-5 py-8 md:grid-cols-3">
+			<div class="mb-8 mt-6 grid grid-cols-1 gap-8 py-8 md:grid-cols-3">
 				<div class="md:col-span-2">
 					<h2 class="mb-4 text-3xl font-semibold">Instructions</h2>
 					{#if isEditing}
@@ -411,13 +432,13 @@
 			</div>
 
 			{#if isEditing}
-				<div class="mb-8 px-5 pb-12">
+				<div class="mb-8 pb-12">
 					<Button onclick={handleSubmitEdit} disabled={res.isSubmittingUpdate}>
 						{res.isSubmittingUpdate ? 'Updating...' : 'Update Recipe'}
 					</Button>
 				</div>
 			{:else}
-				<div class="border-t border-gray-200 px-4 py-4">
+				<div class="-mx-6 border-t border-border px-8 py-4 md:px-4">
 					<button
 						class="group flex items-center text-sm transition-colors"
 						onclick={handleToggleLike}
@@ -434,7 +455,7 @@
 					</button>
 				</div>
 
-				<div class="border-t border-gray-200 px-4 py-6">
+				<div class="-mx-6 border-t border-border px-8 py-6 md:px-4">
 					<h2 class="mb-4 text-2xl font-semibold">Comments</h2>
 					<p class="italic text-gray-600">Comments section coming soon...</p>
 				</div>

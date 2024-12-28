@@ -1,8 +1,7 @@
 <script lang="ts">
+	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { CustomHeaderWithTitle } from '$lib/components/ui/custom-header';
-
-	import Icon from '@iconify/svelte';
 
 	interface MenuItem {
 		href: string;
@@ -16,6 +15,10 @@
 		{ href: '/settings/privacy', icon: 'solar:lock-bold', label: 'Privacy' }
 	]);
 </script>
+
+<svelte:head>
+	<title>Vemeet - Settings</title>
+</svelte:head>
 
 <CustomHeaderWithTitle title="Settings" />
 

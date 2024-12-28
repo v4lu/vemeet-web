@@ -191,6 +191,10 @@
 	const Dialog = $derived(isMobile ? Drawer : Modal);
 </script>
 
+<svelte:head>
+	<title>Vemeet - Security</title>
+</svelte:head>
+
 <CustomHeaderWithTitle title="Security" />
 
 <div class="container h-full px-4 py-4 lg:border-x lg:border-border lg:bg-card lg:px-8">

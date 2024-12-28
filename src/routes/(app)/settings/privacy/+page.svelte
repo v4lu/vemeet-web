@@ -116,6 +116,10 @@
 	const Dialog = $derived(isMobile ? Drawer : Modal);
 </script>
 
+<svelte:head>
+	<title>Vemeet - Privacy</title>
+</svelte:head>
+
 <CustomHeaderWithTitle title="Privacy" />
 
 <div

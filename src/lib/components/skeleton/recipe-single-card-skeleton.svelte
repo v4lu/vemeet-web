@@ -2,7 +2,7 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 </script>
 
-<div class="relative mx-auto max-w-4xl rounded-lg bg-card p-6 shadow-lg">
+<div class="relative mx-auto mt-12 max-w-4xl">
 	<div class="mb-8">
 		<Skeleton class="mb-4 h-10 w-3/4" />
 		<div class="mb-4 flex items-center">
