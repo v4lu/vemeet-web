@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
-	import { uploadImage } from '$lib/api.js';
 	import { useSwiperProfile } from '$lib/api/use-swiper-profile.svelte';
 	import { cn } from '$lib/cn';
 	import { Button } from '$lib/components/ui/button';
@@ -8,6 +7,10 @@
 	import { inputVariants } from '$lib/components/ui/input';
 	import type { SwipeProfileUpdate } from '$lib/types/user.types.js';
 	import { MainWrapper, SettingsTitle } from '$lib/components/layout';
+	import { CropDrawer } from '$lib/components/drawers';
+	import { CropModal } from '$lib/components/ui/modals';
+	import { toast } from '$lib/stores/toast.store';
+	import { uploadImage } from '$lib/api.js';
 
 	let { data } = $props();
 	const { resp, updateProfile } = useSwiperProfile(data.accessToken, data.user.id);
@@ -17,6 +20,17 @@
 	let singleFileInput: HTMLInputElement | null = $state(null);
 	let multipleFileInput: HTMLInputElement | null = $state(null);
 	let mainImageLoading = $state(false);
+
+	let showCropModal = $state(false);
+	let currentCropImage = $state<{ file: File; url: string; type: 'main' | 'other' } | null>(null);
+	let isMobile = $state(true);
+	const CropDialog = $derived(isMobile ? CropDrawer : CropModal);
+
+	let profileChanged = $derived(
+		description !== resp.user?.description ||
+			mainImageUrl !== resp.user?.mainImageUrl ||
+			JSON.stringify(otherImages) !== JSON.stringify(resp.user?.otherImages)
+	);
 
 	async function handleUpdateProfile() {
 		const payload: SwipeProfileUpdate = {
@@ -30,40 +44,69 @@
 	async function handleMainImageUpload(event: Event) {
 		const input = event.target as HTMLInputElement;
 		if (input.files && input.files.length > 0) {
-			mainImageLoading = true;
-			try {
-				await uploadImage({
-					authToken: data.accessToken,
-					file: input.files[0],
-					setImageUrl: (url) => (mainImageUrl = url),
-					setImageUploadLoading: () => {}
-				});
-			} catch (error) {
-				console.error('Error uploading main image:', error);
-			} finally {
-				mainImageLoading = false;
-			}
+			const file = input.files[0];
+			currentCropImage = {
+				file,
+				url: URL.createObjectURL(file),
+				type: 'main'
+			};
+			showCropModal = true;
+			input.value = '';
 		}
 	}
 
 	async function handleOtherImagesUpload(event: Event) {
 		const input = event.target as HTMLInputElement;
 		if (input.files && input.files.length > 0) {
-			try {
-				for (let i = 0; i < input.files.length; i++) {
-					if (otherImages.length >= 5) break;
-					await uploadImage({
-						authToken: data.accessToken,
-						file: input.files[i],
-						setImageUrl: (url) => {
-							otherImages = [...otherImages, url];
-						},
-						setImageUploadLoading: () => {}
-					});
-				}
-			} catch (error) {
-				console.error('Error uploading other images:', error);
+			if (otherImages.length >= 5) {
+				toast.error('You can upload a maximum of 5 images');
+				return;
 			}
+			const file = input.files[0];
+			currentCropImage = {
+				file,
+				url: URL.createObjectURL(file),
+				type: 'other'
+			};
+			showCropModal = true;
+			input.value = '';
+		}
+	}
+
+	async function handleCroppedImage(croppedBlob: Blob): Promise<void> {
+		if (!currentCropImage) return;
+
+		const isMainImage = currentCropImage.type === 'main';
+
+		if (isMainImage) {
+			mainImageLoading = true;
+		}
+
+		try {
+			const croppedFile = new File([croppedBlob], currentCropImage.file.name, {
+				type: 'image/jpeg'
+			});
+
+			await uploadImage({
+				authToken: data.accessToken,
+				file: croppedFile,
+				setImageUploadLoading: () => {},
+				setImageUrl: (url) => {
+					if (isMainImage) {
+						mainImageUrl = url;
+					} else {
+						otherImages = [...otherImages, url];
+					}
+				}
+			});
+		} catch (error) {
+			console.error('Error uploading cropped image:', error);
+			toast.error('Failed to upload image');
+		} finally {
+			if (isMainImage) {
+				mainImageLoading = false;
+			}
+			currentCropImage = null;
 		}
 	}
 
@@ -77,11 +120,20 @@
 		otherImages = resp.user?.otherImages ?? [];
 	});
 
-	let profileChanged = $derived(
-		description !== resp.user?.description ||
-			mainImageUrl !== resp.user?.mainImageUrl ||
-			JSON.stringify(otherImages) !== JSON.stringify(resp.user?.otherImages)
-	);
+	$effect(() => {
+		const mediaQuery = window.matchMedia('(max-width: 768px)');
+
+		function handleResize(e: MediaQueryListEvent | MediaQueryList) {
+			isMobile = e.matches;
+		}
+
+		mediaQuery.addEventListener('change', handleResize);
+		handleResize(mediaQuery);
+
+		return () => {
+			mediaQuery.removeEventListener('change', handleResize);
+		};
+	});
 </script>
 
 <CustomHeaderWithTitle title="Profile Settings" />
@@ -105,14 +157,14 @@
 							role="button"
 							tabindex="0"
 							aria-roledescription="click to open image upload"
-							class="group relative mt-4 h-64 w-full cursor-pointer overflow-hidden rounded-lg"
+							class="group relative mt-4 h-64 w-fit cursor-pointer overflow-hidden rounded-lg"
 							onclick={() => singleFileInput?.click()}
 							onkeypress={() => {}}
 						>
 							<img
 								src={mainImageUrl || '/placeholder-user.webp'}
 								alt="Main Profile"
-								class="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+								class="aspect-[4/3] h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
 							/>
 							<div
 								class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -137,13 +189,13 @@
 						subtitle="Add up to 5 more photos to your profile"
 					/>
 					<div class="flex flex-col space-y-4 pt-4">
-						<div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
+						<div class="mt-4 flex w-full flex-wrap gap-4">
 							{#each otherImages as image, index}
-								<div class="group relative h-32 overflow-hidden rounded-lg">
+								<div class="group relative w-fit overflow-hidden rounded-lg md:h-52">
 									<img
 										src={image}
 										alt={`Profile ${index + 1}`}
-										class="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+										class="aspect-[4/3] object-cover object-center transition-transform duration-300 group-hover:scale-105 md:h-52"
 									/>
 									<button
 										class="absolute right-2 top-2 rounded-full bg-destructive p-1.5 text-destructive-foreground opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -155,7 +207,7 @@
 							{/each}
 							{#if otherImages.length < 5}
 								<button
-									class="flex h-32 w-full items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/50 text-muted-foreground transition-colors duration-300 hover:border-primary hover:text-primary"
+									class="flex aspect-[4/3] items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/50 text-muted-foreground transition-colors duration-300 hover:border-primary hover:text-primary md:h-52"
 									onclick={() => multipleFileInput?.click()}
 								>
 									<Icon icon="solar:add-circle-bold" class="size-8" />
@@ -215,3 +267,15 @@
 		{/if}
 	</div>
 </MainWrapper>
+
+{#if showCropModal && currentCropImage}
+	<CropDialog
+		imageUrl={currentCropImage.url}
+		aspectRatio={4 / 3}
+		onClose={() => {
+			showCropModal = false;
+			currentCropImage = null;
+		}}
+		onCrop={handleCroppedImage}
+	/>
+{/if}
