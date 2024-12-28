@@ -1,17 +1,18 @@
 <script lang="ts">
-	import { cn } from '$lib/cn';
-	import { clickOutside } from '$lib/utils';
 	import type { Snippet } from 'svelte';
 	import { quintOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
+	import { clickOutside } from '$lib/utils';
+	import { cn } from '$lib/cn';
 
 	type Props = {
 		onClose: () => void;
 		class?: string;
 		children: Snippet;
+		closable?: boolean;
 	};
 
-	let { children, onClose, class: className }: Props = $props();
+	let { children, onClose, class: className, closable = true }: Props = $props();
 	let startY = 0;
 	let currentY = 0;
 	let drawerHeight = 0;
@@ -35,7 +36,7 @@
 		const dragDistance = currentY - startY;
 		const threshold = drawerHeight * 0.3;
 
-		if (dragDistance > threshold) {
+		if (closable && dragDistance > threshold) {
 			onClose();
 		} else {
 			drawerElement.style.transform = 'translateY(0)';

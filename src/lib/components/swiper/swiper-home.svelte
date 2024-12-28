@@ -43,60 +43,62 @@
 	}
 </script>
 
-<div class="no-scrollbar container relative mt-6 h-[650px] w-[92%] overflow-hidden px-4">
-	{#if resp.isLoading}
-		<SwipeCardSkeleton />
-	{:else if hasMatches}
-		{#each resp.potentialMatches as match, index (match.id)}
-			<div
-				animate:flip={{ duration: 300 }}
-				in:fly={{ y: 50, duration: 300, delay: index * 100 }}
-				out:cardTransition={{ direction: lastSwipeDirection }}
-				class="no-scrollbar absolute left-0 top-0 h-full w-full"
-				style="z-index: {resp.potentialMatches.length - index};"
-			>
-				<SwipeCard {index} {match} onSwipe={handleSwipe} />
-				<div class="mt-4 flex justify-center space-x-4">
-					<Button
-						size="icon"
-						variant="outline"
-						onclick={() => handleSwipe('left')}
-						class="size-12 rounded-full p-0 transition-colors hover:bg-red-100 dark:hover:bg-red-900"
-					>
-						<Icon icon="mdi:close" class="size-8 text-red-500" />
-					</Button>
-					<Button
-						variant="outline"
-						size="icon"
-						onclick={() => handleSwipe('right')}
-						class="size-12 rounded-full p-0 transition-colors hover:bg-green-100 dark:hover:bg-green-900"
-					>
-						<Icon icon="mdi:heart" class="size-8 text-green-500" />
-					</Button>
+<div class="container h-full md:border-x md:border-border md:bg-card">
+	<div class="no-scrollbar container relative h-[650px] w-[92%] overflow-hidden px-4 pt-6">
+		{#if resp.isLoading}
+			<SwipeCardSkeleton />
+		{:else if hasMatches}
+			{#each resp.potentialMatches as match, index (match.id)}
+				<div
+					animate:flip={{ duration: 300 }}
+					in:fly={{ y: 50, duration: 300, delay: index * 100 }}
+					out:cardTransition={{ direction: lastSwipeDirection }}
+					class="no-scrollbar absolute left-0 top-0 h-full w-full"
+					style="z-index: {resp.potentialMatches.length - index};"
+				>
+					<SwipeCard {index} {match} onSwipe={handleSwipe} />
+					<div class="mt-4 flex justify-center space-x-4">
+						<Button
+							size="icon"
+							variant="outline"
+							onclick={() => handleSwipe('left')}
+							class="size-12 rounded-full p-0 transition-colors hover:bg-red-100 dark:hover:bg-red-900"
+						>
+							<Icon icon="mdi:close" class="size-8 text-red-500" />
+						</Button>
+						<Button
+							variant="outline"
+							size="icon"
+							onclick={() => handleSwipe('right')}
+							class="size-12 rounded-full p-0 transition-colors hover:bg-green-100 dark:hover:bg-green-900"
+						>
+							<Icon icon="mdi:heart" class="size-8 text-green-500" />
+						</Button>
+					</div>
 				</div>
+			{/each}
+		{:else if showNoMoreMatches || resp.potentialMatches.length === 0}
+			<div
+				class="mt-4 flex min-h-[28rem] flex-col items-center justify-center gap-6 text-center"
+				in:fade
+			>
+				<div class="flex size-20 items-center justify-center rounded-full bg-primary/10">
+					<Icon icon="lucide:search-x" class="size-10 text-primary" />
+				</div>
+				<div class="space-y-2 px-4">
+					<h3 class="text-xl font-semibold">No More Matches Found</h3>
+					<p class="text-sm text-muted-foreground">
+						We couldn't find any more matches with your current preferences. Try adjusting your
+						preferences to see more people.
+					</p>
+				</div>
+				<Button onclick={() => goto('/swiper/preferences')} class="mt-4">
+					<Icon icon="solar:settings-bold" class="mr-2 size-4" />
+					Adjust Preferences
+				</Button>
 			</div>
-		{/each}
-	{:else if showNoMoreMatches || resp.potentialMatches.length === 0}
-		<div
-			class="mt-4 flex min-h-[28rem] flex-col items-center justify-center gap-6 text-center"
-			in:fade
-		>
-			<div class="flex size-20 items-center justify-center rounded-full bg-primary/10">
-				<Icon icon="lucide:search-x" class="size-10 text-primary" />
-			</div>
-			<div class="space-y-2 px-4">
-				<h3 class="text-xl font-semibold">No More Matches Found</h3>
-				<p class="text-sm text-muted-foreground">
-					We couldn't find any more matches with your current preferences. Try adjusting your
-					preferences to see more people.
-				</p>
-			</div>
-			<Button onclick={() => goto('/swiper/preferences')} class="mt-4">
-				<Icon icon="solar:settings-bold" class="mr-2 size-4" />
-				Adjust Preferences
-			</Button>
-		</div>
-	{/if}
+		{/if}
+	</div>
 </div>
 
 <style>

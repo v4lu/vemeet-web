@@ -102,7 +102,7 @@
 </script>
 
 {#if showSwiperModeModal}
-	<Dialog onClose={() => (showSwiperModeModal = false)}>
+	<Dialog closable={false} onClose={() => (showSwiperModeModal = false)}>
 		<h2 class="mb-4 text-xl font-bold">Swiper Mode is Disabled</h2>
 		<p>You need to enable Swiper Mode in your privacy settings to continue.</p>
 		<div class="mt-4 flex justify-end">
@@ -114,7 +114,7 @@
 {/if}
 
 {#if showProfileModal}
-	<Dialog onClose={() => (showProfileModal = false)}>
+	<Dialog closable={false} onClose={() => (showProfileModal = false)}>
 		<h2 class="mb-4 text-xl font-bold">Profile Information Incomplete</h2>
 		<p>
 			Please complete your profile information to use Swiper Mode. We need to know your location
@@ -128,7 +128,7 @@
 {/if}
 
 {#if showConfigModal}
-	<Dialog onClose={() => (showConfigModal = false)}>
+	<Dialog closable={false} onClose={() => (showConfigModal = false)}>
 		<h2 class="mb-4 text-xl font-bold">Swiper Mode Configuration</h2>
 		<p class="mb-4">Please configure your Swiper preferences to continue.</p>
 		<form onsubmit={handleSubmit} class="space-y-4">
@@ -181,7 +181,7 @@
 
 {#if resp.isUserReady}
 	<CustomHeader>
-		<div class="container mx-auto flex items-center justify-end">
+		<div class="flex w-full items-center justify-end">
 			{#each navigation as { path, icon }}
 				<a
 					class={cn(

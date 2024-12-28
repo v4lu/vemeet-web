@@ -124,7 +124,7 @@
 <CustomHeaderWithTitle title="Privacy" />
 
 <MainWrapper class="bg-card">
-	<div class="mx-auto max-w-3xl space-y-6">
+	<div class="mx-auto space-y-6">
 		<div class="space-y-2">
 			<h2 class="text-xl font-semibold tracking-tight sm:text-2xl">Privacy & Security</h2>
 			<p class="text-sm text-muted-foreground">
