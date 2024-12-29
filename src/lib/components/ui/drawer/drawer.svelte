@@ -49,20 +49,19 @@
 		bind:this={drawerElement}
 		use:clickOutside={onClose}
 		class={cn(
-			'fixed bottom-0 left-0 right-0 z-[101] h-fit rounded-t-xl border-t border-border bg-card p-6 transition-transform',
-			className
+			'fixed bottom-0 left-0 right-0 z-[101] h-fit rounded-t-xl border-t border-border bg-card p-6 transition-transform'
 		)}
 		transition:slide={{ duration: 300, easing: quintOut, axis: 'y' }}
 	>
 		<div
-			class="m absolute left-0 right-0 top-0 flex h-10 cursor-grab items-center justify-center"
+			class="absolute left-0 right-0 top-0 flex h-10 cursor-grab items-center justify-center"
 			ontouchstart={handleDragStart}
 			ontouchmove={handleDrag}
 			ontouchend={handleDragEnd}
 		>
 			<div class="h-1.5 w-16 rounded-full bg-muted"></div>
 		</div>
-		<div class="mt-6">
+		<div class={cn('mt-6', className)}>
 			{@render children()}
 		</div>
 	</div>

@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { uploadImage } from '$lib/api';
-	import { sessionStore } from '$lib/stores/session.store';
-	import { toast } from '$lib/stores/toast.store';
-	import type { AddressSuggestion, CreateLocation, NominatimResponse } from '$lib/types/geo.types';
-	import { clickOutside, debounce } from '$lib/utils';
 	import Icon from '@iconify/svelte';
 	import { Button } from '../ui/button';
 	import { Field } from '../ui/field';
 	import { Input, inputVariants } from '../ui/input';
 	import { Modal } from '../ui/modals';
+	import { Drawer } from '../ui/drawer';
+	import { uploadImage } from '$lib/api';
+	import { sessionStore } from '$lib/stores/session.store';
+	import { toast } from '$lib/stores/toast.store';
+	import type { AddressSuggestion, CreateLocation, NominatimResponse } from '$lib/types/geo.types';
+	import { clickOutside, debounce } from '$lib/utils';
 
 	type Props = {
 		createLocation: (payload: CreateLocation) => Promise<void>;
@@ -31,6 +32,8 @@
 	let priceRange = $state('');
 	let imageUrls = $state<string[]>([]);
 	let isSearching = $state(false);
+	let formContent = $state<HTMLDivElement>();
+	let showScrollIndicator = $state(false);
 
 	let addressSuggestions = $state<AddressSuggestion[]>([]);
 	let showSuggestions = $state(false);
@@ -44,6 +47,10 @@
 		{ value: '$$', label: '$$' },
 		{ value: '$$$', label: '$$$' }
 	]);
+
+	let isMobile = $state(true);
+
+	const Dialog = $derived(isMobile ? Drawer : Modal);
 
 	const debouncedSearchAddress = debounce(async () => {
 		if (!address || address.length < 3) {
@@ -205,14 +212,59 @@
 			selectAddress(suggestion);
 		}
 	}
+
+	function checkScroll() {
+		if (!formContent) return;
+		const hasScrollableContent = formContent.scrollHeight > formContent.clientHeight + 20;
+		showScrollIndicator =
+			hasScrollableContent &&
+			formContent.scrollTop < formContent.scrollHeight - formContent.clientHeight;
+	}
+
+	function scrollDown() {
+		if (!formContent) return;
+		formContent.scrollBy({
+			top: 200,
+			behavior: 'smooth'
+		});
+	}
+
+	$effect(() => {
+		if (formContent) {
+			checkScroll();
+			formContent.addEventListener('scroll', checkScroll);
+			window.addEventListener('resize', checkScroll);
+
+			return () => {
+				formContent && formContent.removeEventListener('scroll', checkScroll);
+				window.addEventListener('resize', checkScroll);
+			};
+		}
+	});
+
+	$effect(() => {
+		const mediaQuery = window.matchMedia('(max-width: 768px)');
+
+		function handleResize(e: MediaQueryListEvent | MediaQueryList) {
+			isMobile = e.matches;
+		}
+
+		mediaQuery.addEventListener('change', handleResize);
+
+		handleResize(mediaQuery);
+
+		return () => {
+			mediaQuery.removeEventListener('change', handleResize);
+		};
+	});
 </script>
 
-<Modal {onClose} class="flex h-[600px] w-full max-w-md flex-col">
+<Dialog {onClose} class=" flex h-[90%] w-full max-w-2xl flex-col md:h-[600px]">
 	<div class="flex-shrink-0 border-b border-border p-4">
 		<h2 class="text-2xl font-bold">Add New Vegan Location</h2>
 	</div>
-	<form onsubmit={handleSubmit} class="flex flex-grow flex-col overflow-hidden">
-		<div class="flex-grow space-y-4 overflow-y-auto p-4">
+	<form onsubmit={handleSubmit} class="hide-scrollbar flex flex-grow flex-col overflow-hidden">
+		<div bind:this={formContent} class="hide-scrollbar flex-grow space-y-4 overflow-y-auto p-4">
 			<Field name="Name">
 				<Input bind:value={name} placeholder="Name" required />
 			</Field>
@@ -230,7 +282,7 @@
 						</div>
 					{:else if showSuggestions}
 						<ul
-							class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-popover py-1 text-sm shadow-md"
+							class="absolute z-50 mx-auto mt-1 max-h-60 w-full overflow-auto rounded-md bg-popover py-1 text-sm shadow-md md:max-w-[590px]"
 							role="listbox"
 						>
 							{#each addressSuggestions as suggestion}
@@ -322,6 +374,18 @@
 				</div>
 			</Field>
 		</div>
+
+		{#if showScrollIndicator}
+			<button
+				type="button"
+				class="absolute bottom-24 right-4 z-10 hidden h-8 w-8 animate-bounce items-center justify-center rounded-full bg-primary text-white shadow-lg transition-all hover:bg-primary/90 md:flex"
+				onclick={scrollDown}
+				aria-label="Scroll down"
+			>
+				<Icon icon="lucide:chevron-down" class="size-5" />
+			</button>
+		{/if}
+
 		<div class="flex-shrink-0 border-t border-border bg-card p-4">
 			<div class="flex justify-end space-x-2">
 				<Button variant="outline" onclick={onClose} type="button">Cancel</Button>
@@ -329,4 +393,4 @@
 			</div>
 		</div>
 	</form>
-</Modal>
+</Dialog>

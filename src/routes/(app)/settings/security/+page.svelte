@@ -606,7 +606,6 @@
 						type="submit"
 						variant="destructive"
 						disabled={isSubmitting || deleteConfirmation !== 'DELETE' || !passwordForDeletion}
-						class="bg-destructive hover:bg-destructive/90"
 					>
 						{#if isSubmitting}
 							<Icon icon="solar:spinner-bold" class="mr-2 size-4 animate-spin" />

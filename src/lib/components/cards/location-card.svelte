@@ -1,7 +1,12 @@
 <script lang="ts">
-	import { formatTimestamp } from '$lib/date';
-	import { sessionStore } from '$lib/stores/session.store';
-	import { toast } from '$lib/stores/toast.store';
+	import Icon from '@iconify/svelte';
+	import { elasticOut } from 'svelte/easing';
+	import { fade, slide } from 'svelte/transition';
+	import { EditLocation, ReviewModal } from '../locations';
+	import { Button } from '../ui/button';
+	import { Dropdown } from '../ui/dropdown';
+	import { ConfirmModal, ImageModal } from '../ui/modals';
+	import { ReviewCard } from '.';
 	import type {
 		LocationReviewRequest,
 		LocationReviewResponse,
@@ -9,14 +14,9 @@
 		VeganLocation,
 		VeganLocationUpdateRequest
 	} from '$lib/types/geo.types';
-	import Icon from '@iconify/svelte';
-	import { elasticOut } from 'svelte/easing';
-	import { fade, slide } from 'svelte/transition';
-	import { ReviewCard } from '.';
-	import { EditLocation, ReviewModal } from '../locations';
-	import { Button } from '../ui/button';
-	import { Dropdown } from '../ui/dropdown';
-	import { ConfirmModal, ImageModal } from '../ui/modals';
+	import { toast } from '$lib/stores/toast.store';
+	import { sessionStore } from '$lib/stores/session.store';
+	import { formatTimestamp } from '$lib/date';
 
 	type VeganLocationCardProps = {
 		location: VeganLocation;
@@ -137,10 +137,8 @@
 	}
 </script>
 
-<div
-	class="container mb-6 border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
->
-	<div class="relative">
+<div class="mb-6 transition-all duration-300">
+	<div class="relative px-4">
 		{#if $sessionStore.id === location.user.id}
 			<div class="absolute right-3 top-3 z-10">
 				<Dropdown
@@ -176,7 +174,7 @@
 				</Dropdown>
 			</div>
 		{/if}
-		<div class="relative mb-4 flex items-center justify-between p-4">
+		<div class="relative mb-4 flex items-center justify-between">
 			<div class="flex flex-col">
 				<h2 class="text-xl font-semibold text-foreground">{location.name}</h2>
 				<p class="text-sm text-muted-foreground">
@@ -201,13 +199,13 @@
 					aria-describedby="image-description"
 					onkeydown={(e) => e.key === 'Enter' && (isImageModalOpen = true)}
 					onclick={() => (isImageModalOpen = true)}
-					class="h-[20rem] w-full overflow-hidden"
+					class="h-[20rem] w-full overflow-hidden rounded-xl"
 				>
 					{#key currentImageIndex}
 						<img
 							src={location.images[currentImageIndex].url}
 							alt={location.name}
-							class="h-full w-full object-cover object-center transition-transform duration-300 hover:scale-105"
+							class="h-full w-full rounded-xl object-cover object-center transition-transform duration-300 hover:scale-105"
 							in:slide={{
 								duration: 300,
 								axis: 'x'
@@ -239,6 +237,7 @@
 				<div class="mb-3 flex justify-center space-x-1.5">
 					{#each location.images as _, index}
 						<button
+							aria-labelledby="image-description"
 							class="h-2.5 w-2.5 rounded-full transition-colors"
 							class:bg-primary={index === currentImageIndex}
 							class:bg-gray-300={index !== currentImageIndex}
@@ -249,11 +248,11 @@
 			{/if}
 		{/if}
 
-		<div class="mb-4 px-4">
+		<div class="mb-4">
 			<p class="text-foreground">{location.description}</p>
 		</div>
 
-		<div class="mb-4 grid grid-cols-2 gap-4 px-4 text-sm">
+		<div class="mb-4 grid grid-cols-2 gap-4 text-sm">
 			<div>
 				<p class="font-medium">Type:</p>
 				<p>{location.type}</p>
@@ -289,7 +288,7 @@
 			{/if}
 		</div>
 
-		<div class="flex items-center justify-between border-t border-border p-4">
+		<div class=" flex items-center justify-between py-4">
 			<div class="flex w-full items-center justify-between">
 				<div class="flex items-center space-x-4">
 					<div class="group flex items-center text-sm transition-colors">
@@ -307,7 +306,7 @@
 		</div>
 	</div>
 
-	<div class="space-y-6 border-t border-border bg-card">
+	<div class="space-y-6 border-t border-border bg-card px-4">
 		{#each location.reviews as review (review.id)}
 			<ReviewCard {review} {handleEditReview} {handleDeleteReview} />
 		{/each}

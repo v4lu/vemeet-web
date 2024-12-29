@@ -1,15 +1,15 @@
 <script lang="ts">
 	console.warn = () => {};
+	import Icon from '@iconify/svelte';
+	import type { Map as LeafletMap, Marker } from 'leaflet';
+	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { useVeganLocations } from '$lib/api/use-vegan-locations.svelte';
-	import { CreateLocationModal } from '$lib/components/locations';
+	import { CreateLocation } from '$lib/components/locations';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import type { VeganLocation } from '$lib/types/geo.types';
 	import { clickOutside, debounce } from '$lib/utils';
-	import Icon from '@iconify/svelte';
-	import type { Map as LeafletMap, Marker } from 'leaflet';
-	import { onMount } from 'svelte';
 
 	let { data } = $props();
 	const { resp, getLocations, createLocation } = useVeganLocations(data.accessToken);
@@ -251,16 +251,15 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Vemeet - Locations</title>
+</svelte:head>
+
 <div class="fixed inset-x-0 top-[64px] mx-auto h-[calc(100dvh-64px-65px)] w-full max-w-pc">
-	<!-- Map Container -->
 	<div bind:this={mapElement} class="h-full w-full"></div>
 
-	<!-- Search Bar - Mobile Optimized -->
 	<div class="absolute inset-x-4 top-4 z-[1000] flex flex-col items-center gap-2">
-		<div
-			class="relative w-full max-w-[calc(100vw-32px)] shadow-lg"
-			use:clickOutside={handleClickOutside}
-		>
+		<div class="relative w-full max-w-[calc(100vw-32px)]" use:clickOutside={handleClickOutside}>
 			<Input
 				type="text"
 				placeholder="Search vegan locations..."
@@ -284,7 +283,6 @@
 				{/if}
 			</div>
 
-			<!-- Search Results Dropdown -->
 			{#if showDropdown}
 				<div
 					class="absolute left-0 right-0 top-full mt-2 overflow-hidden rounded-lg bg-background/95 shadow-lg backdrop-blur-sm"
@@ -296,12 +294,10 @@
 					{:else}
 						<ul class="max-h-[40vh] overflow-auto overscroll-contain py-1" role="listbox">
 							{#each searchResults as result}
-								<li
+								<button
 									onkeydown={(event) => handleKeyDown(event, result)}
-									class="cursor-pointer px-4 py-3 hover:bg-muted/50 active:bg-muted"
+									class="w-full cursor-pointer px-4 py-3 text-left hover:bg-muted/50 active:bg-muted"
 									onclick={() => selectLocation(result)}
-									tabindex="0"
-									role="button"
 								>
 									<div class="flex items-start gap-3">
 										<div class="rounded-full bg-primary/10 p-2">
@@ -319,7 +315,7 @@
 											<p class="mt-0.5 text-xs text-muted-foreground">{result.address}</p>
 										</div>
 									</div>
-								</li>
+								</button>
 							{/each}
 						</ul>
 					{/if}
@@ -328,7 +324,6 @@
 		</div>
 	</div>
 
-	<!-- Create Location Button - Mobile Optimized -->
 	<div class="absolute inset-x-0 bottom-6 z-[1000] flex justify-center">
 		<Button
 			onclick={() => (isOpenCreateModal = true)}
@@ -342,7 +337,7 @@
 </div>
 
 {#if isOpenCreateModal}
-	<CreateLocationModal
+	<CreateLocation
 		authToken={data.accessToken}
 		{createLocation}
 		onClose={() => (isOpenCreateModal = false)}

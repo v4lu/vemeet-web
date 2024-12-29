@@ -1,14 +1,14 @@
 <script lang="ts">
+	import { quintOut } from 'svelte/easing';
+	import { spring } from 'svelte/motion';
+	import { fade } from 'svelte/transition';
+	import { sessionStore } from '$lib/stores/session.store.js';
 	import {
 		ProfileMedia,
 		ProfileSessionHeader,
 		ProfileSessionPosts,
 		ProfileSessionRecipes
 	} from '$lib/components/profile';
-	import { sessionStore } from '$lib/stores/session.store.js';
-	import { quintOut } from 'svelte/easing';
-	import { spring } from 'svelte/motion';
-	import { fade } from 'svelte/transition';
 
 	let { data } = $props();
 
