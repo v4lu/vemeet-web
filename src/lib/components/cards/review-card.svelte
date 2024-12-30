@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { formatTimestamp } from '$lib/date';
-	import { sessionStore } from '$lib/stores/session.store';
-	import type { LocationReviewResponse } from '$lib/types/geo.types';
 	import Icon from '@iconify/svelte';
 	import { Avatar } from '../ui/avatar';
 	import { Button } from '../ui/button';
 	import { Dropdown } from '../ui/dropdown';
 	import { ConfirmModal, ImageModal } from '../ui/modals';
+	import type { LocationReviewResponse } from '$lib/types/geo.types';
+	import { sessionStore } from '$lib/stores/session.store';
+	import { formatTimestamp } from '$lib/date';
 
 	type Props = {
 		review: LocationReviewResponse;

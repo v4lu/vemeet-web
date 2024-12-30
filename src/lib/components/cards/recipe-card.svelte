@@ -1,8 +1,4 @@
 <script lang="ts">
-	import { cn } from '$lib/cn';
-	import { formatTimestamp } from '$lib/date';
-	import { sessionStore } from '$lib/stores/session.store';
-	import type { Recipe } from '$lib/types/recipe.types';
 	import Icon from '@iconify/svelte';
 	import { elasticOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
@@ -10,6 +6,10 @@
 	import { Button, buttonVariants } from '../ui/button';
 	import { Dropdown } from '../ui/dropdown';
 	import { ConfirmModal, ImageModal } from '../ui/modals';
+	import type { Recipe } from '$lib/types/recipe.types';
+	import { sessionStore } from '$lib/stores/session.store';
+	import { formatTimestamp } from '$lib/date';
+	import { cn } from '$lib/cn';
 
 	type Props = {
 		recipe: Recipe;
@@ -174,6 +174,7 @@
 			<div class="mb-3 flex justify-center space-x-1.5">
 				{#each recipe.images as _, index}
 					<button
+						aria-labelledby="image-description"
 						class="h-2.5 w-2.5 rounded-full transition-colors"
 						class:bg-primary={index === currentImageIndex}
 						class:bg-gray-300={index !== currentImageIndex}
@@ -214,7 +215,8 @@
 				</a>
 			</div>
 			<button
-				class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
+				disabled={true}
+				class="flex cursor-not-allowed items-center text-sm text-muted-foreground transition-colors hover:text-primary"
 			>
 				<Icon icon="solar:multiple-forward-right-bold" class="size-6" />
 				<span class="ml-1.5 font-medium">Share</span>

@@ -174,6 +174,7 @@
 				<div class="mb-3 flex justify-center space-x-1.5">
 					{#each post.images as _, index}
 						<button
+							aria-labelledby="image-description"
 							class="h-2.5 w-2.5 rounded-full transition-colors"
 							class:bg-primary={index === currentImageIndex}
 							class:bg-gray-300={index !== currentImageIndex}
@@ -212,7 +213,9 @@
 					</a>
 				</div>
 				<button
-					class="flex items-center text-sm text-muted-foreground transition-colors hover:text-primary"
+					disabled={true}
+					class="flex cursor-not-allowed
+                     items-center text-sm text-muted-foreground transition-colors hover:text-primary"
 				>
 					<Icon icon="solar:multiple-forward-right-bold" class="size-6" />
 					<span class="ml-1.5 font-medium">Share</span>

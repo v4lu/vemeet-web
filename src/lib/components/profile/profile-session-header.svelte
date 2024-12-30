@@ -1,11 +1,4 @@
 <script lang="ts">
-	import { api, createAuthHeaders, uploadImage } from '$lib/api';
-	import { cn } from '$lib/cn';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import { formatBday } from '$lib/date';
-	import { sessionStore } from '$lib/stores/session.store';
-	import type { ResponseFollowStats } from '$lib/types/follow.types';
-	import type { User } from '$lib/types/user.types';
 	import Icon from '@iconify/svelte';
 	import { onMount } from 'svelte';
 	import { UserHorizontalCard } from '../cards';
@@ -13,6 +6,13 @@
 	import { Drawer } from '../ui/drawer';
 	import { Modal } from '../ui/modals';
 	import { Skeleton } from '../ui/skeleton';
+	import { api, createAuthHeaders, uploadImage } from '$lib/api';
+	import { cn } from '$lib/cn';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { formatBday } from '$lib/date';
+	import { sessionStore } from '$lib/stores/session.store';
+	import type { ResponseFollowStats } from '$lib/types/follow.types';
+	import type { User } from '$lib/types/user.types';
 
 	type HeaderProps = {
 		authToken: string;
@@ -164,7 +164,7 @@
 	>
 		<a
 			href="/settings"
-			class={cn(buttonVariants({ size: 'sm', variant: 'outline' }), 'absolute right-2 top-2')}
+			class={cn(buttonVariants({ size: 'sm', variant: 'outline' }), 'absolute right-4 top-4')}
 		>
 			<Icon icon="solar:settings-bold" class="mr-2 size-5" />
 			Settings
