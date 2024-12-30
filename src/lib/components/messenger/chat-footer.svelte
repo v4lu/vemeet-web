@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { uploadFile, uploadImage } from '$lib/api';
-	import { cn } from '$lib/cn';
-	import type { ChatAssetReq, CreateMessage } from '$lib/types/chat.types';
 	import Icon from '@iconify/svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { Button } from '../ui/button';
 	import { inputVariants } from '../ui/input';
+	import type { ChatAssetReq, CreateMessage } from '$lib/types/chat.types';
+	import { cn } from '$lib/cn';
+	import { uploadFile, uploadImage } from '$lib/api';
 
 	type Props = {
 		handleSubmit: (message: Omit<CreateMessage, 'firstTime'>) => Promise<void>;
@@ -230,7 +230,7 @@
 </script>
 
 <div class="container fixed bottom-0 left-0 right-0 border-t border-border bg-card shadow-lg">
-	<div class="container mx-auto py-4">
+	<div class="container mx-auto py-3">
 		<form onsubmit={onSubmit} class="flex flex-col items-center justify-center gap-4">
 			{#if imageUrls.length > 0}
 				<div class="flex flex-wrap gap-2 pb-3">

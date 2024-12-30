@@ -1,11 +1,12 @@
 <script lang="ts">
+	import Icon from '@iconify/svelte';
 	import { useFetchChats } from '$lib/api/use-fetch-chats.svelte';
 	import { CustomHeaderWithTitle } from '$lib/components/ui/custom-header';
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 	import { formatTimestamp } from '$lib/date.js';
 	import { sessionStore } from '$lib/stores/session.store';
 	import type { Chat } from '$lib/types/chat.types';
-	import Icon from '@iconify/svelte';
+	import { MainWrapper } from '$lib/components/layout';
 
 	let { data } = $props();
 	const { resp } = useFetchChats(data.accessToken);
@@ -31,17 +32,15 @@
 
 <CustomHeaderWithTitle title="Messages" />
 
-<div
-	class="container min-h-full bg-background py-4 sm:px-6 lg:border-x lg:border-border lg:bg-card"
->
-	<div class="mx-auto space-y-6">
+<MainWrapper class="bg-card">
+	<div class="space-y-6">
 		<div class="space-y-2">
 			<h2 class="text-xl font-semibold tracking-tight sm:text-2xl">Recent Chats</h2>
 			<p class="text-sm text-muted-foreground">Keep in touch with your connections</p>
 		</div>
 
 		{#if resp.isLoading}
-			<div class="space-y-4 rounded-lg border bg-card p-4 shadow-sm">
+			<div class="space-y-4 rounded-lg border bg-card p-4 shadow-lg">
 				{#each Array(5) as _}
 					<div class="flex items-center space-x-4">
 						<Skeleton class="size-12 rounded-full" />
@@ -97,7 +96,7 @@
 								</p>
 							</div>
 						</div>
-						<Icon icon="solar:arrow-right-bold" class="size-5 shrink-0 text-muted-foreground" />
+						<Icon icon="tabler:chevron-right" class="size-5 text-muted-foreground" />
 					</a>
 					{#if chat !== resp.chats[resp.chats.length - 1]}
 						<div class="border-t border-border/50"></div>
@@ -130,4 +129,4 @@
 			</div>
 		</div>
 	</div>
-</div>
+</MainWrapper>

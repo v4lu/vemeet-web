@@ -1,18 +1,19 @@
 <script lang="ts">
-	import { cn } from '$lib/cn';
-	import { formatTimestamp } from '$lib/date';
-	import { sessionStore } from '$lib/stores/session.store';
-	import type { Message } from '$lib/types/chat.types';
 	import Icon from '@iconify/svelte';
 	import { fly } from 'svelte/transition';
 	import { AudioPlayer } from '../ui/audio-player';
 	import { ImageModal } from '../ui/modals';
+	import { cn } from '$lib/cn';
+	import { formatTimestamp } from '$lib/date';
+	import { sessionStore } from '$lib/stores/session.store';
+	import type { Message } from '$lib/types/chat.types';
 
 	type Props = {
 		message: Message;
+		id: number;
 	};
 
-	let { message }: Props = $props();
+	let { message, id }: Props = $props();
 	let showImageModal = $state(false);
 	let selectedImage = $state('');
 
@@ -28,6 +29,7 @@
 </script>
 
 <div
+	id={String(id)}
 	class={cn('mb-4 flex', message.sender.id === $sessionStore.id ? 'justify-end' : 'justify-start')}
 	in:fly={{ y: message.sender.id === $sessionStore.id ? 50 : -50, duration: 300 }}
 	out:fly={{ y: message.sender.id === $sessionStore.id ? 50 : -50, duration: 300 }}

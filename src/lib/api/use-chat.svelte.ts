@@ -1,17 +1,18 @@
+import { HTTPError } from 'ky';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 import { browser } from '$app/environment';
 import { authAPI } from '$lib/api';
 import { WEBSOCKET_URL } from '$lib/constants';
 import { toast } from '$lib/stores/toast.store';
 import type { CreateMessage, Message, MessagesPagableResponse } from '$lib/types/chat.types';
 import type { ServerErrorResponse } from '$lib/types/ky.types';
-import { HTTPError } from 'ky';
-import ReconnectingWebSocket from 'reconnecting-websocket';
 
 type UseFetchChatArgs = {
 	userId: number;
 	chatId?: number;
 	authToken: string;
 	firstTime: boolean;
+	onNewMessage?: () => void;
 };
 
 class Chat {
@@ -22,9 +23,10 @@ class Chat {
 	hasMore = $state(true);
 	socket: ReconnectingWebSocket | null = $state(null);
 	firstTime = $state(true);
+	isSubmitting = $state(false);
 }
 
-export function useChat({ authToken, chatId, userId, firstTime }: UseFetchChatArgs) {
+export function useChat({ authToken, chatId, userId, firstTime, onNewMessage }: UseFetchChatArgs) {
 	const resp = new Chat();
 	const api = authAPI(authToken);
 	resp.firstTime = firstTime;
@@ -42,6 +44,7 @@ export function useChat({ authToken, chatId, userId, firstTime }: UseFetchChatAr
 		resp.socket.onmessage = (event) => {
 			const newMessage = JSON.parse(event.data) as Message;
 			resp.messages = [...resp.messages, newMessage];
+			onNewMessage?.();
 		};
 
 		resp.socket.onerror = (error) => {
@@ -56,11 +59,16 @@ export function useChat({ authToken, chatId, userId, firstTime }: UseFetchChatAr
 			const response = await api
 				.get<MessagesPagableResponse>(`chats/${chatId}?page=${page}`)
 				.json();
+
+			const newMessages = response.content.reverse();
+
 			if (page === 0) {
-				resp.messages = response.content.reverse();
+				resp.messages = deduplicateMessages(newMessages);
 			} else {
-				resp.messages = [...response.content.reverse(), ...resp.messages];
+				// Kombiniramo nove i postojeće poruke, pa deduplicirano
+				resp.messages = deduplicateMessages([...newMessages, ...resp.messages]);
 			}
+
 			resp.currentPage = page;
 			resp.hasMore = !response.last;
 		} catch (err) {
@@ -74,6 +82,7 @@ export function useChat({ authToken, chatId, userId, firstTime }: UseFetchChatAr
 	}
 
 	async function postMessage(payload: Omit<CreateMessage, 'firstTime'>) {
+		resp.isSubmitting = true;
 		try {
 			const message: CreateMessage = {
 				...payload,
@@ -87,6 +96,8 @@ export function useChat({ authToken, chatId, userId, firstTime }: UseFetchChatAr
 				resp.error = (await err.response.json()) as ServerErrorResponse;
 				toast.error('Failed to send message. Please try again.');
 			}
+		} finally {
+			resp.isSubmitting = false;
 		}
 	}
 
@@ -94,6 +105,12 @@ export function useChat({ authToken, chatId, userId, firstTime }: UseFetchChatAr
 		if (browser && resp.socket) {
 			resp.socket.close();
 		}
+	}
+
+	function deduplicateMessages(messages: Message[]): Message[] {
+		const uniqueMessages = new Map<number, Message>();
+		messages.forEach((msg) => uniqueMessages.set(msg.id, msg));
+		return Array.from(uniqueMessages.values());
 	}
 
 	if (browser) {
