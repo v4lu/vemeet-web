@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { useRecipes } from '$lib/api/use-recipes.svelte';
-	import { sessionStore } from '$lib/stores/session.store';
 	import Icon from '@iconify/svelte';
-	import { CreateRecipe } from '.';
 	import { Button } from '../ui/button';
 	import ProfileSessionRecipeFeed from './profile-session-recipe-feed.svelte';
+	import { CreateRecipe } from '.';
+	import { sessionStore } from '$lib/stores/session.store';
+	import { useRecipes } from '$lib/api/use-recipes.svelte';
 
 	type Props = {
 		authToken: string;

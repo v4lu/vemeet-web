@@ -37,7 +37,7 @@
 
 	onMount(async () => {
 		if (!resp.messages.length) {
-			await fetchData(1);
+			await fetchData(0);
 		}
 		isInitialLoad = false;
 		scrollToBottom();

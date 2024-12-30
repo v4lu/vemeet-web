@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Icon from '@iconify/svelte';
+	import { onMount } from 'svelte';
 	import { useSearch } from '$lib/api/use-search.svelte';
 	import { useSuggestions } from '$lib/api/use-suggestions.svelte.js';
 	import { cn } from '$lib/cn';
@@ -9,12 +11,11 @@
 	} from '$lib/components/cards';
 	import { CustomHeader } from '$lib/components/ui/custom-header';
 	import { Input } from '$lib/components/ui/input';
-	import { clickOutside, debounce, useIntersection } from '$lib/utils';
-	import Icon from '@iconify/svelte';
-	import { onMount } from 'svelte';
+	import { capitalize, clickOutside, debounce, useIntersection } from '$lib/utils';
+	import { MainWrapper } from '$lib/components/layout';
 
-	type RecipeSort = 'popular' | 'weekly' | 'newest';
-	type LocationFilter = '50km' | '20km' | 'city';
+	// type RecipeSort = 'popular' | 'weekly' | 'newest';
+	// type LocationFilter = '50km' | '20km' | 'city';
 
 	let { data } = $props();
 	const { getUsers, getRecipes, getLocations, resp } = useSearch(data.accessToken);
@@ -23,6 +24,7 @@
 		getUsers: getSuggestionUsers,
 		loadMore,
 		getLocations: getSuggestionLocations,
+		getRecipes: getSuggestionRecipes,
 		requestLocation
 	} = useSuggestions(data.accessToken);
 
@@ -34,8 +36,7 @@
 	let userLocation = $state<{ lat: number; lng: number } | null>(null);
 	let activeSuggestionTab = $state<'people' | 'locations' | 'recipes'>('people');
 
-	let recipeSort = $state<RecipeSort>('popular');
-	let locationFilter = $state<LocationFilter>('50km');
+	// let locationFilter = $state<LocationFilter>('50km');
 
 	const debouncedSearch = debounce(async (query: string) => {
 		if (query.trim()) {
@@ -86,9 +87,18 @@
 	async function getUserLocation() {
 		if ('geolocation' in navigator) {
 			try {
-				const position = await requestLocation();
+				// Prvo provjerimo localStorage
+				const storedPermission = localStorage.getItem('locationPermission');
 
+				if (storedPermission === 'granted') {
+					suggestionsResp.locationPermission = 'granted';
+				}
+
+				const position = await requestLocation();
 				suggestionsResp.locationPermission = 'granted';
+
+				// Spremimo dozvolu u localStorage
+				localStorage.setItem('locationPermission', 'granted');
 
 				userLocation = {
 					lat: position.coords.latitude,
@@ -98,10 +108,12 @@
 				const permission = await navigator.permissions.query({ name: 'geolocation' });
 				permission.addEventListener('change', () => {
 					suggestionsResp.locationPermission = permission.state;
+					localStorage.setItem('locationPermission', permission.state);
 				});
 			} catch (error) {
 				console.error('Error in getUserLocation:', error);
 				suggestionsResp.locationPermission = 'denied';
+				localStorage.setItem('locationPermission', 'denied');
 			}
 		}
 	}
@@ -110,14 +122,22 @@
 		if (userLocation && activeSuggestionTab === 'people') {
 			getSuggestionUsers(userLocation.lat, userLocation.lng, 500);
 		} else if (userLocation && activeSuggestionTab === 'locations') {
-			const radius = locationFilter === '50km' ? 50000 : locationFilter === '20km' ? 20000 : 5000;
-			getSuggestionLocations(userLocation.lat, userLocation.lng, radius);
+			// const radius = locationFilter === '50km' ? 50000 : locationFilter === '20km' ? 20000 : 5000;
+			getSuggestionLocations(userLocation.lat, userLocation.lng, 5000);
+		} else if (activeSuggestionTab === 'recipes') {
+			getSuggestionRecipes({});
 		}
 	});
 
 	onMount(() => {
 		if (!('geolocation' in navigator)) {
 			suggestionsResp.locationPermission = 'denied';
+			return;
+		}
+
+		const storedPermission = localStorage.getItem('locationPermission');
+		if (storedPermission === 'granted') {
+			getUserLocation();
 		}
 	});
 
@@ -126,47 +146,6 @@
 		{ id: 'locations', icon: 'solar:map-point-bold', label: 'Locations' },
 		{ id: 'recipes', icon: 'tabler:bowl-filled', label: 'Recipes' }
 	] as const;
-
-	const mockSuggestions = {
-		recipes: [
-			{
-				id: 1,
-				name: 'Classic  Pizza',
-				cuisine: 'Italian',
-				time: '30 mins',
-				difficulty: 'Easy',
-				image:
-					'https://vemeet.s3.eu-central-1.amazonaws.com/7f5a4631-33dc-4d2c-a108-1c06f9ae3949.avif'
-			},
-			{
-				id: 2,
-				name: 'Spicy Thai Curry',
-				cuisine: 'Thai',
-				time: '45 mins',
-				difficulty: 'Medium',
-				image:
-					'https://vemeet.s3.eu-central-1.amazonaws.com/7f5a4631-33dc-4d2c-a108-1c06f9ae3949.avif'
-			},
-			{
-				id: 3,
-				name: 'Fresh Fresh Roll',
-				cuisine: 'Japanese',
-				time: '60 mins',
-				difficulty: 'Hard',
-				image:
-					'https://vemeet.s3.eu-central-1.amazonaws.com/7f5a4631-33dc-4d2c-a108-1c06f9ae3949.avif'
-			},
-			{
-				id: 4,
-				name: 'Homemade Pasta',
-				cuisine: 'Italian',
-				time: '40 mins',
-				difficulty: 'Medium',
-				image:
-					'https://vemeet.s3.eu-central-1.amazonaws.com/7f5a4631-33dc-4d2c-a108-1c06f9ae3949.avif'
-			}
-		]
-	};
 </script>
 
 <CustomHeader
@@ -297,7 +276,7 @@
 	</div>
 </CustomHeader>
 
-<div class="container mx-auto mt-6 w-full max-w-2xl space-y-6">
+<MainWrapper>
 	<div
 		class="flex flex-col items-start justify-start gap-4 md:flex-row md:items-center md:justify-between"
 	>
@@ -322,9 +301,10 @@
 
 	<div class="">
 		{#if activeSuggestionTab === 'recipes' || activeSuggestionTab === 'locations'}
-			<div class="">
+			<div class="mt-4">
 				<div class="flex flex-col gap-3 sm:flex-row sm:items-center">
 					<div class="no-scrollbar flex w-full gap-2 overflow-x-auto pb-1 sm:pb-0">
+						<!--
 						{#if activeSuggestionTab === 'recipes'}
 							{#each [{ value: 'popular', label: 'Most Popular' }, { value: 'weekly', label: 'Weekly Popular' }, { value: 'newest', label: 'Newest' }] as sort}
 								<button
@@ -340,6 +320,7 @@
 									{sort.label}
 								</button>
 							{/each}
+
 						{:else if activeSuggestionTab === 'locations' && suggestionsResp.locationPermission === 'granted'}
 							{#each [{ value: '50km', label: 'Within 50km' }, { value: '20km', label: 'Within 20km' }, { value: 'city', label: 'Search by City' }] as filter}
 								<button
@@ -355,7 +336,9 @@
 									{filter.label}
 								</button>
 							{/each}
+
 						{/if}
+                            -->
 					</div>
 				</div>
 			</div>
@@ -363,7 +346,7 @@
 
 		{#if activeSuggestionTab === 'people'}
 			{#if suggestionsResp.locationPermission !== 'granted'}
-				<div class="rounded-lg border bg-card p-4">
+				<div class="mt-8 rounded-lg border bg-card p-4">
 					<div class="flex items-start gap-4">
 						<div
 							class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10"
@@ -387,7 +370,7 @@
 					</div>
 				</div>
 			{:else}
-				<div class="divide-y">
+				<div class="mt-4 divide-y">
 					{#if suggestionsResp.users.length === 0 && !suggestionsResp.isLoading}
 						<div class="flex flex-col items-center justify-center p-8 text-center">
 							<div class="flex size-12 items-center justify-center rounded-full bg-primary/10">
@@ -400,7 +383,7 @@
 						</div>
 					{:else}
 						{#each suggestionsResp.users as user}
-							<UserHorizontalCard {user} />
+							<UserHorizontalCard notRounded {user} />
 						{/each}
 
 						{#if suggestionsResp.hasMore}
@@ -426,7 +409,7 @@
 			{/if}
 		{:else if activeSuggestionTab === 'locations'}
 			{#if suggestionsResp.locationPermission !== 'granted'}
-				<div class="rounded-lg border bg-card p-4">
+				<div class="mt-4 rounded-lg border bg-card p-4">
 					<div class="flex items-start gap-4">
 						<div
 							class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10"
@@ -473,12 +456,13 @@
 									onIntersect: () => {
 										if (userLocation) {
 											const radius =
-												locationFilter === '50km'
+												/*	locationFilter === '50km'
 													? 50000
 													: locationFilter === '20km'
 														? 20000
 														: 5000;
-											loadMore(userLocation.lat, userLocation.lng, radius, 'locations');
+                                                        */
+												loadMore(userLocation.lat, userLocation.lng, 50000, 'locations');
 										}
 									}
 								}}
@@ -495,19 +479,21 @@
 			{/if}
 		{:else}
 			<div class="grid gap-4 p-4 sm:grid-cols-2">
-				{#each mockSuggestions.recipes as recipe}
+				{#each suggestionsResp.recipes as recipe}
 					<div class="overflow-hidden rounded-lg border bg-card">
-						<img src={recipe.image} alt={recipe.name} class="h-32 w-full object-cover" />
+						<img
+							src={recipe.images[0].imageUrl}
+							alt={recipe.title}
+							class="h-32 w-full object-cover"
+						/>
 						<div class="p-3">
-							<h3 class="font-medium">{recipe.name}</h3>
+							<h3 class="font-medium">{recipe.title}</h3>
 							<div
 								class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground"
 							>
-								<span>{recipe.cuisine}</span>
+								<span>{recipe.preparationTime} min</span>
 								<span>•</span>
-								<span>{recipe.time}</span>
-								<span>•</span>
-								<span>{recipe.difficulty}</span>
+								<span>{capitalize(recipe.difficulty)}</span>
 							</div>
 						</div>
 					</div>
@@ -515,7 +501,7 @@
 			</div>
 		{/if}
 	</div>
-</div>
+</MainWrapper>
 
 <style lang="postcss">
 	.hide-scrollbar {

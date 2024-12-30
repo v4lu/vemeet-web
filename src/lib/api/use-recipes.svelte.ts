@@ -1,3 +1,4 @@
+import { HTTPError } from 'ky';
 import { authAPI } from '$lib/api';
 import { toast } from '$lib/stores/toast.store';
 import type { ServerErrorResponse } from '$lib/types/ky.types';
@@ -7,7 +8,6 @@ import type {
 	RecipePagableResponse,
 	Recipe as RecipeType
 } from '$lib/types/recipe.types';
-import { HTTPError } from 'ky';
 class Recipe {
 	error = $state<ServerErrorResponse | null>(null);
 

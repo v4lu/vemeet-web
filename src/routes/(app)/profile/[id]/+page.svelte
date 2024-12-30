@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { useUser } from '$lib/api/use-user-by-id.svelte.js';
-	import { ProfileFeed, ProfileHeader, ProfileMedia } from '$lib/components/profile';
-	import { ProfileHeaderSkeleton } from '$lib/components/skeleton';
-	import { sessionStore } from '$lib/stores/session.store.js';
 	import { quintOut } from 'svelte/easing';
 	import { spring } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
+	import { useUser } from '$lib/api/use-user-by-id.svelte.js';
+	import { ProfileFeed, ProfileHeader, ProfileMedia, RecipeFeed } from '$lib/components/profile';
+	import { ProfileHeaderSkeleton } from '$lib/components/skeleton';
+	import { sessionStore } from '$lib/stores/session.store.js';
 
 	let { data } = $props();
 
@@ -76,7 +76,7 @@
 				</div>
 			{:else if activeTab === 'Recipes'}
 				<div in:fade={{ duration: 300, easing: quintOut }}>
-					<h2>Recipes area</h2>
+					<RecipeFeed authToken={data.accessToken} userId={data.id} />
 				</div>
 			{:else if activeTab === 'Media'}
 				<div in:fade={{ duration: 300, easing: quintOut }}>

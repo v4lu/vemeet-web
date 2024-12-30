@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { Avatar } from '../ui/avatar';
 	import { cn } from '$lib/cn';
 	import type { User } from '$lib/types/user.types';
-	import { Avatar } from '../ui/avatar';
 
 	type UserHorizontalCardProps = {
 		user: User;

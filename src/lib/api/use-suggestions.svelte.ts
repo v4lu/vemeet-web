@@ -1,14 +1,16 @@
+import { HTTPError } from 'ky';
 import { authAPI } from '$lib/api';
 import type { LocationPagableResponse, VeganLocation } from '$lib/types/geo.types';
 import type { ServerErrorResponse } from '$lib/types/ky.types';
+import type { Recipe, RecipePagableResponse } from '$lib/types/recipe.types';
 import type { User, UserPagableResponse } from '$lib/types/user.types';
-import { HTTPError } from 'ky';
 
 class Search {
 	error = $state<ServerErrorResponse | null>(null);
 	isLoading = $state(false);
 	users = $state<User[]>([]);
 	locations = $state<VeganLocation[]>([]);
+	recipes = $state<Recipe[]>([]);
 	hasMore = $state(true);
 	currentPage = $state(0);
 	locationPermission = $state<'granted' | 'denied' | 'prompt'>('prompt');
@@ -78,6 +80,30 @@ export function useSuggestions(authToken: string) {
 		resp.isLoading = false;
 	}
 
+	async function getRecipes(params: {
+		search?: string;
+		categoryId?: number;
+		tagId?: number;
+		difficulty?: string;
+		minServings?: number;
+		maxServings?: number;
+	}) {
+		resp.isLoading = true;
+		try {
+			const response = await api
+				.get<RecipePagableResponse>('search/recipes/popular', {
+					searchParams: params
+				})
+				.json();
+			resp.recipes = response.content;
+		} catch (err) {
+			if (err instanceof HTTPError) {
+				resp.error = (await err.response.json()) as ServerErrorResponse;
+			}
+		}
+		resp.isLoading = false;
+	}
+
 	async function loadMore(
 		lat: number,
 		lon: number,
@@ -126,6 +152,7 @@ export function useSuggestions(authToken: string) {
 		loadMore,
 		requestLocation,
 		checkLocationPermission,
-		getLocations
+		getLocations,
+		getRecipes
 	};
 }

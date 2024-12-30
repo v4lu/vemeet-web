@@ -1,9 +1,9 @@
+import { HTTPError } from 'ky';
 import { authAPI } from '$lib/api';
 import type { VeganLocation } from '$lib/types/geo.types';
 import type { ServerErrorResponse } from '$lib/types/ky.types';
 import type { Recipe } from '$lib/types/recipe.types';
 import type { User as UserType } from '$lib/types/user.types';
-import { HTTPError } from 'ky';
 
 class Search {
 	error = $state<ServerErrorResponse | null>(null);

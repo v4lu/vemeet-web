@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Post } from '$lib/types/post.types.js';
 	import { PostCard } from '../cards';
 	import { SkeletonCard } from '../ui/skeleton';
+	import type { Post } from '$lib/types/post.types.js';
 
 	type ProfileFeedProps = {
 		posts: Post[];
