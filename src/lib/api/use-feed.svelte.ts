@@ -118,6 +118,7 @@ export function useFeed(authToken: string) {
 	async function deleteRecipe(id: number) {
 		try {
 			await api.delete(`recipes/${id}`, {}).json();
+
 			resp.items = resp.items.filter((item) => !(item.type === 'recipe' && item.item.id === id));
 			toast.success('Recipe deleted successfully!');
 		} catch (error) {

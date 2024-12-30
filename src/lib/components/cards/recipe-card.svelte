@@ -243,13 +243,3 @@
 		confirmText="Delete Recipe"
 	/>
 {/if}
-{#if isDeleteModalConfirmOpen}
-	<ConfirmModal
-		title="Delete Content"
-		desc="Deleting content is a permanent action. Recipe will be removed and cannot be recovered."
-		onClose={() => (isDeleteModalConfirmOpen = false)}
-		onConfirm={handleDeletePost}
-		submitting={isSubmittingDelete}
-		confirmText="Delete REcipe"
-	/>
-{/if}
