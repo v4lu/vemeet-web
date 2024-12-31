@@ -49,7 +49,8 @@
 		bind:this={drawerElement}
 		use:clickOutside={onClose}
 		class={cn(
-			'fixed bottom-0 left-0 right-0 z-[101] h-fit rounded-t-xl border-t border-border bg-card p-6 transition-transform'
+			'fixed bottom-0 left-0 right-0 z-[101] h-fit rounded-t-xl border-t border-border bg-card p-6 transition-transform',
+			className
 		)}
 		transition:slide={{ duration: 300, easing: quintOut, axis: 'y' }}
 	>
@@ -61,7 +62,7 @@
 		>
 			<div class="h-1.5 w-16 rounded-full bg-muted"></div>
 		</div>
-		<div class={cn('mt-6', className)}>
+		<div class={cn('mt-6')}>
 			{@render children()}
 		</div>
 	</div>
